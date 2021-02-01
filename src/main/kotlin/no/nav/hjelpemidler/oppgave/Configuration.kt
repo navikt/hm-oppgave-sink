@@ -13,7 +13,7 @@ import java.net.UnknownHostException
 
 private val localProperties = ConfigurationMap(
     mapOf(
-        "application.httpPort" to "8083",
+        "application.httpPort" to "8084",
         "application.profile" to "LOCAL",
         "kafka.reset.policy" to "earliest",
         "kafka.topic" to "teamdigihot.hm-soknadsbehandling-v1",
