@@ -23,12 +23,13 @@ private val localProperties = ConfigurationMap(
         "KAFKA_KEYSTORE_PATH" to "bla/bla",
         "kafka.brokers" to "host.docker.internal:9092",
         "IS_KAFKA_CLOUD" to "false",
-        "AZURE_TENANT_BASEURL" to "http://localhost:9099",
+        "AZURE_TENANT_BASEURL" to "http://localhost:9098",
         "AZURE_APP_TENANT_ID" to "123",
         "AZURE_APP_CLIENT_ID" to "123",
         "AZURE_APP_CLIENT_SECRET" to "dummy",
-        "oppgave.baseurl" to "http://localhost:9099/oppgave",
-        "OPPGAVE_SCOPE" to "123"
+        "oppgave.baseurl" to "http://localhost:9098/oppgave",
+        "PROXY_SCOPE" to "123",
+        "pdl.baseurl" to "http://localhost:9098/pdl",
     )
 )
 private val devProperties = ConfigurationMap(
@@ -41,7 +42,8 @@ private val devProperties = ConfigurationMap(
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "oppgave.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/dokarkiv-aad",
-        "OPPGAVE_SCOPE" to "api://9a0d62f4-00cf-462a-9acc-0e76e7a360ae/.default"
+        "PROXY_SCOPE" to "api://9a0d62f4-00cf-462a-9acc-0e76e7a360ae/.default",
+        "pdl.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl",
     )
 )
 private val prodProperties = ConfigurationMap(
@@ -54,7 +56,8 @@ private val prodProperties = ConfigurationMap(
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "oppgave.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/dokarkiv",
-        "OPPGAVE_SCOPE" to "123"
+        "PROXY_SCOPE" to "123",
+        "pdl.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl",
     )
 )
 
@@ -70,6 +73,7 @@ internal object Configuration {
     val application: Application = Application()
     val azure: Azure = Azure()
     val oppgave: Oppgave = Oppgave()
+    val pdl: Pdl = Pdl()
     val rapidApplication: Map<String, String> = mapOf(
         "RAPID_KAFKA_CLUSTER" to "gcp",
         "RAPID_APP_NAME" to "hm-oppgave-sink",
@@ -95,13 +99,16 @@ internal object Configuration {
         val tenantBaseUrl: String = config()[Key("AZURE_TENANT_BASEURL", stringType)],
         val tenantId: String = config()[Key("AZURE_APP_TENANT_ID", stringType)],
         val clientId: String = config()[Key("AZURE_APP_CLIENT_ID", stringType)],
-        val clientSecret: String = config()[Key("AZURE_APP_CLIENT_SECRET", stringType)]
+        val clientSecret: String = config()[Key("AZURE_APP_CLIENT_SECRET", stringType)],
+        val proxyScope: String = config()[Key("PROXY_SCOPE", stringType)]
     )
 
     data class Oppgave(
         val baseUrl: String = config()[Key("oppgave.baseurl", stringType)],
-        val oppgaveScope: String = config()[Key("OPPGAVE_SCOPE", stringType)]
+    )
 
+    data class Pdl(
+        val baseUrl: String = config()[Key("pdl.baseurl", stringType)],
     )
 }
 

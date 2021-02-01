@@ -7,7 +7,7 @@ import no.nav.hjelpemidler.oppgave.Configuration
 internal class WiremockServer(private val configuration: Configuration) {
 
     fun startServer() {
-        val wiremockServer = WireMockServer(9099)
+        val wiremockServer = WireMockServer(9098)
         wiremockServer
             .stubFor(
                 WireMock.post(WireMock.urlPathMatching("/${configuration.azure.tenantId}/oauth2/v2.0/token"))
@@ -25,16 +25,27 @@ internal class WiremockServer(private val configuration: Configuration) {
             )
         wiremockServer
             .stubFor(
-                WireMock.post(WireMock.urlPathMatching("/dokarkiv"))
+                WireMock.post(WireMock.urlPathMatching("/oppgave"))
                     .willReturn(
                         WireMock.aResponse().withStatus(200)
                             .withHeader("Content-Type", "application/json")
                             .withBody(
                                 """
                                 {
-                                    "journalpostId": "12345"
+                                    "id": "12345"
                                 }
                                       """
+                            )
+                    )
+            )
+        wiremockServer
+            .stubFor(
+                WireMock.post(WireMock.urlPathMatching("/pdl"))
+                    .willReturn(
+                        WireMock.aResponse().withStatus(200)
+                            .withHeader("Content-Type", "application/json")
+                            .withBody(
+                                """{"data":{"hentIdenter":{"identer": [{"ident": "aktorid","historisk": false,"type": "AKTORID"}]}}}"""
                             )
                     )
             )

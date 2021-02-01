@@ -1,8 +1,8 @@
 package no.nav.hjelpemidler.oppgave
 
 import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.hjelpemidler.oppgave.oppgave.AzureClient
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
+import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
 import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 
@@ -19,12 +19,17 @@ fun main() {
     )
     val oppgaveClient = OppgaveClient(
         baseUrl = Configuration.oppgave.baseUrl,
-        accesstokenScope = Configuration.oppgave.oppgaveScope,
+        accesstokenScope = Configuration.azure.proxyScope,
+        azureClient = azureClient
+    )
+    val pdlClient = PdlClient(
+        baseUrl = Configuration.pdl.baseUrl,
+        accesstokenScope = Configuration.azure.proxyScope,
         azureClient = azureClient
     )
 
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(Configuration.rapidApplication))
         .build().apply {
-            OppgaveDataSink(this, oppgaveClient)
+            OppgaveDataSink(this, oppgaveClient, pdlClient)
         }.start()
 }

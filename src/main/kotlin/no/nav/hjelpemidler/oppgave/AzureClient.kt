@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.oppgave
+package no.nav.hjelpemidler.oppgave
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory

@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.oppgave
+package no.nav.hjelpemidler.oppgave.pdl
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -10,37 +10,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
-import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
-import java.time.LocalDate
 
 private val logger = KotlinLogging.logger {}
 
-class OppgaveClient(
+class PdlClient(
     private val baseUrl: String,
     private val accesstokenScope: String,
     private val azureClient: AzureClient
 ) {
 
     companion object {
-        private val objectMapper = ObjectMapper()
-        const val BEHANDLINGSTYPE = "ae0227"
-        const val OPPGAVETYPE_JRF = "JFR"
-        const val OPPGAVE_PRIORITET_NORM = "NORM"
-        const val TEMA = "HJE"
-        const val TEMA_GRUPPE = "HJLPM"
-        const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
+        fun aktorQuery(fnr: String) =
+            """
+        {
+            "query": "query(${'$'}ident: ID!) { hentIdenter(ident:${'$'}ident, grupper: [AKTORID]) { identer { ident,gruppe, historisk } } }",
+            "variables": {
+                "ident": "$fnr"
+            }
+        }            
+        """
     }
 
-    suspend fun arkiverSoknad(aktorId: String, journalpostId: String): String {
-        logger.info { "Oppretter oppgave" }
-
-        val requestBody = OppgaveRequest(
-            aktorId, journalpostId, BESKRIVELSE_OPPGAVE,
-            TEMA_GRUPPE, TEMA, OPPGAVETYPE_JRF, BEHANDLINGSTYPE,
-            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM
-        )
-
-        val jsonBody = objectMapper.writeValueAsString(requestBody)
+    suspend fun hentAktorId(fnr: String): String {
+        logger.info { "Henter aktørid" }
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
@@ -49,7 +41,8 @@ class OppgaveClient(
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
-                    .jsonBody(jsonBody)
+                    .header("Tema", "HJE")
+                    .jsonBody(aktorQuery(fnr))
                     .awaitObject(
                         object : ResponseDeserializable<JsonNode> {
                             override fun deserialize(content: String): JsonNode {
@@ -58,9 +51,9 @@ class OppgaveClient(
                         }
                     )
                     .let {
-                        when (it.has("id")) {
-                            true -> it["id"].textValue()
-                            false -> throw OppgaveException("Klarte ikke å opprette oppgave")
+                        when (it.hasNonNull("errors")) {
+                            true -> throw PdlException(it["errors"].toString())
+                            false -> it["data"]["hentIdenter"]["identer"][0]["ident"].asText()
                         }
                     }
             }
@@ -70,12 +63,6 @@ class OppgaveClient(
         }
             .getOrThrow()
     }
-
-    private fun hentFristFerdigstillelse() =
-        LocalDate.now().toString()
-
-    private fun hentAktivDato() =
-        LocalDate.now().toString()
 }
 
-internal class OppgaveException(msg: String) : RuntimeException(msg)
+internal class PdlException(msg: String) : RuntimeException(msg)
