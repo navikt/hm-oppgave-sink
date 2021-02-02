@@ -43,7 +43,7 @@ private val devProperties = ConfigurationMap(
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "oppgave.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/dokarkiv-aad",
         "PROXY_SCOPE" to "api://9a0d62f4-00cf-462a-9acc-0e76e7a360ae/.default",
-        "pdl.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl",
+        "pdl.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",
     )
 )
 private val prodProperties = ConfigurationMap(
@@ -55,9 +55,9 @@ private val prodProperties = ConfigurationMap(
         "IS_KAFKA_CLOUD" to "true",
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
-        "oppgave.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/dokarkiv",
+        "oppgave.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/dokarkiv-aad",
         "PROXY_SCOPE" to "123",
-        "pdl.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl",
+        "pdl.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl-aad",
     )
 )
 
