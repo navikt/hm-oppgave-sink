@@ -60,10 +60,8 @@ class OppgaveClient(
                         }
                     )
                     .let {
-                        logger.info { "Reponse from oppgave: " }
-                        logger.info { it.toPrettyString() }
                         when (it.has("id")) {
-                            true -> it["id"].textValue()
+                            true -> it["id"].toString()
                             false -> throw OppgaveException("Klarte ikke å opprette oppgave")
                         }
                     }
