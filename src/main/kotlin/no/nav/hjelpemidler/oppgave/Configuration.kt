@@ -27,7 +27,7 @@ private val localProperties = ConfigurationMap(
         "AZURE_APP_TENANT_ID" to "123",
         "AZURE_APP_CLIENT_ID" to "123",
         "AZURE_APP_CLIENT_SECRET" to "dummy",
-        "oppgave.baseurl" to "http://localhost:9098/oppgave",
+        "oppgave.baseurl" to "http://localhost:8079/oppgave-aad",
         "PROXY_SCOPE" to "123",
         "pdl.baseurl" to "http://localhost:9098/pdl",
     )

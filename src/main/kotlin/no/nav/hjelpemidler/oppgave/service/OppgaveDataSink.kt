@@ -49,7 +49,7 @@ internal class OppgaveDataSink(
                     )
                     logger.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
                     val aktorId = pdlClient.hentAktorId(soknadData.fnrBruker)
-                    val oppgaveId = opprettOppgave(aktorId, "", soknadData.soknadId)
+                    val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
                     forward(soknadData, oppgaveId, context)
                 }
             }
