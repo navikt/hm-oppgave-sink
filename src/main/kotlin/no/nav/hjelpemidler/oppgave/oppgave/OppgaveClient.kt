@@ -12,6 +12,7 @@ import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
 import java.time.LocalDate
+import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 
@@ -45,10 +46,11 @@ class OppgaveClient(
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
 
-                "$baseUrl".httpPost()
+                baseUrl.httpPost()
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
+                    .header("X-Correlation-ID", UUID.randomUUID().toString())
                     .jsonBody(jsonBody)
                     .awaitObject(
                         object : ResponseDeserializable<JsonNode> {
