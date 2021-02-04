@@ -16,10 +16,10 @@ oppgave(GOSYS), PDL og AzureAd er mocka med Wiremock
 - start hm-oppgave-sink og vent på melding
 
 
-#Interne henvendelser 
+# Interne henvendelser 
 
 slack -> #digihot-dev
 
-#Eksterne henvendelser
+# Eksterne henvendelser
 
 Lag issue i repo 
