@@ -14,3 +14,12 @@ oppgave(GOSYS), PDL og AzureAd er mocka med Wiremock
 - start [hm-joark-sink](https://github.com/navikt/hm-joark-sink) for å arkivere søknad mot mock dokarkiv og sende videre på rapid
 
 - start hm-oppgave-sink og vent på melding
+
+
+#Interne henvendelser 
+
+slack -> #digihot-dev
+
+#Eksterne henvendelser
+
+Lag issue i repo 
