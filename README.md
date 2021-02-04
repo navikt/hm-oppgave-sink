@@ -16,10 +16,10 @@ oppgave(GOSYS), PDL og AzureAd er mocka med Wiremock
 - start hm-oppgave-sink og vent på melding
 
 
-# Interne henvendelser 
+# Henvendelser
 
-slack -> #digihot-dev
+Spørsmål knyttet til koden eller prosjektet kan stilles som issues her på GitHub.
 
-# Eksterne henvendelser
+## For NAV-ansatte
 
-Lag issue i repo 
+Interne henvendelser kan sendes via Slack i kanalen #digihot-dev.
