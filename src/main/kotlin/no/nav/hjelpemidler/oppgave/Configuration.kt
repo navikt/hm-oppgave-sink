@@ -53,7 +53,7 @@ private val prodProperties = ConfigurationMap(
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "oppgave.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/oppgave-aad",
-        "PROXY_SCOPE" to "123",
+        "PROXY_SCOPE" to "api://8bdfd270-4760-4428-8a6e-540707d61cf9/.default",
         "pdl.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl-aad",
     )
 )
