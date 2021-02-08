@@ -15,6 +15,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import no.nav.hjelpemidler.oppgave.pdl.PdlClient
+import java.lang.RuntimeException
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -30,10 +31,11 @@ internal class OppgaveDataSink(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey("fodselNrBruker", "joarkRef", "soknadId") }
+            validate { it.requireKey("fodselNrBruker", "joarkRef", "soknadId", "eventId") }
         }.register(this)
     }
 
+    private val JsonMessage.eventId get() = this["eventId"].textValue()
     private val JsonMessage.fnrBruker get() = this["fodselNrBruker"].textValue()
     private val JsonMessage.joarkRef get() = this["joarkRef"].textValue()
     private val JsonMessage.soknadId get() = this["soknadId"].textValue()
@@ -42,18 +44,31 @@ internal class OppgaveDataSink(
         runBlocking {
             withContext(Dispatchers.IO) {
                 launch {
-                    val soknadData = SoknadData(
-                        fnrBruker = packet.fnrBruker,
-                        joarkRef = packet.joarkRef,
-                        soknadId = UUID.fromString(packet.soknadId)
-                    )
-                    logger.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
-                    val aktorId = pdlClient.hentAktorId(soknadData.fnrBruker)
-                    val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
-                    forward(soknadData, oppgaveId, context)
+                    if (skipEvent(UUID.fromString(packet.eventId))) {
+                        logger.info { "Hopper over event i skip-list: ${packet.eventId}" }
+                        return@launch
+                    }
+                    try {
+                        val soknadData = SoknadData(
+                            fnrBruker = packet.fnrBruker,
+                            joarkRef = packet.joarkRef,
+                            soknadId = UUID.fromString(packet.soknadId)
+                        )
+                        logger.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
+                        val aktorId = pdlClient.hentAktorId(soknadData.fnrBruker)
+                        val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
+                        forward(soknadData, oppgaveId, context)
+                    } catch (e: Exception) {
+                        throw RuntimeException("Håndtering av event ${packet.eventId} feilet", e)
+                    }
                 }
             }
         }
+    }
+
+    private fun skipEvent(eventId: UUID): Boolean {
+        val skipList = mutableListOf<UUID>()
+        return skipList.any { it == eventId }
     }
 
     private suspend fun opprettOppgave(aktorId: String, journalpostId: String, soknadId: UUID) =
