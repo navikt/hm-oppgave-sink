@@ -21,10 +21,8 @@ internal class PapirsoeknadSink(
         }.register(this)
     }
 
-
     override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-        logger.info( packet.toString() )
+        logger.info(packet.toString())
         Prometheus.papirsoeknadMottattCounter.inc()
     }
-
 }
