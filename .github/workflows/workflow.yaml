@@ -27,7 +27,7 @@ jobs:
         env:
           TESTCONTAINERS_RYUK_DISABLED: true
       - name: Build and Publish Docker image
-#        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -38,7 +38,7 @@ jobs:
   deploy-dev:
     name: Deploy to dev
     needs: build
-#    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -47,15 +47,15 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: nais/nais-dev.yaml,nais/alerts-dev.yaml
-#  deploy-prod:
-#    name: Deploy to Production
-#    needs: [build, deploy-dev]
-#    if: github.ref == 'refs/heads/main'
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: nais/deploy/actions/deploy@v1
-#        env:
-#          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-#          CLUSTER: prod-gcp
-#          RESOURCE: nais/nais-prod.yaml,nais/alerts-prod.yaml
+  deploy-prod:
+    name: Deploy to Production
+    needs: [build, deploy-dev]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: prod-gcp
+          RESOURCE: nais/nais-prod.yaml,nais/alerts-prod.yaml

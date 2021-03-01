@@ -22,7 +22,7 @@ internal class PapirsoeknadSink(
     }
 
     override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
-        logger.info(packet.toString())
+        logger.info("received packet from rapid: papirsøknad midelertidig journalført")
         Prometheus.papirsoeknadMottattCounter.inc()
     }
 }
