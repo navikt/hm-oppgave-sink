@@ -31,12 +31,13 @@ internal class OppgaveDataSink(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.requireKey("fodselNrBruker", "joarkRef", "soknadId", "eventId") }
+            validate { it.demandValue("eventName", "hm-SøknadArkivert") }
+            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId") }
         }.register(this)
     }
 
     private val JsonMessage.eventId get() = this["eventId"].textValue()
-    private val JsonMessage.fnrBruker get() = this["fodselNrBruker"].textValue()
+    private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
     private val JsonMessage.joarkRef get() = this["joarkRef"].textValue()
     private val JsonMessage.soknadId get() = this["soknadId"].textValue()
 
@@ -108,8 +109,9 @@ internal data class SoknadData(
     internal fun toJson(oppgaveId: String): String {
         return JsonMessage("{}", MessageProblems("")).also {
             it["soknadId"] = this.soknadId
-            it["@event_name"] = "OppgaveOpprettet"
-            it["@opprettet"] = LocalDateTime.now()
+            it["@event_name"] = "OppgaveOpprettet" // @deprecated
+            it["eventName"] = "hm-OppgaveOpprettet"
+            it["opprettet"] = LocalDateTime.now()
             it["fnrBruker"] = this.fnrBruker
             it["oppgaveId"] = oppgaveId
         }.toJson()
