@@ -40,7 +40,7 @@ private val devProperties = ConfigurationMap(
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "oppgave.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/oppgave-aad",
-        "PROXY_SCOPE" to "api://dev-fss.teamdigihot.digihot-proxy/defaultaccess",
+        "PROXY_SCOPE" to "api://dev-fss.teamdigihot.digihot-proxy/.default",
         "pdl.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",
     )
 )
