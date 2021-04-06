@@ -37,10 +37,14 @@ class PdlClient(
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
 
+                val token = azureClient.getToken(accesstokenScope).accessToken
+                logger.info("DEBUG: PDL auth token used: $token")
+                logger.info("DEBUG: accesstokenScope: $accesstokenScope")
+
                 "$baseUrl".httpPost()
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
-                    .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
+                    .header("Authorization", "Bearer $token")
                     .header("Tema", "HJE")
                     .jsonBody(aktorQuery(fnr))
                     .awaitObject(
