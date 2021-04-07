@@ -38,8 +38,6 @@ class PdlClient(
             kotlin.runCatching {
 
                 val token = azureClient.getToken(accesstokenScope).accessToken
-                logger.info("DEBUG: PDL auth token used: $token")
-                logger.info("DEBUG: accesstokenScope: $accesstokenScope")
 
                 "$baseUrl".httpPost()
                     .header("Content-Type", "application/json")
