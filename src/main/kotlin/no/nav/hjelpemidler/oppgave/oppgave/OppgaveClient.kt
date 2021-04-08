@@ -46,11 +46,14 @@ class OppgaveClient(
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
 
+                val correlationID = UUID.randomUUID().toString()
+                logger.info("DEBUG: akriverSøknad correlationID=$correlationID")
+
                 baseUrl.httpPost()
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
-                    .header("X-Correlation-ID", UUID.randomUUID().toString())
+                    .header("X-Correlation-ID", correlationID)
                     .jsonBody(jsonBody)
                     .awaitObject(
                         object : ResponseDeserializable<JsonNode> {
