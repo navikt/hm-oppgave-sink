@@ -26,8 +26,7 @@ internal class OppgaveDataSink(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
     private val pdlClient: PdlClient
-) :
-    River.PacketListener {
+) : PacketListenerWithOnError {
 
     init {
         River(rapidsConnection).apply {
