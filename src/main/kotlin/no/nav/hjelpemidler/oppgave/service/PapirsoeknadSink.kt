@@ -11,8 +11,7 @@ private val sikkerlogg = KotlinLogging.logger("tjenestekall")
 
 internal class PapirsoeknadSink(
     rapidsConnection: RapidsConnection,
-) :
-    River.PacketListener {
+) : PacketListenerWithOnError {
 
     init {
         River(rapidsConnection).apply {
