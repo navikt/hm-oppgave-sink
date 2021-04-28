@@ -2,6 +2,7 @@ package no.nav.hjelpemidler.oppgave.service
 
 import mu.KotlinLogging
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
@@ -20,7 +21,7 @@ internal class PapirsoeknadSink(
         }.register(this)
     }
 
-    override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
         logger.info("received packet from rapid: papirsøknad midelertidig journalført")
         Prometheus.papirsoeknadMottattCounter.inc()
     }

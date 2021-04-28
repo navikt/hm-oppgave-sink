@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.helse.rapids_rivers.JsonMessage
+import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
@@ -40,7 +41,7 @@ internal class OppgaveDataSink(
     private val JsonMessage.joarkRef get() = this["joarkRef"].textValue()
     private val JsonMessage.soknadId get() = this["soknadId"].textValue()
 
-    override fun onPacket(packet: JsonMessage, context: RapidsConnection.MessageContext) {
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
         runBlocking {
             withContext(Dispatchers.IO) {
                 launch {
@@ -81,9 +82,9 @@ internal class OppgaveDataSink(
             logger.error(it) { "Feilet under opprettelse av oppgave: $soknadId" }
         }.getOrThrow()
 
-    private fun CoroutineScope.forward(søknadData: SoknadData, joarkRef: String, context: RapidsConnection.MessageContext) {
+    private fun CoroutineScope.forward(søknadData: SoknadData, joarkRef: String, context: MessageContext) {
         launch(Dispatchers.IO + SupervisorJob()) {
-            context.send(søknadData.fnrBruker, søknadData.toJson(joarkRef))
+            context.publish(søknadData.fnrBruker, søknadData.toJson(joarkRef))
             Prometheus.oppgaveOpprettetCounter.inc()
         }.invokeOnCompletion {
             when (it) {
