@@ -16,12 +16,11 @@ private val localProperties = ConfigurationMap(
         "application.httpPort" to "8084",
         "application.profile" to "LOCAL",
         "kafka.reset.policy" to "earliest",
-        "kafka.topic" to "teamdigihot.hm-soknadsbehandling-v1",
-        "kafka.truststore.password" to "",
+        "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "KAFKA_TRUSTSTORE_PATH" to "",
         "KAFKA_CREDSTORE_PASSWORD" to "",
         "KAFKA_KEYSTORE_PATH" to "",
-        "kafka.brokers" to "host.docker.internal:9092",
+        "KAFKA_BROKERS" to "host.docker.internal:9092",
         "AZURE_TENANT_BASEURL" to "http://localhost:9098",
         "AZURE_APP_TENANT_ID" to "123",
         "AZURE_APP_CLIENT_ID" to "123",
@@ -35,8 +34,8 @@ private val devProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to "8080",
         "application.profile" to "DEV",
-        "kafka.reset.policy" to "earliest",
-        "kafka.topic" to "teamdigihot.hm-soknadsbehandling-v1",
+        "KAFKA_RESET_POLICY" to "earliest",
+        "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "oppgave.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/oppgave-aad",
@@ -48,8 +47,8 @@ private val prodProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to "8080",
         "application.profile" to "PROD",
-        "kafka.reset.policy" to "earliest",
-        "kafka.topic" to "teamdigihot.hm-soknadsbehandling-v1",
+        "KAFKA_RESET_POLICY" to "earliest",
+        "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "oppgave.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/oppgave-aad",
@@ -74,12 +73,11 @@ internal object Configuration {
     val rapidApplication: Map<String, String> = mapOf(
         "RAPID_KAFKA_CLUSTER" to "gcp",
         "RAPID_APP_NAME" to "hm-oppgave-sink",
-        "KAFKA_BOOTSTRAP_SERVERS" to config()[Key("kafka.brokers", stringType)],
+        "KAFKA_BROKERS" to config()[Key("KAFKA_BROKERS", stringType)],
         "KAFKA_CONSUMER_GROUP_ID" to application.id,
-        "KAFKA_RAPID_TOPIC" to config()[Key("kafka.topic", stringType)],
-        "KAFKA_RESET_POLICY" to config()[Key("kafka.reset.policy", stringType)],
-        "NAV_TRUSTSTORE_PATH" to config()[Key("KAFKA_TRUSTSTORE_PATH", stringType)],
-        "NAV_TRUSTSTORE_PASSWORD" to config()[Key("KAFKA_CREDSTORE_PASSWORD", stringType)],
+        "KAFKA_RAPID_TOPIC" to config()[Key("KAFKA_TOPIC", stringType)],
+        "KAFKA_RESET_POLICY" to config()[Key("KAFKA_RESET_POLICY", stringType)],
+        "KAFKA_CREDSTORE_PASSWORD" to config()[Key("KAFKA_CREDSTORE_PASSWORD", stringType)],
         "KAFKA_KEYSTORE_PATH" to config()[Key("KAFKA_KEYSTORE_PATH", stringType)],
         "KAFKA_KEYSTORE_PASSWORD" to config()[Key("KAFKA_CREDSTORE_PASSWORD", stringType)],
         "HTTP_PORT" to config()[Key("application.httpPort", stringType)],
@@ -111,15 +109,3 @@ internal object Configuration {
 enum class Profile {
     LOCAL, DEV, PROD
 }
-
-private fun getHostname(): String {
-    return try {
-        val addr: InetAddress = InetAddress.getLocalHost()
-        addr.hostName
-    } catch (e: UnknownHostException) {
-        "unknown"
-    }
-}
-
-private fun String.readFile() =
-    File(this).readText(Charsets.UTF_8)
