@@ -74,9 +74,9 @@ internal object Configuration {
         "KAFKA_CONSUMER_GROUP_ID" to application.id,
         "KAFKA_RAPID_TOPIC" to config()[Key("KAFKA_TOPIC", stringType)],
         "KAFKA_RESET_POLICY" to config()[Key("KAFKA_RESET_POLICY", stringType)],
+        "KAFKA_TRUSTSTORE_PATH" to config()[Key("KAFKA_TRUSTSTORE_PATH", stringType)],
         "KAFKA_CREDSTORE_PASSWORD" to config()[Key("KAFKA_CREDSTORE_PASSWORD", stringType)],
         "KAFKA_KEYSTORE_PATH" to config()[Key("KAFKA_KEYSTORE_PATH", stringType)],
-        "KAFKA_KEYSTORE_PASSWORD" to config()[Key("KAFKA_CREDSTORE_PASSWORD", stringType)],
         "HTTP_PORT" to config()[Key("application.httpPort", stringType)],
     ) + System.getenv().filter { it.key.startsWith("NAIS_") }
 
