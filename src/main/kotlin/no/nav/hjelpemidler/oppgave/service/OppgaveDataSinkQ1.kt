@@ -21,7 +21,7 @@ import java.util.UUID
 private val logger = KotlinLogging.logger {}
 private val sikkerlogg = KotlinLogging.logger("tjenestekall")
 
-internal class OppgaveDataSink(
+internal class OppgaveDataSinkQ1(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
     private val pdlClient: PdlClient
@@ -29,7 +29,7 @@ internal class OppgaveDataSink(
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("eventName", "hm-SøknadArkivert") }
+            validate { it.demandValue("eventName", "hm-SøknadArkivert-q1") }
             validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId") }
         }.register(this)
     }
@@ -53,7 +53,7 @@ internal class OppgaveDataSink(
                             joarkRef = packet.joarkRef,
                             soknadId = UUID.fromString(packet.soknadId)
                         )
-                        logger.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
+                        logger.info { "Arkivert søknad mottatt i Q1: ${soknadData.soknadId}" }
                         val aktorId = pdlClient.hentAktorId(soknadData.fnrBruker)
                         val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
                         forward(soknadData, oppgaveId, context)
@@ -74,21 +74,21 @@ internal class OppgaveDataSink(
         kotlin.runCatching {
             oppgaveClient.arkiverSoknad(aktorId, journalpostId)
         }.onSuccess {
-            logger.info("Oppgave opprettet: $soknadId")
+            logger.info("Oppgave opprettet i Q1: $soknadId")
             Prometheus.hentetAktorIdCounter.inc()
         }.onFailure {
-            logger.error(it) { "Feilet under opprettelse av oppgave: $soknadId" }
+            logger.error(it) { "Feilet under opprettelse av oppgave i Q1: $soknadId" }
         }.getOrThrow()
 
     private fun CoroutineScope.forward(søknadData: SoknadData, joarkRef: String, context: MessageContext) {
         launch(Dispatchers.IO + SupervisorJob()) {
-            context.publish(søknadData.fnrBruker, søknadData.toJson(joarkRef, "hm-OppgaveOpprettet"))
+            context.publish(søknadData.fnrBruker, søknadData.toJson(joarkRef, "hm-OppgaveOpprettet-q1"))
             Prometheus.oppgaveOpprettetCounter.inc()
         }.invokeOnCompletion {
             when (it) {
                 null -> {
-                    logger.info("Oppgave opprettet for søknad: ${søknadData.soknadId}")
-                    sikkerlogg.info("Oppgave opprettet for søknad: ${søknadData.soknadId}, fnr: ${søknadData.fnrBruker})")
+                    logger.info("Oppgave opprettet for søknad i Q1: ${søknadData.soknadId}")
+                    sikkerlogg.info("Oppgave opprettet for søknad i Q1: ${søknadData.soknadId}, fnr: ${søknadData.fnrBruker})")
                 }
                 is CancellationException -> logger.warn("Cancelled: ${it.message}")
                 else -> {

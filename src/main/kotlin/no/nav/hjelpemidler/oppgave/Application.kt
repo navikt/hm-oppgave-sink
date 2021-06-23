@@ -4,6 +4,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
+import no.nav.hjelpemidler.oppgave.service.OppgaveDataSinkQ1
 import no.nav.hjelpemidler.oppgave.service.PapirsoeknadSink
 import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 
@@ -31,7 +32,19 @@ fun main() {
 
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(Configuration.rapidApplication))
         .build().apply {
-            OppgaveDataSink(this, oppgaveClient, pdlClient)
             PapirsoeknadSink(this)
+            OppgaveDataSink(this, oppgaveClient, pdlClient)
+
+            // River kun brukt i dev for testing av Ditt NAV/Dine saker
+            // Når vi tek over dokumentvisning kan det hende vi kan fjerne alle Q1-appane
+            if (Configuration.application.profile == Profile.DEV) OppgaveDataSinkQ1(
+                this,
+                OppgaveClient(
+                    baseUrl = System.getenv("OPPGAVE_BASEURL_Q1"),
+                    accesstokenScope = System.getenv("PROXY_SCOPE_Q1"),
+                    azureClient = azureClient
+                ),
+                pdlClient
+            )
         }.start()
 }
