@@ -10,12 +10,15 @@ import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
+import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import java.lang.RuntimeException
+import java.time.LocalDateTime
 import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
@@ -24,12 +27,14 @@ private val sikkerlogg = KotlinLogging.logger("tjenestekall")
 internal class OppgaveDataSink(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
-    private val pdlClient: PdlClient
+    private val pdlClient: PdlClient,
+    private val producedEventName: String = Configuration.application.producedEventName,
+    private val consumedEventName: String = Configuration.application.consumedEventName,
 ) : PacketListenerWithOnError {
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("eventName", "hm-SøknadArkivert") }
+            validate { it.demandValue("eventName", consumedEventName) }
             validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId") }
         }.register(this)
     }
@@ -82,7 +87,7 @@ internal class OppgaveDataSink(
 
     private fun CoroutineScope.forward(søknadData: SoknadData, joarkRef: String, context: MessageContext) {
         launch(Dispatchers.IO + SupervisorJob()) {
-            context.publish(søknadData.fnrBruker, søknadData.toJson(joarkRef, "hm-OppgaveOpprettet"))
+            context.publish(søknadData.fnrBruker, søknadData.toJson(joarkRef, producedEventName))
             Prometheus.oppgaveOpprettetCounter.inc()
         }.invokeOnCompletion {
             when (it) {
@@ -96,5 +101,21 @@ internal class OppgaveDataSink(
                 }
             }
         }
+    }
+}
+
+internal data class SoknadData(
+    val fnrBruker: String,
+    val soknadId: UUID,
+    val joarkRef: String,
+) {
+    internal fun toJson(oppgaveId: String, producedEventName: String): String {
+        return JsonMessage("{}", MessageProblems("")).also {
+            it["soknadId"] = this.soknadId
+            it["eventName"] = producedEventName
+            it["opprettet"] = LocalDateTime.now()
+            it["fnrBruker"] = this.fnrBruker
+            it["oppgaveId"] = oppgaveId
+        }.toJson()
     }
 }

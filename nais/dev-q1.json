@@ -1,0 +1,8 @@
+{
+  "appnavn": "hm-oppgave-sink-q1",
+  "KAFKA_CONSUMER_GROUP_ID": , // TODO: Hente riktig consumer group id
+  "OPPGAVE_BASEURL": "https://digihot-proxy-q1.dev-fss-pub.nais.io/oppgave-aad",
+  "PROXY_SCOPE": "api://dev-fss.teamdigihot.digihot-proxy-q1/.default",
+  "CONSUMED_EVENT_NAME": "hm-SøknadArkivert-q1",
+  "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet-q1"
+}
