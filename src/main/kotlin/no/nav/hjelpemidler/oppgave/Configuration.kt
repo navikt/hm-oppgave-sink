@@ -12,6 +12,7 @@ private val localProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to "8084",
         "application.profile" to "LOCAL",
+        "APPNAVN" to "hm-oppgave-sink",
         "kafka.reset.policy" to "earliest",
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "KAFKA_TRUSTSTORE_PATH" to "",
@@ -44,6 +45,7 @@ private val prodProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to "8080",
         "application.profile" to "PROD",
+        "APPNAVN" to "hm-oppgave-sink",
         "KAFKA_RESET_POLICY" to "earliest",
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
@@ -69,7 +71,7 @@ internal object Configuration {
     val pdl: Pdl = Pdl()
     val rapidApplication: Map<String, String> = mapOf(
         "RAPID_KAFKA_CLUSTER" to "gcp",
-        "RAPID_APP_NAME" to "hm-oppgave-sink",
+        "RAPID_APP_NAME" to config()[Key("APPNAVN", stringType)],
         "KAFKA_BROKERS" to config()[Key("KAFKA_BROKERS", stringType)],
         "KAFKA_CONSUMER_GROUP_ID" to config()[Key("KAFKA_CONSUMER_GROUP_ID", stringType)],
         "KAFKA_RAPID_TOPIC" to config()[Key("KAFKA_TOPIC", stringType)],

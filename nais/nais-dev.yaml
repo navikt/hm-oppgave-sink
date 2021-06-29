@@ -2,9 +2,9 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   labels:
-    app: hm-oppgave-sink
+    app: {{ APPNAVN }}
     team: teamdigihot
-  name: hm-oppgave-sink
+  name: {{ APPNAVN }}
   namespace: teamdigihot
 spec:
   image: {{ image }}
