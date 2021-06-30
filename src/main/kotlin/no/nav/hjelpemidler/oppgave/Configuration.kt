@@ -12,8 +12,10 @@ private val localProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to "8084",
         "application.profile" to "LOCAL",
+        "APPNAVN" to "hm-oppgave-sink",
         "kafka.reset.policy" to "earliest",
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
+        "KAFKA_CONSUMER_GROUP_ID" to "hm-oppgave-sink-v1",
         "KAFKA_TRUSTSTORE_PATH" to "",
         "KAFKA_CREDSTORE_PASSWORD" to "",
         "KAFKA_KEYSTORE_PATH" to "",
@@ -35,8 +37,8 @@ private val devProperties = ConfigurationMap(
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "PDF_BASEURL" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
-        "OPPGAVE_BASEURL" to System.getenv("OPPGAVE_BASEURL_Q1"),
-        "PROXY_SCOPE" to System.getenv("PROXY_SCOPE_Q1"),
+        "OPPGAVE_BASEURL" to System.getenv("OPPGAVE_BASEURL"),
+        "PROXY_SCOPE" to System.getenv("PROXY_SCOPE"),
         "PDL_BASEURL" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",
     )
 )
@@ -44,8 +46,10 @@ private val prodProperties = ConfigurationMap(
     mapOf(
         "application.httpPort" to "8080",
         "application.profile" to "PROD",
+        "APPNAVN" to "hm-oppgave-sink",
         "KAFKA_RESET_POLICY" to "earliest",
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
+        "KAFKA_CONSUMER_GROUP_ID" to "hm-oppgave-sink-v1",
         "PDF_BASEURL" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "OPPGAVE_BASEURL" to "https://digihot-proxy.prod-fss-pub.nais.io/oppgave-aad",
@@ -69,9 +73,9 @@ internal object Configuration {
     val pdl: Pdl = Pdl()
     val rapidApplication: Map<String, String> = mapOf(
         "RAPID_KAFKA_CLUSTER" to "gcp",
-        "RAPID_APP_NAME" to "hm-oppgave-sink",
+        "RAPID_APP_NAME" to config()[Key("APPNAVN", stringType)],
         "KAFKA_BROKERS" to config()[Key("KAFKA_BROKERS", stringType)],
-        "KAFKA_CONSUMER_GROUP_ID" to application.id,
+        "KAFKA_CONSUMER_GROUP_ID" to config()[Key("KAFKA_CONSUMER_GROUP_ID", stringType)],
         "KAFKA_RAPID_TOPIC" to config()[Key("KAFKA_TOPIC", stringType)],
         "KAFKA_RESET_POLICY" to config()[Key("KAFKA_RESET_POLICY", stringType)],
         "KAFKA_TRUSTSTORE_PATH" to config()[Key("KAFKA_TRUSTSTORE_PATH", stringType)],
@@ -83,7 +87,9 @@ internal object Configuration {
     data class Application(
         val id: String = config().getOrElse(Key("", stringType), "hm-oppgave-sink-v1"),
         val profile: Profile = config()[Key("application.profile", stringType)].let { Profile.valueOf(it) },
-        val httpPort: Int = config()[Key("application.httpPort", intType)]
+        val httpPort: Int = config()[Key("application.httpPort", intType)],
+        val producedEventName: String = config()[Key("PRODUCED_EVENT_NAME", stringType)],
+        val consumedEventName: String = config()[Key("CONSUMED_EVENT_NAME", stringType)],
     )
 
     data class Azure(

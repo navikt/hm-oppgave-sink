@@ -2,9 +2,8 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   labels:
-    app: hm-oppgave-sink
     team: teamdigihot
-  name: hm-oppgave-sink
+  name: {{ APPNAVN }}
   namespace: teamdigihot
 spec:
   image: {{ image }}
@@ -28,14 +27,18 @@ spec:
       cpu: 200m
       memory: 512Mi
   env:
+    - name: APPNAVN
+      value: "{{ APPNAVN }}"
+    - name: KAFKA_CONSUMER_GROUP_ID
+      value: "{{ KAFKA_CONSUMER_GROUP_ID }}"
     - name: OPPGAVE_BASEURL
-      value: https://digihot-proxy.dev-fss-pub.nais.io/oppgave-aad
+      value: "{{ OPPGAVE_BASEURL }}"
     - name: PROXY_SCOPE
-      value: api://dev-fss.teamdigihot.digihot-proxy/.default
-    - name: OPPGAVE_BASEURL_Q1
-      value: https://digihot-proxy-q1.dev-fss-pub.nais.io/oppgave-aad
-    - name: PROXY_SCOPE_Q1
-      value: api://dev-fss.teamdigihot.digihot-proxy-q1/.default
+      value: "{{ PROXY_SCOPE }}"
+    - name: CONSUMED_EVENT_NAME
+      value: "{{ CONSUMED_EVENT_NAME }}"
+    - name: PRODUCED_EVENT_NAME
+      value: "{{ PRODUCED_EVENT_NAME }}"
   secureLogs:
     enabled: true
   kafka:
