@@ -33,6 +33,8 @@ spec:
       value: "{{ KAFKA_CONSUMER_GROUP_ID }}"
     - name: OPPGAVE_BASEURL
       value: "{{ OPPGAVE_BASEURL }}"
+    - name: PDL_BASEURL
+      value: "{{ PDL_BASEURL }}"
     - name: PROXY_SCOPE
       value: "{{ PROXY_SCOPE }}"
     - name: CONSUMED_EVENT_NAME

@@ -39,7 +39,7 @@ private val devProperties = ConfigurationMap(
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "OPPGAVE_BASEURL" to System.getenv("OPPGAVE_BASEURL"),
         "PROXY_SCOPE" to System.getenv("PROXY_SCOPE"),
-        "PDL_BASEURL" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",
+        "PDL_BASEURL" to System.getenv("PDL_BASEURL"),
     )
 )
 private val prodProperties = ConfigurationMap(
