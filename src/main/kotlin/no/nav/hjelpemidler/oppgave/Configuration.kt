@@ -24,9 +24,9 @@ private val localProperties = ConfigurationMap(
         "AZURE_APP_TENANT_ID" to "123",
         "AZURE_APP_CLIENT_ID" to "123",
         "AZURE_APP_CLIENT_SECRET" to "dummy",
-        "oppgave.baseurl" to "http://localhost:9098/oppgave-aad",
+        "OPPGAVE_BASEURL" to "http://localhost:9098/oppgave-aad",
         "PROXY_SCOPE" to "123",
-        "pdl.baseurl" to "http://localhost:9098/pdl",
+        "PDL_BASEURL" to "http://localhost:9098/pdl",
     )
 )
 private val devProperties = ConfigurationMap(
@@ -35,11 +35,11 @@ private val devProperties = ConfigurationMap(
         "application.profile" to "DEV",
         "KAFKA_RESET_POLICY" to "earliest",
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
-        "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
+        "PDF_BASEURL" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
-        "oppgave.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/oppgave-aad",
-        "PROXY_SCOPE" to "api://dev-fss.teamdigihot.digihot-proxy/.default",
-        "pdl.baseurl" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",
+        "OPPGAVE_BASEURL" to System.getenv("OPPGAVE_BASEURL"),
+        "PROXY_SCOPE" to System.getenv("PROXY_SCOPE"),
+        "PDL_BASEURL" to "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",
     )
 )
 private val prodProperties = ConfigurationMap(
@@ -50,11 +50,11 @@ private val prodProperties = ConfigurationMap(
         "KAFKA_RESET_POLICY" to "earliest",
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "KAFKA_CONSUMER_GROUP_ID" to "hm-oppgave-sink-v1",
-        "pdf.baseurl" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
+        "PDF_BASEURL" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
-        "oppgave.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/oppgave-aad",
+        "OPPGAVE_BASEURL" to "https://digihot-proxy.prod-fss-pub.nais.io/oppgave-aad",
         "PROXY_SCOPE" to "api://8bdfd270-4760-4428-8a6e-540707d61cf9/.default",
-        "pdl.baseurl" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl-aad",
+        "PDL_BASEURL" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl-aad",
     )
 )
 
@@ -101,11 +101,11 @@ internal object Configuration {
     )
 
     data class Oppgave(
-        val baseUrl: String = config()[Key("oppgave.baseurl", stringType)],
+        val baseUrl: String = config()[Key("OPPGAVE_BASEURL", stringType)],
     )
 
     data class Pdl(
-        val baseUrl: String = config()[Key("pdl.baseurl", stringType)],
+        val baseUrl: String = config()[Key("PDL_BASEURL", stringType)],
     )
 }
 
