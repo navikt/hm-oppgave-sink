@@ -27,6 +27,8 @@ private val localProperties = ConfigurationMap(
         "OPPGAVE_BASEURL" to "http://localhost:9098/oppgave-aad",
         "PROXY_SCOPE" to "123",
         "PDL_BASEURL" to "http://localhost:9098/pdl",
+        "CONSUMED_EVENT_NAME" to "hm-SøknadArkivert",
+        "PRODUCED_EVENT_NAME" to "hm-OppgaveOpprettet",
     )
 )
 private val devProperties = ConfigurationMap(
@@ -55,6 +57,8 @@ private val prodProperties = ConfigurationMap(
         "OPPGAVE_BASEURL" to "https://digihot-proxy.prod-fss-pub.nais.io/oppgave-aad",
         "PROXY_SCOPE" to "api://8bdfd270-4760-4428-8a6e-540707d61cf9/.default",
         "PDL_BASEURL" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl-aad",
+        "CONSUMED_EVENT_NAME" to "hm-SøknadArkivert",
+        "PRODUCED_EVENT_NAME" to "hm-OppgaveOpprettet",
     )
 )
 
