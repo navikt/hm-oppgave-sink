@@ -101,7 +101,7 @@ internal class OpprettBehandleSakOppgave(
         dokumentBeskrivelse: String
     ) =
         kotlin.runCatching {
-           oppgaveClientV2.opprettBehandleSakOppgave(aktorId, journalpostId, enhet, dokumentBeskrivelse)
+            oppgaveClientV2.opprettBehandleSakOppgave(aktorId, journalpostId, enhet, dokumentBeskrivelse)
         }.onSuccess {
             logger.info("Behandle sak oppgave opprettet: $soknadId, oppgaveId: $it")
             Prometheus.hentetAktorIdCounter.inc()
