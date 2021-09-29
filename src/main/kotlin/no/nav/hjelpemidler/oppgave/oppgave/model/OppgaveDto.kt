@@ -13,6 +13,20 @@ data class OppgaveRequest(
     val prioritet: String
 )
 
+data class OpprettBehandleSakOppgaveRequest(
+    val aktoerId: String,
+    val journalpostId: String,
+    val beskrivelse: String,
+    val temagruppe: String,
+    val tema: String,
+    val oppgavetype: String,
+    val behandlingstype: String,
+    val aktivDato: String,
+    val fristFerdigstillelse: String,
+    val prioritet: String,
+    val tildeltEnhetsnr: String
+)
+
 data class OppgaveResponse(
     val id: Int,
     val versjon: Int?,

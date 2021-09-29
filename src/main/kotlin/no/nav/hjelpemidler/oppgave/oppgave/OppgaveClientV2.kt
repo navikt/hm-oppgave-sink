@@ -10,13 +10,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
-import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
+import no.nav.hjelpemidler.oppgave.oppgave.model.OpprettBehandleSakOppgaveRequest
 import java.time.LocalDate
 import java.util.UUID
 
 private val logger = KotlinLogging.logger {}
 
-class OppgaveClient(
+class OppgaveClientV2(
     private val baseUrl: String,
     private val accesstokenScope: String,
     private val azureClient: AzureClient
@@ -25,20 +25,20 @@ class OppgaveClient(
     companion object {
         private val objectMapper = ObjectMapper()
         const val BEHANDLINGSTYPE = "ae0227" // Digital søknad
-        const val OPPGAVETYPE_JRF = "JFR"
+        const val OPPGAVETYPE_JRF = "BEH_SAK"
         const val OPPGAVE_PRIORITET_NORM = "NORM"
         const val TEMA = "HJE"
         const val TEMA_GRUPPE = "HJLPM"
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
     }
 
-    suspend fun arkiverSoknad(aktorId: String, journalpostId: String): String {
-        logger.info { "Oppretter oppgave" }
+    suspend fun opprettBehandleSakOppgave(aktorId: String, journalpostId: String, enhet: String): String {
+        logger.info { "Oppretter oppgave for ferdigstilt journalpost" }
 
-        val requestBody = OppgaveRequest(
+        val requestBody = OpprettBehandleSakOppgaveRequest(
             aktorId, journalpostId, BESKRIVELSE_OPPGAVE,
             TEMA_GRUPPE, TEMA, OPPGAVETYPE_JRF, BEHANDLINGSTYPE,
-            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM
+            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM, enhet
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
@@ -83,4 +83,4 @@ class OppgaveClient(
         LocalDate.now().toString()
 }
 
-internal class OppgaveException(msg: String) : RuntimeException(msg)
+internal class OppgaveExceptionV2(msg: String) : RuntimeException(msg)
