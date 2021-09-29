@@ -25,19 +25,19 @@ class OppgaveClientV2(
     companion object {
         private val objectMapper = ObjectMapper()
         const val BEHANDLINGSTYPE = "ae0227" // Digital søknad
-        const val OPPGAVETYPE_JRF = "BEH_SAK"
+        const val OPPGAVETYPE_BEH_SAK = "BEH_SAK"
         const val OPPGAVE_PRIORITET_NORM = "NORM"
         const val TEMA = "HJE"
         const val TEMA_GRUPPE = "HJLPM"
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
     }
 
-    suspend fun opprettBehandleSakOppgave(aktorId: String, journalpostId: String, enhet: String): String {
+    suspend fun opprettBehandleSakOppgave(aktorId: String, journalpostId: String, enhet: String, dokumentBeskrivelse: String): String {
         logger.info { "Oppretter oppgave for ferdigstilt journalpost" }
 
         val requestBody = OpprettBehandleSakOppgaveRequest(
-            aktorId, journalpostId, BESKRIVELSE_OPPGAVE,
-            TEMA_GRUPPE, TEMA, OPPGAVETYPE_JRF, BEHANDLINGSTYPE,
+            aktorId, journalpostId, dokumentBeskrivelse,
+            TEMA_GRUPPE, TEMA, OPPGAVETYPE_BEH_SAK, BEHANDLINGSTYPE,
             hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM, enhet
         )
 

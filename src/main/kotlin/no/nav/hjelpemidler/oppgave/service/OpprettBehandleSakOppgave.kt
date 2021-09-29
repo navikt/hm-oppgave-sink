@@ -31,7 +31,17 @@ internal class OpprettBehandleSakOppgave(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", "hm-sakTilbakeførtOebs") }
-            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "enhet", "sakId") }
+            validate {
+                it.requireKey(
+                    "fnrBruker",
+                    "joarkRef",
+                    "soknadId",
+                    "eventId",
+                    "enhet",
+                    "saksnummer",
+                    "dokumentBeskrivelse"
+                )
+            }
         }.register(this)
     }
 
@@ -40,7 +50,8 @@ internal class OpprettBehandleSakOppgave(
     private val JsonMessage.joarkRef get() = this["joarkRef"].textValue()
     private val JsonMessage.soknadId get() = this["soknadId"].textValue()
     private val JsonMessage.enhet get() = this["enhet"].textValue()
-    private val JsonMessage.sakId get() = this["sakId"].textValue()
+    private val JsonMessage.sakId get() = this["saksnummer"].textValue()
+    private val JsonMessage.dokumentBeskrivelse get() = this["dokumentBeskrivelse"].textValue()
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         runBlocking {
@@ -51,17 +62,24 @@ internal class OpprettBehandleSakOppgave(
                         return@launch
                     }
                     try {
-                        val soknadData = OpprettBehandleOppgaveData(
+                        val oppgaveData = OpprettBehandleOppgaveData(
                             fnrBruker = packet.fnrBruker,
                             joarkRef = packet.joarkRef,
                             soknadId = UUID.fromString(packet.soknadId),
                             sakId = packet.sakId,
-                            enhet = packet.enhet
+                            enhet = packet.enhet,
+                            dokumentBeskrivelse = packet.dokumentBeskrivelse
                         )
-                        logger.info { "Tilbakeført sak mottatt, sakId:  ${soknadData.sakId}" }
-                        val aktorId = pdlClient.hentAktorId(soknadData.fnrBruker)
-                        val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId, soknadData.enhet)
-                        forward(soknadData, oppgaveId, context)
+                        logger.info { "Tilbakeført sak mottatt, sakId:  ${oppgaveData.sakId}" }
+                        val aktorId = pdlClient.hentAktorId(oppgaveData.fnrBruker)
+                        val oppgaveId = opprettOppgave(
+                            aktorId,
+                            oppgaveData.joarkRef,
+                            oppgaveData.soknadId,
+                            oppgaveData.enhet,
+                            oppgaveData.dokumentBeskrivelse
+                        )
+                        forward(oppgaveData, oppgaveId, context)
                     } catch (e: Exception) {
                         throw RuntimeException("Håndtering av event ${packet.eventId} feilet", e)
                     }
@@ -75,9 +93,15 @@ internal class OpprettBehandleSakOppgave(
         return skipList.any { it == eventId }
     }
 
-    private suspend fun opprettOppgave(aktorId: String, journalpostId: String, soknadId: UUID, enhet: String) =
+    private suspend fun opprettOppgave(
+        aktorId: String,
+        journalpostId: String,
+        soknadId: UUID,
+        enhet: String,
+        dokumentBeskrivelse: String
+    ) =
         kotlin.runCatching {
-            oppgaveClientV2.opprettBehandleSakOppgave(aktorId, journalpostId, enhet)
+            oppgaveClientV2.opprettBehandleSakOppgave(aktorId, journalpostId, enhet, dokumentBeskrivelse)
         }.onSuccess {
             logger.info("Behandle sak oppgave opprettet: $soknadId")
             Prometheus.hentetAktorIdCounter.inc()
@@ -85,9 +109,16 @@ internal class OpprettBehandleSakOppgave(
             logger.error(it) { "Feilet under opprettelse av behandle sak oppgave: $soknadId" }
         }.getOrThrow()
 
-    private fun CoroutineScope.forward(opprettBehandleOppgaveData: OpprettBehandleOppgaveData, joarkRef: String, context: MessageContext) {
+    private fun CoroutineScope.forward(
+        opprettBehandleOppgaveData: OpprettBehandleOppgaveData,
+        joarkRef: String,
+        context: MessageContext
+    ) {
         launch(Dispatchers.IO + SupervisorJob()) {
-            context.publish(opprettBehandleOppgaveData.fnrBruker, opprettBehandleOppgaveData.toJson(joarkRef, "hm-opprettetBehandleSakOppgave"))
+            context.publish(
+                opprettBehandleOppgaveData.fnrBruker,
+                opprettBehandleOppgaveData.toJson(joarkRef, "hm-opprettetBehandleSakOppgave")
+            )
             Prometheus.oppgaveOpprettetCounter.inc()
         }.invokeOnCompletion {
             when (it) {
@@ -109,7 +140,8 @@ internal data class OpprettBehandleOppgaveData(
     val soknadId: UUID,
     val joarkRef: String,
     val sakId: String,
-    val enhet: String
+    val enhet: String,
+    val dokumentBeskrivelse: String
 ) {
     internal fun toJson(oppgaveId: String, producedEventName: String): String {
         return JsonMessage("{}", MessageProblems("")).also {
@@ -120,6 +152,7 @@ internal data class OpprettBehandleOppgaveData(
             it["oppgaveId"] = oppgaveId
             it["enhet"] = enhet
             it["sakId"] = sakId
+            it["dokumentBeskrivelse"] = dokumentBeskrivelse
         }.toJson()
     }
 }
