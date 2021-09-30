@@ -5,7 +5,7 @@ import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClientV2
 import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
-import no.nav.hjelpemidler.oppgave.service.OpprettBehandleSakOppgave
+import no.nav.hjelpemidler.oppgave.service.OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning
 import no.nav.hjelpemidler.oppgave.service.PapirsoeknadSink
 import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 
@@ -43,7 +43,7 @@ fun main() {
             OppgaveDataSink(this, oppgaveClient, pdlClient)
             PapirsoeknadSink(this)
             if (System.getenv("NAIS_CLUSTER_NAME") == null || System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
-                OpprettBehandleSakOppgave(this, oppgaveClientV2, pdlClient)
+                OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(this, oppgaveClient, pdlClient)
             }
         }.start()
 }
