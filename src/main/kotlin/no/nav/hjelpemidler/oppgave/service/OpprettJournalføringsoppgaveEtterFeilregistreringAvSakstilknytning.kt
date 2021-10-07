@@ -29,12 +29,11 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
 
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("eventName", "hm-feilregistrerteSakstilknytningForJournalpost") }
+            validate { it.demandValue("eventName", "hm-opprettetMottattJournalpost") }
             validate {
                 it.requireKey(
-                    "fnrBruker",
-                    "feilregistrertJournalpostId",
-                    "nyJournalpostId",
+                    "fodselNrBruker",
+                    "joarkRef",
                     "eventId",
                     "sakId"
                 )
@@ -43,9 +42,8 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     }
 
     private val JsonMessage.eventId get() = this["eventId"].textValue()
-    private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
-    private val JsonMessage.feilregistrertJournalpostId get() = this["feilregistrertJournalpostId"].textValue()
-    private val JsonMessage.nyJournalpostId get() = this["nyJournalpostId"].textValue()
+    private val JsonMessage.fnrBruker get() = this["fodselNrBruker"].textValue()
+    private val JsonMessage.nyJournalpostId get() = this["joarkRef"].textValue()
     private val JsonMessage.sakId get() = this["sakId"].textValue()
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
@@ -59,7 +57,6 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     try {
                         val oppgaveData = OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
                             fnrBruker = packet.fnrBruker,
-                            feilregistrertJournalpostId = packet.feilregistrertJournalpostId,
                             nyJournalpostId = packet.nyJournalpostId,
                             sakId = packet.sakId
                         )
@@ -131,7 +128,6 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
 internal data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
     val fnrBruker: String,
     val sakId: String,
-    val feilregistrertJournalpostId: String,
     val nyJournalpostId: String
 ) {
     internal fun toJson(oppgaveId: String, producedEventName: String): String {
@@ -141,7 +137,6 @@ internal data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveDat
             it["fnrBruker"] = this.fnrBruker
             it["oppgaveId"] = oppgaveId
             it["sakId"] = sakId
-            it["feilregistrertJournalpostId"] = feilregistrertJournalpostId
             it["nyJournalpostId"] = nyJournalpostId
         }.toJson()
     }
