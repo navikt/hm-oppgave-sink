@@ -21,7 +21,7 @@ apply {
 repositories {
     mavenCentral()
     jcenter()
-    maven("http://packages.confluent.io/maven/")
+    maven("https://packages.confluent.io/maven/")
     maven("https://jitpack.io")
 }
 
@@ -31,8 +31,8 @@ application {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_12
-    targetCompatibility = JavaVersion.VERSION_12
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 dependencies {
@@ -40,7 +40,9 @@ dependencies {
     implementation(Jackson.kotlin)
     implementation(Jackson.jsr310)
     implementation("com.github.guepardoapps:kulid:1.1.2.0")
-    implementation("com.github.navikt:rapids-and-rivers:20210428115805-514c80c")
+    implementation("com.github.navikt:rapids-and-rivers:2022.04.05-09.40.11a466d7ac70")
+    implementation("org.slf4j:slf4j-api:2.0.0-alpha6") // fordi rapids-and-rivers er på logback-classic:1.3.0-alpha10 som krever slf4j >= 2.0.0-alpha4
+    implementation("io.github.microutils:kotlin-logging:2.1.21")
     implementation(Ktor.serverNetty)
     implementation(Database.Kotlinquery)
     implementation(Fuel.fuel)
@@ -55,7 +57,8 @@ dependencies {
     testImplementation(Ktor.ktorTest)
     testImplementation(Mockk.mockk)
     implementation(Wiremock.standalone)
-    testRuntimeOnly(Junit5.engine)
+    testImplementation(Junit5.engine)
+    testImplementation(kotlin("test"))
 }
 
 spotless {
@@ -69,8 +72,7 @@ spotless {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.freeCompilerArgs = listOf()
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = "17"
 }
 
 tasks.withType<Test> {
@@ -81,10 +83,6 @@ tasks.withType<Test> {
         exceptionFormat = TestExceptionFormat.FULL
         events = setOf(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
     }
-}
-
-tasks.withType<Wrapper> {
-    gradleVersion = "6.2.2"
 }
 
 tasks.named("shadowJar") {
