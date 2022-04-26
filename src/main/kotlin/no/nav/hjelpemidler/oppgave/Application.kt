@@ -4,7 +4,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
-import no.nav.hjelpemidler.oppgave.service.PapirsoeknadSink
+import no.nav.hjelpemidler.oppgave.service.RutingOppgaveSink
 import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 
 fun main() {
@@ -39,7 +39,7 @@ fun main() {
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(Configuration.rapidApplication))
         .build().apply {
             OppgaveDataSink(this, oppgaveClient, pdlClient)
-            PapirsoeknadSink(this)
+            RutingOppgaveSink(this, oppgaveClient)
             /* if (System.getenv("NAIS_CLUSTER_NAME") == null || System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
                 OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(this, oppgaveClient, pdlClient)
             } */
