@@ -1,7 +1,14 @@
 name: Build and deploy
-
-on: [push]
-
+on:
+  push:
+    paths-ignore:
+      - "**.md"
+      - ".gitignore"
+      - "LICENCE"
+      - "CODEOWNERS"
+    branches:
+      - main
+      - 92-ta-over-ruting-av-papirsøknader
 env:
   IMAGE: "docker.pkg.github.com/${{ github.repository }}/hm-oppgave-sink:${{ github.sha }}"
 jobs:
@@ -37,7 +44,6 @@ jobs:
 #  deploy-dev-q1:
 #    name: Deploy to dev-q1
 #    needs: build
-#    if: github.ref == 'refs/heads/main'
 #    runs-on: ubuntu-latest
 #    steps:
 #      - uses: actions/checkout@v2
@@ -50,7 +56,6 @@ jobs:
   deploy-dev:
     name: Deploy to dev
     needs: build
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
