@@ -39,10 +39,12 @@ class OppgaveClient(
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
 
-                baseUrl.httpGet(listOf(
-                    Pair("aktoerId", aktoerId),
-                    Pair("journalpostId", journalpostId),
-                ))
+                baseUrl.httpGet(
+                    listOf(
+                        Pair("aktoerId", aktoerId),
+                        Pair("journalpostId", journalpostId),
+                    )
+                )
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
