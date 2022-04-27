@@ -9,7 +9,6 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotliquery.param
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
