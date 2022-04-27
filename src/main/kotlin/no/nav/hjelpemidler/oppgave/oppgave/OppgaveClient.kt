@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotliquery.param
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
@@ -34,13 +35,12 @@ class OppgaveClient(
     }
 
     suspend fun harAlleredeOppgaveForJournalpost(journalpostId: Int): Boolean {
-        val url = "$baseUrl?journalpostId=$journalpostId"
         return withContext(Dispatchers.IO) {
-            kotlin.runCatching {
+            runCatching {
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
 
-                url.httpGet()
+                baseUrl.httpGet(listOf(Pair("journalpostId", journalpostId)))
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
