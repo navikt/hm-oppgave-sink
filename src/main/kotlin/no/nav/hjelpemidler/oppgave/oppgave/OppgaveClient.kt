@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.coroutines.awaitObject
+import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,6 +31,39 @@ class OppgaveClient(
         const val TEMA = "HJE"
         const val TEMA_GRUPPE = "HJLPM"
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
+    }
+
+    suspend fun harAlleredeOppgaveForJournalpost(journalpostId: Int): Boolean {
+        val url = "$baseUrl?journalpostId=$journalpostId"
+        return withContext(Dispatchers.IO) {
+            kotlin.runCatching {
+                val correlationID = UUID.randomUUID().toString()
+                logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
+
+                url.httpGet()
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
+                    .header("X-Correlation-ID", correlationID)
+                    .awaitObject(
+                        object : ResponseDeserializable<JsonNode> {
+                            override fun deserialize(content: String): JsonNode {
+                                return ObjectMapper().readTree(content)
+                            }
+                        }
+                    )
+                    .let {
+                        when (it.has("antallTreffTotalt")) {
+                            true -> it.at("/antallTreffTotalt").let { if (it.isNull()) 0 else it.asInt() } > 0
+                            false -> throw OppgaveException("Klarte ikke å sjekke om oppgave finnes alt")
+                        }
+                    }
+            }
+                .onFailure {
+                    logger.error { it.message }
+                }
+        }
+            .getOrThrow()
     }
 
     suspend fun arkiverSoknad(aktorId: String, journalpostId: String): String {

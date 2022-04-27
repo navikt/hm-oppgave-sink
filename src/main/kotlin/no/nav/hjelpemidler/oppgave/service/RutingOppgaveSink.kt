@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -39,19 +43,33 @@ internal class RutingOppgaveSink(
     private val JsonMessage.eventId get() = this["eventId"].textValue()
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        if (skipEvent(UUID.fromString(packet.eventId))) {
-            logg.info { "Hopper over event i skip-list: ${packet.eventId}" }
-            return
-        }
+        runBlocking {
+            withContext(Dispatchers.IO) {
+                launch {
+                    if (skipEvent(UUID.fromString(packet.eventId))) {
+                        logg.info { "Hopper over event i skip-list: ${packet.eventId}" }
+                        return@launch
+                    }
 
-        val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
+                    val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
+                    try {
+                        logg.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
 
-        try {
-            logg.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
-            // val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
-        } catch (e: Exception) {
-            logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
-            throw e
+                        // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte
+                        // prosesseringen tidlig.
+                        if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
+                            logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
+                            return@launch
+                        }
+
+                        // TODO: Opprett oppgave for journalpost
+                        // val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
+                    } catch (e: Exception) {
+                        logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
+                        throw e
+                    }
+                }
+            }
         }
     }
 
