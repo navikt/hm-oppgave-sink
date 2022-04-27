@@ -33,13 +33,16 @@ class OppgaveClient(
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
     }
 
-    suspend fun harAlleredeOppgaveForJournalpost(journalpostId: Int): Boolean {
+    suspend fun harAlleredeOppgaveForJournalpost(aktoerId: String, journalpostId: Int): Boolean {
         return withContext(Dispatchers.IO) {
             runCatching {
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
 
-                baseUrl.httpGet(listOf(Pair("journalpostId", journalpostId)))
+                baseUrl.httpGet(listOf(
+                    Pair("aktoerId", aktoerId),
+                    Pair("journalpostId", journalpostId),
+                ))
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header("Authorization", "Bearer ${azureClient.getToken(accesstokenScope).accessToken}")
