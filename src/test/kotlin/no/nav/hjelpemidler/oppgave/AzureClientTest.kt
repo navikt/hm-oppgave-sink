@@ -29,11 +29,7 @@ internal class AzureClientTest {
         }
     }
 
-    private val azureClient: AzureClient
-
-    init {
-        azureClient = AzureClient(server.baseUrl(), "clientId", "clientSecret")
-    }
+    private val azureClient: AzureClient = AzureClient(server.baseUrl(), "clientId", "clientSecret")
 
     @BeforeEach
     fun configure() {
@@ -54,10 +50,10 @@ internal class AzureClientTest {
 
     private val tokenResponse =
         """
-{
-    "token_type": "Bearer",
-    "expires_in": 3599,
-    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBP..."
-}
-                """
+        {
+            "token_type": "Bearer",
+            "expires_in": 3599,
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Ik1uQ19WWmNBVGZNNXBP..."
+        }
+        """
 }

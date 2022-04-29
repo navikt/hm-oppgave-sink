@@ -54,7 +54,6 @@ dependencies {
     testImplementation(Junit5.api)
     testImplementation(KoTest.assertions)
     testImplementation(KoTest.runner)
-    testImplementation(Ktor.ktorTest)
     testImplementation(Mockk.mockk)
     implementation(Wiremock.standalone)
     testImplementation(Junit5.engine)
