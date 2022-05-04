@@ -65,7 +65,7 @@ class OppgaveClient(
                     }
             }
                 .onFailure {
-                    logger.error { it.message }
+                    logger.error(it) { "Api kallet feilet for harAlleredeOppgaveForJournalpost" }
                 }
         }
             .getOrThrow()

@@ -60,6 +60,8 @@ internal class RutingOppgaveSink(
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.aktoerId, oppgave.journalpostId)) {
                             logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
                             return@launch
+                        } else {
+                            logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
                         }
 
                         // TODO: Opprett oppgave for journalpost
