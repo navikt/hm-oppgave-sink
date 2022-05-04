@@ -70,7 +70,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             oppgaveData.nyJournalpostId,
                             oppgaveData.sakId
                         )
-                        logger.info("Tilbakeført oppgave opprettet med opgpaveId=$oppgaveId")
+                        logger.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
                         forward(oppgaveData, oppgaveId, context)
                     } catch (e: Exception) {
                         throw RuntimeException("Håndtering av event ${packet.eventId} feilet", e)
