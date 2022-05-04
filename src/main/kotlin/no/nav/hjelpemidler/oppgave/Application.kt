@@ -4,6 +4,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
+import no.nav.hjelpemidler.oppgave.service.OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning
 import no.nav.hjelpemidler.oppgave.service.RutingOppgaveSink
 import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 
@@ -40,8 +41,6 @@ fun main() {
         .build().apply {
             OppgaveDataSink(this, oppgaveClient, pdlClient)
             RutingOppgaveSink(this, oppgaveClient)
-            /* if (System.getenv("NAIS_CLUSTER_NAME") == null || System.getenv("NAIS_CLUSTER_NAME") == "dev-gcp") {
-                OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(this, oppgaveClient, pdlClient)
-            } */
+            OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(this, oppgaveClient, pdlClient)
         }.start()
 }
