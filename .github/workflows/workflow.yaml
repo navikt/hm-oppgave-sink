@@ -1,16 +1,14 @@
 name: Build and deploy
-
 on:
   push:
     paths-ignore:
-      - '**.md'
-      - '.gitignore'
-      - 'LICENCE'
-      - 'CODEOWNERS'
+      - "**.md"
+      - ".gitignore"
+      - "LICENCE"
+      - "CODEOWNERS"
     branches:
       - main
-      - snyk-2022-04-29
-
+      - 92-ta-over-ruting-av-papirsøknader
 env:
   IMAGE: "docker.pkg.github.com/${{ github.repository }}/hm-oppgave-sink:${{ github.sha }}"
 jobs:

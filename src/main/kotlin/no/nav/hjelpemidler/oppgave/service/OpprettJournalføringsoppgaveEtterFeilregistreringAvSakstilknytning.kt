@@ -35,7 +35,8 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "fodselNrBruker",
                     "joarkRef",
                     "eventId",
-                    "sakId"
+                    "sakId",
+                    "soknadId",
                 )
             }
         }.register(this)
@@ -45,6 +46,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     private val JsonMessage.fnrBruker get() = this["fodselNrBruker"].textValue()
     private val JsonMessage.nyJournalpostId get() = this["joarkRef"].textValue()
     private val JsonMessage.sakId get() = this["sakId"].textValue()
+    private val JsonMessage.soknadId get() = this["soknadId"].textValue()
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         runBlocking {
@@ -58,7 +60,8 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                         val oppgaveData = OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
                             fnrBruker = packet.fnrBruker,
                             nyJournalpostId = packet.nyJournalpostId,
-                            sakId = packet.sakId
+                            sakId = packet.sakId,
+                            soknadId = UUID.fromString(packet.soknadId),
                         )
                         logger.info { "Tilbakeført sak mottatt, sakId:  ${oppgaveData.sakId}" }
                         val aktorId = pdlClient.hentAktorId(oppgaveData.fnrBruker)
@@ -67,6 +70,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             oppgaveData.nyJournalpostId,
                             oppgaveData.sakId
                         )
+                        logger.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
                         forward(oppgaveData, oppgaveId, context)
                     } catch (e: Exception) {
                         throw RuntimeException("Håndtering av event ${packet.eventId} feilet", e)
@@ -128,7 +132,8 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
 internal data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
     val fnrBruker: String,
     val sakId: String,
-    val nyJournalpostId: String
+    val nyJournalpostId: String,
+    val soknadId: UUID,
 ) {
     internal fun toJson(oppgaveId: String, producedEventName: String): String {
         return JsonMessage("{}", MessageProblems("")).also {
@@ -138,6 +143,7 @@ internal data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveDat
             it["oppgaveId"] = oppgaveId
             it["sakId"] = sakId
             it["nyJournalpostId"] = nyJournalpostId
+            it["soknadId"] = this.soknadId
         }.toJson()
     }
 }
