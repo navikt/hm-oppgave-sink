@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
+import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequestRutingOppgave
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
 import java.util.UUID
@@ -74,13 +75,15 @@ class OppgaveClient(
     suspend fun opprettOppgaveBasertPåRutingOppgave(oppgave: RutingOppgave): String {
         logger.info("Oppretter gosys-oppgave basert på ruting oppgave")
 
-        val requestBody = OppgaveRequest(
+        val requestBody = OppgaveRequestRutingOppgave(
             oppgave.aktoerId, oppgave.journalpostId.toString(), oppgave.beskrivelse,
-            TEMA_GRUPPE, oppgave.tema, oppgave.oppgavetype, oppgave.behandlingtype ?: "",
-            oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet
+            TEMA_GRUPPE, oppgave.tema, oppgave.oppgavetype,
+            oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet,
+            oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype,
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
+        logger.info("DEBUG: opprettOppgaveBasertPåRutingOppgave: jsonBody=$jsonBody")
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
@@ -109,7 +112,7 @@ class OppgaveClient(
                     }
             }
                 .onFailure {
-                    logger.error { it.message }
+                    logger.error(it) { "Klarte ikke opprette oppgave basert på ruting-oppgave" }
                 }
         }
             .getOrThrow()

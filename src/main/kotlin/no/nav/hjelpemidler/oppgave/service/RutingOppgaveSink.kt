@@ -14,6 +14,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.hjelpemidler.oppgave.Configuration
+import no.nav.hjelpemidler.oppgave.Configuration.oppgave
+import no.nav.hjelpemidler.oppgave.Profile
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -60,12 +63,12 @@ internal class RutingOppgaveSink(
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.aktoerId, oppgave.journalpostId)) {
                             logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
                             return@launch
-                        } else {
-                            logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
                         }
 
+                        logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
+
                         // TODO: Opprett oppgave for journalpost
-                        // val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
+                        if (Configuration.application.profile == Profile.DEV) opprettOppgave(oppgave)
                     } catch (e: Exception) {
                         logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
                         throw e
@@ -74,6 +77,17 @@ internal class RutingOppgaveSink(
             }
         }
     }
+
+    private suspend fun opprettOppgave(
+        oppgave: RutingOppgave,
+    ) =
+        kotlin.runCatching {
+            oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave)
+        }.onSuccess {
+            logg.info("Journalføringsoppgave opprettet for ruting-oppgave: journalpostId: ${oppgave.journalpostId}, oppgaveId=$it")
+        }.onFailure {
+            logg.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave: journalpostId: ${oppgave.journalpostId}" }
+        }.getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
         val skipList = listOf<UUID>()
