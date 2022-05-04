@@ -25,12 +25,6 @@ fun main() {
         azureClient = azureClient
     )
 
-    /*val oppgaveClientV2 = OppgaveClientV2(
-        baseUrl = Configuration.oppgave.baseUrl,
-        accesstokenScope = Configuration.azure.proxyScope,
-        azureClient = azureClient
-    )*/
-
     val pdlClient = PdlClient(
         baseUrl = Configuration.pdl.baseUrl,
         accesstokenScope = Configuration.azure.proxyScope,
