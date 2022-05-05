@@ -63,12 +63,13 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             sakId = packet.sakId,
                             soknadId = UUID.fromString(packet.soknadId),
                         )
-                        logger.info { "Tilbakeført sak mottatt, sakId:  ${oppgaveData.sakId}" }
+                        logger.info { "Tilbakeført sak mottatt, sakId=${oppgaveData.sakId}, soknadsId=${oppgaveData.soknadId}" }
                         val aktorId = pdlClient.hentAktorId(oppgaveData.fnrBruker)
                         val oppgaveId = opprettOppgave(
                             aktorId,
                             oppgaveData.nyJournalpostId,
-                            oppgaveData.sakId
+                            oppgaveData.sakId,
+                            oppgaveData.soknadId,
                         )
                         logger.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
                         forward(oppgaveData, oppgaveId, context)
@@ -88,12 +89,13 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     private suspend fun opprettOppgave(
         aktorId: String,
         journalpostId: String,
-        sakId: String
+        sakId: String,
+        soknadId: UUID,
     ) =
         kotlin.runCatching {
             oppgaveClient.arkiverSoknad(aktorId, journalpostId)
         }.onSuccess {
-            logger.info("Journalføringsoppgave opprettet for tilbakeført sak: $sakId, oppgaveId: $it")
+            logger.info("Journalføringsoppgave opprettet for tilbakeført sak=$sakId, soknadsId=$soknadId, oppgaveId=$it")
         }.onFailure {
             logger.error(it) { "Feilet under opprettelse av journalføringsoppgave for sak: $sakId" }
         }.getOrThrow()
