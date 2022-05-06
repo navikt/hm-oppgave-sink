@@ -62,14 +62,15 @@ internal class RutingOppgaveSink(
                         // prosesseringen tidlig.
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.aktoerId, oppgave.journalpostId)) {
                             logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
-                            // return@launch
-                            logg.info("OBS! Lager oppgave likevel for å teste at alt funker i dev!")
+                            return@launch
+                            // logg.info("OBS! Lager oppgave likevel for å teste at alt funker i dev!")
                         }
 
                         logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
 
-                        // TODO: Opprett oppgave for journalpost
+                        // Opprett oppgave for journalpost
                         if (Configuration.application.profile == Profile.DEV) opprettOppgave(oppgave)
+
                     } catch (e: Exception) {
                         logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
                         throw e
