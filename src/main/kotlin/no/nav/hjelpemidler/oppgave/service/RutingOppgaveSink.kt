@@ -70,7 +70,6 @@ internal class RutingOppgaveSink(
 
                         // Opprett oppgave for journalpost
                         if (Configuration.application.profile == Profile.DEV) opprettOppgave(oppgave)
-
                     } catch (e: Exception) {
                         logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
                         throw e
