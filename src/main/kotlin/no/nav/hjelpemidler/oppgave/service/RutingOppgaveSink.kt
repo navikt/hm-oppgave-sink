@@ -38,8 +38,8 @@ internal class RutingOppgaveSink(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", "hm-ruting-oppgave") }
-            validate { it.requireKey("eventId", "opprettet", "aktoerId", "journalpostId", "tema", "oppgavetype", "aktivDato", "prioritet", "opprettetAvEnhetsnr", "fristFerdigstillelse", "beskrivelse") }
-            validate { it.interestedIn("behandlingstema", "behandlingtype", "tildeltEnhetsnr") }
+            validate { it.requireKey("eventId", "opprettet", "journalpostId", "tema", "oppgavetype", "aktivDato", "prioritet", "opprettetAvEnhetsnr", "fristFerdigstillelse", "beskrivelse") }
+            validate { it.interestedIn("aktoerId", "behandlingstema", "behandlingtype", "tildeltEnhetsnr") }
         }.register(this)
     }
 
