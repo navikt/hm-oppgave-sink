@@ -43,11 +43,6 @@ class OppgaveClient(
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
 
-                // FIXME: fjern igjen
-                if (Configuration.application.profile == Profile.DEV) {
-                    logger.info("DEBUG: token: ${azureClient.getToken(accesstokenScope).accessToken}")
-                }
-
                 baseUrl.httpGet(
                     listOf(
                         Pair("journalpostId", journalpostId),
