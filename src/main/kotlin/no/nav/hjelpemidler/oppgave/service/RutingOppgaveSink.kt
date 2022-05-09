@@ -55,12 +55,7 @@ internal class RutingOppgaveSink(
                     }
 
                     val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
-
-                    // FIXME: aktoerid == null deal med det
-                    if (oppgave.aktoerId == null) {
-                        logg.warn("aktoerId == null, ikke dealet med enda")
-                        return@launch
-                    }
+                    oppgave.aktoerId = null
 
                     try {
                         logg.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
@@ -108,7 +103,7 @@ data class RutingOppgave(
     val eventName: String,
     val opprettet: LocalDateTime,
 
-    val aktoerId: String?,
+    var aktoerId: String?,
     val journalpostId: Int,
     val tema: String,
     val behandlingstema: String?,
