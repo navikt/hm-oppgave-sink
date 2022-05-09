@@ -55,22 +55,14 @@ internal class RutingOppgaveSink(
                     }
 
                     val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
-
-                    // FIXME: aktoerid == null deal med det
-                    if (oppgave.aktoerId == null) {
-                        logg.warn("aktoerId == null, ikke dealet med enda")
-                        return@launch
-                    }
-
                     try {
                         logg.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
 
                         // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte
                         // prosesseringen tidlig.
-                        if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.aktoerId, oppgave.journalpostId)) {
+                        if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
                             logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
                             return@launch
-                            // logg.info("OBS! Lager oppgave likevel for å teste at alt funker i dev!")
                         }
 
                         logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")

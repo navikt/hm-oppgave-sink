@@ -35,16 +35,17 @@ class OppgaveClient(
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
     }
 
-    suspend fun harAlleredeOppgaveForJournalpost(aktoerId: String?, journalpostId: Int): Boolean {
+    suspend fun harAlleredeOppgaveForJournalpost(journalpostId: Int): Boolean {
         return withContext(Dispatchers.IO) {
             runCatching {
                 val correlationID = UUID.randomUUID().toString()
-                logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
 
                 baseUrl.httpGet(
                     listOf(
-                        Pair("aktoerId", aktoerId),
                         Pair("journalpostId", journalpostId),
+                        Pair("statuskategori", "AAPEN"),
+                        Pair("oppgavetype", "JFR"),
+                        Pair("oppgavetype", "FDR"),
                     )
                 )
                     .header("Content-Type", "application/json")
@@ -77,13 +78,12 @@ class OppgaveClient(
 
         val requestBody = OppgaveRequestRutingOppgave(
             oppgave.aktoerId, oppgave.journalpostId.toString(), oppgave.beskrivelse,
-            TEMA_GRUPPE, oppgave.tema, oppgave.oppgavetype,
+            oppgave.tema, oppgave.oppgavetype,
             oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet,
             oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype,
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
-        logger.info("DEBUG: opprettOppgaveBasertPåRutingOppgave: jsonBody=$jsonBody")
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {

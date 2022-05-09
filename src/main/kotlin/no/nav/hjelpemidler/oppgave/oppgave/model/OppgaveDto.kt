@@ -17,7 +17,6 @@ data class OppgaveRequestRutingOppgave(
     val aktoerId: String?,
     val journalpostId: String,
     val beskrivelse: String,
-    val temagruppe: String,
     val tema: String,
     val oppgavetype: String,
     val aktivDato: String,
