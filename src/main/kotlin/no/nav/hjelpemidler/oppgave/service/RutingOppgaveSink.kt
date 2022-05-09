@@ -57,7 +57,7 @@ internal class RutingOppgaveSink(
                         return@launch
                     }
 
-                    metrics.rutingOppgaveForsøktHåndtert()
+                    metrics.rutingOppgaveForsøktHåndtert(packet["oppgavetype"].asText())
 
                     val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
                     try {
@@ -67,7 +67,7 @@ internal class RutingOppgaveSink(
                         // prosesseringen tidlig.
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
                             logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
-                            metrics.rutingOppgaveEksisterteAllerede()
+                            metrics.rutingOppgaveEksisterteAllerede(oppgave.oppgavetype)
                             return@launch
                         }
 
@@ -76,11 +76,11 @@ internal class RutingOppgaveSink(
                         // Opprett oppgave for journalpost
                         if (Configuration.application.profile == Profile.DEV) {
                             opprettOppgave(oppgave)
-                            metrics.rutingOppgaveOpprettet()
+                            metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
                         }
                     } catch (e: Exception) {
                         logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
-                        metrics.rutingOppgaveException()
+                        metrics.rutingOppgaveException(oppgave.oppgavetype)
                         throw e
                     }
                 }

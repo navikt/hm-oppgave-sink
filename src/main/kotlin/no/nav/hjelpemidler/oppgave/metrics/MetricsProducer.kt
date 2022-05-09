@@ -18,20 +18,20 @@ class MetricsProducer(
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         .build()
 
-    fun rutingOppgaveForsøktHåndtert() {
-        hendelseOpprettet(RUTING_OPPGAVE_FORSØKT_HÅNDTERT, mapOf("counter" to 1L), emptyMap())
+    fun rutingOppgaveForsøktHåndtert(type: String) {
+        hendelseOpprettet(RUTING_OPPGAVE_FORSØKT_HÅNDTERT, mapOf("type" to type), emptyMap())
     }
 
-    fun rutingOppgaveOpprettet() {
-        hendelseOpprettet(RUTING_OPPGAVE_OPPRETTET, mapOf("counter" to 1L), emptyMap())
+    fun rutingOppgaveOpprettet(type: String) {
+        hendelseOpprettet(RUTING_OPPGAVE_OPPRETTET, mapOf("type" to type), emptyMap())
     }
 
-    fun rutingOppgaveEksisterteAllerede() {
-        hendelseOpprettet(RUTING_OPPGAVE_EKSISTERTE_ALLEREDE, mapOf("counter" to 1L), emptyMap())
+    fun rutingOppgaveEksisterteAllerede(type: String) {
+        hendelseOpprettet(RUTING_OPPGAVE_EKSISTERTE_ALLEREDE, mapOf("type" to type), emptyMap())
     }
 
-    fun rutingOppgaveException() {
-        hendelseOpprettet(RUTING_OPPGAVE_EXCEPTION, mapOf("counter" to 1L), emptyMap())
+    fun rutingOppgaveException(type: String) {
+        hendelseOpprettet(RUTING_OPPGAVE_EXCEPTION, mapOf("type" to type), emptyMap())
     }
 
     fun hendelseOpprettet(
