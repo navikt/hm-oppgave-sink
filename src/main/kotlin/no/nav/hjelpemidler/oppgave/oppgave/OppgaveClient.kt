@@ -43,7 +43,7 @@ class OppgaveClient(
 
                 baseUrl.httpGet(
                     listOf(
-                        // Pair("aktoerId", aktoerId),
+                        Pair("aktoerId", aktoerId),
                         Pair("journalpostId", journalpostId),
                     )
                 )

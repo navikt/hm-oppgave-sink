@@ -56,6 +56,12 @@ internal class RutingOppgaveSink(
 
                     val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
 
+                    // FIXME: aktoerid == null deal med det
+                    if (oppgave.aktoerId == null) {
+                        logg.warn("aktoerId == null, ikke dealet med enda")
+                        return@launch
+                    }
+
                     try {
                         logg.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
 
