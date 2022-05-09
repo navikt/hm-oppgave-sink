@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
+import no.nav.hjelpemidler.oppgave.Configuration
+import no.nav.hjelpemidler.oppgave.Profile
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequestRutingOppgave
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
@@ -41,9 +43,17 @@ class OppgaveClient(
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
 
+                // FIXME: fjern igjen
+                if (Configuration.application.profile == Profile.DEV) {
+                    logger.info("DEBUG: token: ${azureClient.getToken(accesstokenScope).accessToken}")
+                }
+
                 baseUrl.httpGet(
                     listOf(
                         Pair("journalpostId", journalpostId),
+                        Pair("statuskategori", "AAPEN"),
+                        Pair("oppgavetype", "JFR"),
+                        Pair("oppgavetype", "FDR"),
                     )
                 )
                     .header("Content-Type", "application/json")
