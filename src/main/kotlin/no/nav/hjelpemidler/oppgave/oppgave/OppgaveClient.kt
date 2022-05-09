@@ -76,7 +76,7 @@ class OppgaveClient(
 
         val requestBody = OppgaveRequestRutingOppgave(
             oppgave.aktoerId, oppgave.journalpostId.toString(), oppgave.beskrivelse,
-            TEMA_GRUPPE, oppgave.tema, oppgave.oppgavetype,
+            oppgave.tema, oppgave.oppgavetype,
             oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet,
             oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype,
         )
