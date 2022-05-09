@@ -39,7 +39,6 @@ class OppgaveClient(
         return withContext(Dispatchers.IO) {
             runCatching {
                 val correlationID = UUID.randomUUID().toString()
-                logger.info("DEBUG: harAlleredeOppgaveForJournalpost correlationID=$correlationID")
 
                 baseUrl.httpGet(
                     listOf(
@@ -85,7 +84,6 @@ class OppgaveClient(
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
-        logger.info("DEBUG: opprettOppgaveBasertPåRutingOppgave: jsonBody=$jsonBody")
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
