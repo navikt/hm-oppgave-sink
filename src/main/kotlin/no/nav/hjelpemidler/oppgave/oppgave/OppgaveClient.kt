@@ -11,8 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
-import no.nav.hjelpemidler.oppgave.Configuration
-import no.nav.hjelpemidler.oppgave.Profile
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequestRutingOppgave
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
