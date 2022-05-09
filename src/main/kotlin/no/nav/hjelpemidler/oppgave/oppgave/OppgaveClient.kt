@@ -35,7 +35,7 @@ class OppgaveClient(
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
     }
 
-    suspend fun harAlleredeOppgaveForJournalpost(aktoerId: String, journalpostId: Int): Boolean {
+    suspend fun harAlleredeOppgaveForJournalpost(aktoerId: String?, journalpostId: Int): Boolean {
         return withContext(Dispatchers.IO) {
             runCatching {
                 val correlationID = UUID.randomUUID().toString()
@@ -43,7 +43,7 @@ class OppgaveClient(
 
                 baseUrl.httpGet(
                     listOf(
-                        Pair("aktoerId", aktoerId),
+                        // Pair("aktoerId", aktoerId),
                         Pair("journalpostId", journalpostId),
                     )
                 )
@@ -76,7 +76,7 @@ class OppgaveClient(
         logger.info("Oppretter gosys-oppgave basert på ruting oppgave")
 
         val requestBody = OppgaveRequestRutingOppgave(
-            oppgave.aktoerId!!, oppgave.journalpostId.toString(), oppgave.beskrivelse,
+            oppgave.aktoerId, oppgave.journalpostId.toString(), oppgave.beskrivelse,
             TEMA_GRUPPE, oppgave.tema, oppgave.oppgavetype,
             oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet,
             oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype,
