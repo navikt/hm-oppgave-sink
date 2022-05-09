@@ -17,6 +17,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.Configuration.oppgave
 import no.nav.hjelpemidler.oppgave.Profile
+import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -46,6 +47,8 @@ internal class RutingOppgaveSink(
     private val JsonMessage.eventId get() = this["eventId"].textValue()
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
+        val metrics = MetricsProducer(context)
+
         runBlocking {
             withContext(Dispatchers.IO) {
                 launch {
@@ -53,6 +56,8 @@ internal class RutingOppgaveSink(
                         logg.info { "Hopper over event i skip-list: ${packet.eventId}" }
                         return@launch
                     }
+
+                    metrics.rutingOppgaveForsøktHåndtert()
 
                     val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
                     try {
@@ -62,15 +67,20 @@ internal class RutingOppgaveSink(
                         // prosesseringen tidlig.
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
                             logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
+                            metrics.rutingOppgaveEksisterteAllerede()
                             return@launch
                         }
 
                         logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
 
                         // Opprett oppgave for journalpost
-                        if (Configuration.application.profile == Profile.DEV) opprettOppgave(oppgave)
+                        if (Configuration.application.profile == Profile.DEV) {
+                            opprettOppgave(oppgave)
+                            metrics.rutingOppgaveOpprettet()
+                        }
                     } catch (e: Exception) {
                         logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
+                        metrics.rutingOppgaveException()
                         throw e
                     }
                 }
