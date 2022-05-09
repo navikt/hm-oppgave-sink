@@ -55,8 +55,6 @@ internal class RutingOppgaveSink(
                     }
 
                     val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
-                    oppgave.aktoerId = null
-
                     try {
                         logg.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
 
