@@ -35,7 +35,7 @@ class OppgaveClient(
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
     }
 
-    suspend fun harAlleredeOppgaveForJournalpost(aktoerId: String?, journalpostId: Int): Boolean {
+    suspend fun harAlleredeOppgaveForJournalpost(journalpostId: Int): Boolean {
         return withContext(Dispatchers.IO) {
             runCatching {
                 val correlationID = UUID.randomUUID().toString()
@@ -43,7 +43,6 @@ class OppgaveClient(
 
                 baseUrl.httpGet(
                     listOf(
-                        Pair("aktoerId", aktoerId),
                         Pair("journalpostId", journalpostId),
                     )
                 )
