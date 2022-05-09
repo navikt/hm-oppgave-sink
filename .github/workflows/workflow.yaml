@@ -8,8 +8,7 @@ on:
       - "CODEOWNERS"
     branches:
       - main
-      - 92-ta-over-ruting-av-papirsøknader
-
+      - test-aktoerid-nullable
 env:
   IMAGE: "docker.pkg.github.com/${{ github.repository }}/hm-oppgave-sink:${{ github.sha }}"
 jobs:
