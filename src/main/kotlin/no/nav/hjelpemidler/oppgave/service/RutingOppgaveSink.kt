@@ -100,7 +100,7 @@ data class RutingOppgave(
     val eventName: String,
     val opprettet: LocalDateTime,
 
-    var aktoerId: String?,
+    val aktoerId: String?,
     val journalpostId: Int,
     val tema: String,
     val behandlingstema: String?,
