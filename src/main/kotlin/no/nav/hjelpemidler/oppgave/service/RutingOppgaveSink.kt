@@ -14,9 +14,7 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.Configuration.oppgave
-import no.nav.hjelpemidler.oppgave.Profile
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import java.time.LocalDate
@@ -74,10 +72,8 @@ internal class RutingOppgaveSink(
                         logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
 
                         // Opprett oppgave for journalpost
-                        if (Configuration.application.profile == Profile.DEV) {
-                            opprettOppgave(oppgave)
-                            metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
-                        }
+                        opprettOppgave(oppgave)
+                        metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
                     } catch (e: Exception) {
                         logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
                         metrics.rutingOppgaveException(oppgave.oppgavetype)
