@@ -107,6 +107,7 @@ data class RutingOppgave(
     val opprettet: LocalDateTime,
 
     val aktoerId: String?,
+    val orgnr: String?,
     val journalpostId: Int,
     val tema: String,
     val behandlingstema: String?,

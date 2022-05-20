@@ -77,7 +77,7 @@ class OppgaveClient(
         logger.info("Oppretter gosys-oppgave basert på ruting oppgave")
 
         val requestBody = OppgaveRequestRutingOppgave(
-            oppgave.aktoerId, oppgave.journalpostId.toString(), oppgave.beskrivelse,
+            oppgave.aktoerId, oppgave.orgnr, oppgave.journalpostId.toString(), oppgave.beskrivelse,
             oppgave.tema, oppgave.oppgavetype,
             oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet,
             oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype,

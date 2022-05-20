@@ -15,6 +15,7 @@ data class OppgaveRequest(
 
 data class OppgaveRequestRutingOppgave(
     val aktoerId: String?,
+    val orgnr: String?,
     val journalpostId: String,
     val beskrivelse: String,
     val tema: String,
