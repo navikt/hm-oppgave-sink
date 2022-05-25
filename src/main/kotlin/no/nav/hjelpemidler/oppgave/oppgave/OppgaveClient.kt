@@ -2,6 +2,7 @@ package no.nav.hjelpemidler.oppgave.oppgave
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.coroutines.awaitObject
@@ -112,7 +113,12 @@ class OppgaveClient(
                     }
             }
                 .onFailure {
-                    logger.error(it) { "Klarte ikke opprette oppgave basert på ruting-oppgave" }
+                    if (it is FuelError) {
+                        val exp = it
+                        logger.error(it) { "Klarte ikke opprette oppgave basert på ruting-oppgave: ${exp.errorData.toString(Charsets.UTF_8)}" }
+                    } else {
+                        logger.error(it) { "Klarte ikke opprette oppgave basert på ruting-oppgave" }
+                    }
                 }
         }
             .getOrThrow()
