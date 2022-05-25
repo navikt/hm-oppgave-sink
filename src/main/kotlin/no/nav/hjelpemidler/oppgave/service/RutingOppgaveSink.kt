@@ -96,7 +96,9 @@ internal class RutingOppgaveSink(
         }.getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
-        val skipList = listOf<UUID>()
+        val skipList = listOf<UUID>(
+            UUID.fromString("1c125d44-9299-464c-ab4d-c034ffdc89e8")
+        )
         return skipList.any { it == eventId }
     }
 }
