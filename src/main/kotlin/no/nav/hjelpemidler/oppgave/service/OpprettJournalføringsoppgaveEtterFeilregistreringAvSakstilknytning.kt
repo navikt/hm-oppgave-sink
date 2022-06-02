@@ -38,6 +38,9 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "sakId",
                     "soknadId",
                 )
+                it.interestedIn(
+                    "soknadJson"
+                )
             }
         }.register(this)
     }
@@ -47,6 +50,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     private val JsonMessage.nyJournalpostId get() = this["joarkRef"].textValue()
     private val JsonMessage.sakId get() = this["sakId"].textValue()
     private val JsonMessage.soknadId get() = this["soknadId"].textValue()
+    private val JsonMessage.soknadJson get() = this["soknadJson"]
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         runBlocking {
@@ -63,13 +67,17 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             sakId = packet.sakId,
                             soknadId = UUID.fromString(packet.soknadId),
                         )
-                        logger.info { "Tilbakeført sak mottatt, sakId=${oppgaveData.sakId}, soknadsId=${oppgaveData.soknadId}" }
+                        val behovsmeldingType = BehovsmeldingType.valueOf(
+                            packet.soknadJson.at("/behovsmeldingType").textValue().let { if (it.isNullOrEmpty()) "SØKNAD" else it }
+                        )
+                        logger.info { "Tilbakeført sak mottatt ($behovsmeldingType), sakId=${oppgaveData.sakId}, soknadsId=${oppgaveData.soknadId}" }
                         val aktorId = pdlClient.hentAktorId(oppgaveData.fnrBruker)
                         val oppgaveId = opprettOppgave(
                             aktorId,
                             oppgaveData.nyJournalpostId,
                             oppgaveData.sakId,
                             oppgaveData.soknadId,
+                            behovsmeldingType,
                         )
                         logger.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
                         forward(oppgaveData, oppgaveId, context)
@@ -91,9 +99,10 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         journalpostId: String,
         sakId: String,
         soknadId: UUID,
+        behovsmeldingType: BehovsmeldingType,
     ) =
         kotlin.runCatching {
-            oppgaveClient.arkiverSoknad(aktorId, journalpostId)
+            oppgaveClient.arkiverSoknad(aktorId, journalpostId, behovsmeldingType)
         }.onSuccess {
             logger.info("Journalføringsoppgave opprettet for tilbakeført sak=$sakId, soknadsId=$soknadId, oppgaveId=$it")
         }.onFailure {
@@ -149,3 +158,8 @@ internal data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveDat
         }.toJson()
     }
 }
+
+enum class BehovsmeldingType {
+    SØKNAD, BESTILLING
+}
+

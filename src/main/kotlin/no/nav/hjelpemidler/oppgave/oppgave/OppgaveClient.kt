@@ -12,8 +12,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.hjelpemidler.oppgave.AzureClient
+import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClientV2.Companion.BEHANDLINGSTYPE
+import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClientV2.Companion.BESKRIVELSE_OPPGAVE
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequest
 import no.nav.hjelpemidler.oppgave.oppgave.model.OppgaveRequestRutingOppgave
+import no.nav.hjelpemidler.oppgave.service.BehovsmeldingType
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
 import java.util.UUID
@@ -28,12 +31,14 @@ class OppgaveClient(
 
     companion object {
         private val objectMapper = ObjectMapper()
-        const val BEHANDLINGSTYPE = "ae0227" // Digital søknad
+        const val BEHANDLINGSTYPE_SOK = "ae0227" // Digital søknad
+        const val BEHANDLINGSTYPE_BEST = "" // Digital bestilling?
         const val OPPGAVETYPE_JRF = "JFR"
         const val OPPGAVE_PRIORITET_NORM = "NORM"
         const val TEMA = "HJE"
         const val TEMA_GRUPPE = "HJLPM"
-        const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
+        const val BESKRIVELSE_OPPGAVE_SOK = "Digital søknad om hjelpemidler"
+        const val BESKRIVELSE_OPPGAVE_BEST = "Digital bestilling av hjelpemidler"
     }
 
     suspend fun harAlleredeOppgaveForJournalpost(journalpostId: Int): Boolean {
@@ -124,13 +129,20 @@ class OppgaveClient(
             .getOrThrow()
     }
 
-    suspend fun arkiverSoknad(aktorId: String, journalpostId: String): String {
+    suspend fun arkiverSoknad(aktorId: String, journalpostId: String, behovsmeldingType: BehovsmeldingType): String {
         logger.info { "Oppretter oppgave" }
 
         val requestBody = OppgaveRequest(
-            aktorId, journalpostId, BESKRIVELSE_OPPGAVE,
-            TEMA_GRUPPE, TEMA, OPPGAVETYPE_JRF, BEHANDLINGSTYPE,
-            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM
+            aktorId,
+            journalpostId,
+            if (behovsmeldingType == BehovsmeldingType.BESTILLING) BESKRIVELSE_OPPGAVE_BEST else BESKRIVELSE_OPPGAVE_SOK,
+            TEMA_GRUPPE,
+            TEMA,
+            OPPGAVETYPE_JRF,
+            if (behovsmeldingType == BehovsmeldingType.BESTILLING) BEHANDLINGSTYPE_BEST else BEHANDLINGSTYPE_SOK,
+            hentAktivDato(),
+            hentFristFerdigstillelse(),
+            OPPGAVE_PRIORITET_NORM,
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
