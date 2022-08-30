@@ -36,7 +36,7 @@ private val devProperties = ConfigurationMap(
         "application.httpPort" to "8080",
         "application.profile" to "DEV",
         "KAFKA_RESET_POLICY" to "latest",
-        "KAFKA_CONSUMER_GROUP_ID" to "hm-oppgave-sink-v2",
+        "KAFKA_CONSUMER_GROUP_ID" to "hm-oppgave-sink-v3",
         "KAFKA_TOPIC" to "teamdigihot.hm-soknadsbehandling-v1",
         "PDF_BASEURL" to "http://hm-soknad-pdfgen.teamdigihot.svc.cluster.local",
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
