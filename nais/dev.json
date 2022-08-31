@@ -1,6 +1,6 @@
 {
   "APPNAVN": "hm-oppgave-sink",
-  "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-v1",
+  "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-v2",
   "OPPGAVE_BASEURL": "https://digihot-proxy.dev-fss-pub.nais.io/oppgave-aad",
   "PDL_BASEURL": "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",
   "PROXY_SCOPE": "api://dev-fss.teamdigihot.digihot-proxy/.default",
