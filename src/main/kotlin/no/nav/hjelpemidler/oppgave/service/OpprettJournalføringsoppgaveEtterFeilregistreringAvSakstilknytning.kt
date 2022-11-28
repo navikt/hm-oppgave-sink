@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger {}
 internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
-    private val pdlClient: PdlClient,
+    private val pdlClient: PdlClient
 ) : PacketListenerWithOnError {
 
     init {
@@ -36,7 +36,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "joarkRef",
                     "eventId",
                     "sakId",
-                    "soknadId",
+                    "soknadId"
                 )
             }
         }.register(this)
@@ -61,7 +61,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             fnrBruker = packet.fnrBruker,
                             nyJournalpostId = packet.nyJournalpostId,
                             sakId = packet.sakId,
-                            soknadId = UUID.fromString(packet.soknadId),
+                            soknadId = UUID.fromString(packet.soknadId)
                         )
                         logger.info { "Tilbakeført sak mottatt, sakId=${oppgaveData.sakId}, soknadsId=${oppgaveData.soknadId}" }
                         val aktorId = pdlClient.hentAktorId(oppgaveData.fnrBruker)
@@ -69,7 +69,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             aktorId,
                             oppgaveData.nyJournalpostId,
                             oppgaveData.sakId,
-                            oppgaveData.soknadId,
+                            oppgaveData.soknadId
                         )
                         logger.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
                         forward(oppgaveData, oppgaveId, context)
@@ -90,7 +90,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         aktorId: String,
         journalpostId: String,
         sakId: String,
-        soknadId: UUID,
+        soknadId: UUID
     ) =
         kotlin.runCatching {
             oppgaveClient.arkiverSoknad(aktorId, journalpostId)
@@ -135,7 +135,7 @@ internal data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveDat
     val fnrBruker: String,
     val sakId: String,
     val nyJournalpostId: String,
-    val soknadId: UUID,
+    val soknadId: UUID
 ) {
     internal fun toJson(oppgaveId: String, producedEventName: String): String {
         return JsonMessage("{}", MessageProblems("")).also {

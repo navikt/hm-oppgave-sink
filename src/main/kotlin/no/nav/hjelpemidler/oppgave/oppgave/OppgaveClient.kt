@@ -46,7 +46,7 @@ class OppgaveClient(
                         Pair("journalpostId", journalpostId),
                         Pair("statuskategori", "AAPEN"),
                         Pair("oppgavetype", "JFR"),
-                        Pair("oppgavetype", "FDR"),
+                        Pair("oppgavetype", "FDR")
                     )
                 )
                     .header("Content-Type", "application/json")
@@ -81,14 +81,13 @@ class OppgaveClient(
             oppgave.aktoerId, oppgave.orgnr, oppgave.journalpostId.toString(), oppgave.beskrivelse,
             oppgave.tema, oppgave.oppgavetype,
             oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet,
-            oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype,
+            oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
-
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: akriverSøknad correlationID=$correlationID")
 
@@ -137,7 +136,6 @@ class OppgaveClient(
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
-
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: akriverSøknad correlationID=$correlationID")
 

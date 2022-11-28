@@ -26,7 +26,7 @@ data class OppgaveRequestRutingOppgave(
     val opprettetAvEnhetsnr: String,
     val tildeltEnhetsnr: String?,
     val behandlingstema: String?,
-    val behandlingstype: String?,
+    val behandlingstype: String?
 )
 
 data class OpprettBehandleSakOppgaveRequest(

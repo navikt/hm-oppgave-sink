@@ -53,7 +53,7 @@ jobs:
           VARS: nais/dev.json
   deploy-prod:
     name: Deploy to Production
-    needs: [build, deploy-dev]
+    needs: [ build, deploy-dev ]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

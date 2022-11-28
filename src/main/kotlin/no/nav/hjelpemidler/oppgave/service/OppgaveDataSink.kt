@@ -29,7 +29,7 @@ internal class OppgaveDataSink(
     private val oppgaveClient: OppgaveClient,
     private val pdlClient: PdlClient,
     private val producedEventName: String = Configuration.application.producedEventName,
-    private val consumedEventName: String = Configuration.application.consumedEventName,
+    private val consumedEventName: String = Configuration.application.consumedEventName
 ) : PacketListenerWithOnError {
 
     init {
@@ -107,7 +107,7 @@ internal class OppgaveDataSink(
 internal data class SoknadData(
     val fnrBruker: String,
     val soknadId: UUID,
-    val joarkRef: String,
+    val joarkRef: String
 ) {
     internal fun toJson(oppgaveId: String, producedEventName: String): String {
         return JsonMessage("{}", MessageProblems("")).also {

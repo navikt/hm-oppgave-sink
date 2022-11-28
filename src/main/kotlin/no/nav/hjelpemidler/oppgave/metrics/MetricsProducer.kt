@@ -11,7 +11,7 @@ import java.util.UUID
 private val log = KotlinLogging.logger {}
 
 class MetricsProducer(
-    private val messageContext: MessageContext,
+    private val messageContext: MessageContext
 ) {
     private val mapper = jacksonMapperBuilder()
         .addModule(JavaTimeModule())
@@ -37,7 +37,7 @@ class MetricsProducer(
     fun hendelseOpprettet(
         measurement: String,
         fields: Map<String, Any>,
-        tags: Map<String, String>,
+        tags: Map<String, String>
     ) {
         messageContext.publish(
             measurement,

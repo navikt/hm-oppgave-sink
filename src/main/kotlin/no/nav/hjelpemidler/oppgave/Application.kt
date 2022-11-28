@@ -9,7 +9,6 @@ import no.nav.hjelpemidler.oppgave.service.RutingOppgaveSink
 import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 
 fun main() {
-
     if (Configuration.application.profile == Profile.LOCAL) {
         WiremockServer(Configuration).startServer()
     }

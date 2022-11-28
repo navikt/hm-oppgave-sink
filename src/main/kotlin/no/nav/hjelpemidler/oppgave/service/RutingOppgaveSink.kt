@@ -31,7 +31,7 @@ private val sikkerlogg = KotlinLogging.logger("tjenestekall")
 
 internal class RutingOppgaveSink(
     rapidsConnection: RapidsConnection,
-    private val oppgaveClient: OppgaveClient,
+    private val oppgaveClient: OppgaveClient
 ) : PacketListenerWithOnError {
 
     init {
@@ -85,7 +85,7 @@ internal class RutingOppgaveSink(
     }
 
     private suspend fun opprettOppgave(
-        oppgave: RutingOppgave,
+        oppgave: RutingOppgave
     ) =
         kotlin.runCatching {
             oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave)
@@ -118,5 +118,5 @@ data class RutingOppgave(
     val opprettetAvEnhetsnr: String,
     val fristFerdigstillelse: LocalDate,
     val tildeltEnhetsnr: String?,
-    val beskrivelse: String,
+    val beskrivelse: String
 )

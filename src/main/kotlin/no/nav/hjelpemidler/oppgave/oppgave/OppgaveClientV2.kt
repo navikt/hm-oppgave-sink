@@ -45,7 +45,6 @@ class OppgaveClientV2(
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
-
                 val correlationID = UUID.randomUUID().toString()
                 logger.info("DEBUG: akriverSøknad correlationID=$correlationID")
 

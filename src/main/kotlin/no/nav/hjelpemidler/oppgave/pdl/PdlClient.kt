@@ -36,7 +36,6 @@ class PdlClient(
 
         return withContext(Dispatchers.IO) {
             kotlin.runCatching {
-
                 val token = azureClient.getToken(accesstokenScope).accessToken
 
                 "$baseUrl".httpPost()
