@@ -88,14 +88,10 @@ class OppgaveClient(
             oppgave.fristFerdigstillelse.toString(),
             oppgave.prioritet,
             oppgave.opprettetAvEnhetsnr,
-            if (oppgave.tildeltEnhetsnr == "4720") "4719" else oppgave.tildeltEnhetsnr,
+            oppgave.tildeltEnhetsnr,
             oppgave.behandlingstema,
             oppgave.behandlingtype
         )
-
-        if (oppgave.tildeltEnhetsnr == "4720") {
-            logger.warn("Mappa om utgått enhetsnr 4720 til ${requestBody.tildeltEnhetsnr} for journalpostId ${oppgave.journalpostId} ")
-        }
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
 
