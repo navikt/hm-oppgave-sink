@@ -92,7 +92,7 @@ internal class RutingOppgaveSink(
         }.onSuccess {
             logg.info("Journalføringsoppgave opprettet for ruting-oppgave: journalpostId: ${oppgave.journalpostId}, oppgaveId=$it")
         }.onFailure {
-            logg.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave: journalpostId: ${oppgave.journalpostId}" }
+            logg.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave: journalpostId: ${oppgave.journalpostId} tildelt enhet: ${oppgave.tildeltEnhetsnr} opprettet av enhet: ${oppgave.opprettetAvEnhetsnr}" }
         }.getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
