@@ -78,11 +78,24 @@ class OppgaveClient(
         logger.info("Oppretter gosys-oppgave basert på ruting oppgave")
 
         val requestBody = OppgaveRequestRutingOppgave(
-            oppgave.aktoerId, oppgave.orgnr, oppgave.journalpostId.toString(), oppgave.beskrivelse,
-            oppgave.tema, oppgave.oppgavetype,
-            oppgave.aktivDato.toString(), oppgave.fristFerdigstillelse.toString(), oppgave.prioritet,
-            oppgave.opprettetAvEnhetsnr, oppgave.tildeltEnhetsnr, oppgave.behandlingstema, oppgave.behandlingtype
+            oppgave.aktoerId,
+            oppgave.orgnr,
+            oppgave.journalpostId.toString(),
+            oppgave.beskrivelse,
+            oppgave.tema,
+            oppgave.oppgavetype,
+            oppgave.aktivDato.toString(),
+            oppgave.fristFerdigstillelse.toString(),
+            oppgave.prioritet,
+            oppgave.opprettetAvEnhetsnr,
+            if (oppgave.tildeltEnhetsnr == "4720") "4719" else oppgave.tildeltEnhetsnr,
+            oppgave.behandlingstema,
+            oppgave.behandlingtype
         )
+
+        if (oppgave.tildeltEnhetsnr == "4720") {
+            logger.warn("Mappa om utgått enhetsnr 4720 til ${requestBody.tildeltEnhetsnr} for journalpostId ${oppgave.journalpostId} ")
+        }
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
 
@@ -114,7 +127,13 @@ class OppgaveClient(
                 .onFailure {
                     if (it is FuelError) {
                         val exp = it
-                        logger.error(it) { "Klarte ikke opprette oppgave basert på ruting-oppgave: ${exp.errorData.toString(Charsets.UTF_8)}" }
+                        logger.error(it) {
+                            "Klarte ikke opprette oppgave basert på ruting-oppgave: ${
+                            exp.errorData.toString(
+                                Charsets.UTF_8
+                            )
+                            }"
+                        }
                     } else {
                         logger.error(it) { "Klarte ikke opprette oppgave basert på ruting-oppgave" }
                     }
