@@ -88,7 +88,7 @@ class OppgaveClient(
             oppgave.fristFerdigstillelse.toString(),
             oppgave.prioritet,
             oppgave.opprettetAvEnhetsnr,
-            oppgave.tildeltEnhetsnr, //if (oppgave.tildeltEnhetsnr == "4717") "4716" else oppgave.tildeltEnhetsnr,
+            oppgave.tildeltEnhetsnr, // if (oppgave.tildeltEnhetsnr == "4717") "4716" else oppgave.tildeltEnhetsnr,
             oppgave.behandlingstema,
             oppgave.behandlingtype
         )
