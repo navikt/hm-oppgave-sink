@@ -134,9 +134,9 @@ class OppgaveClient(
                         val exp = it
                         logger.error(it) {
                             "Klarte ikke opprette oppgave basert på ruting-oppgave: ${
-                                exp.errorData.toString(
-                                    Charsets.UTF_8
-                                )
+                            exp.errorData.toString(
+                                Charsets.UTF_8
+                            )
                             }"
                         }
                     } else {
