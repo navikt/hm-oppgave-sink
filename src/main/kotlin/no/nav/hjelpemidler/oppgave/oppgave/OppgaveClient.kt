@@ -74,8 +74,17 @@ class OppgaveClient(
             .getOrThrow()
     }
 
+    // Nedlagte/sammenslåtte enheter som skal sendes til ny enhet. Kan skje av og til feks. pga. at avsender har brukt en gammel forside som de hadde liggende
+    private val enhetVideresendingMap = mapOf("4708" to "4707", "4709" to "4710", "4717" to "4716", "4720" to "4719")
+
     suspend fun opprettOppgaveBasertPåRutingOppgave(oppgave: RutingOppgave): String {
         logger.info("Oppretter gosys-oppgave basert på ruting oppgave")
+
+        val tildeltEnhetsnr = if (oppgave.tildeltEnhetsnr in enhetVideresendingMap) {
+            val nyEnhet = enhetVideresendingMap[oppgave.tildeltEnhetsnr]
+            logger.warn { "Mappa om nedlagt/sammenslått enhetsnr ${oppgave.tildeltEnhetsnr} til $nyEnhet for journalpostId ${oppgave.journalpostId}" }
+            nyEnhet
+        } else oppgave.tildeltEnhetsnr
 
         val requestBody = OppgaveRequestRutingOppgave(
             oppgave.aktoerId,
@@ -88,14 +97,10 @@ class OppgaveClient(
             oppgave.fristFerdigstillelse.toString(),
             oppgave.prioritet,
             oppgave.opprettetAvEnhetsnr,
-            oppgave.tildeltEnhetsnr, // if (oppgave.tildeltEnhetsnr == "4717") "4716" else oppgave.tildeltEnhetsnr,
+            tildeltEnhetsnr,
             oppgave.behandlingstema,
             oppgave.behandlingtype
         )
-
-//        if (oppgave.tildeltEnhetsnr == "4717") {
-//            logger.warn("Mappa om nedlagt enhetsnr ${oppgave.tildeltEnhetsnr} til ${requestBody.tildeltEnhetsnr} for journalpostId ${oppgave.journalpostId} ")
-//        }
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
 
@@ -129,9 +134,9 @@ class OppgaveClient(
                         val exp = it
                         logger.error(it) {
                             "Klarte ikke opprette oppgave basert på ruting-oppgave: ${
-                            exp.errorData.toString(
-                                Charsets.UTF_8
-                            )
+                                exp.errorData.toString(
+                                    Charsets.UTF_8
+                                )
                             }"
                         }
                     } else {
