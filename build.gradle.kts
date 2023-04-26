@@ -17,7 +17,7 @@ repositories {
 
 application {
     applicationName = "hm-oppgave-sink"
-    // mainClassName = "no.nav.hjelpemidler.oppgave.ApplicationKt"
+    mainClass.set("no.nav.hjelpemidler.oppgave.ApplicationKt")
 }
 
 dependencies {
