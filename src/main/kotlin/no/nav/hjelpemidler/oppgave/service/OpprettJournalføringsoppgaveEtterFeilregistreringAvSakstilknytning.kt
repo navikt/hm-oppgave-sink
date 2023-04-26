@@ -36,7 +36,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "joarkRef",
                     "eventId",
                     "sakId",
-                    "soknadId"
+                    "soknadId",
                 )
             }
         }.register(this)
@@ -61,7 +61,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             fnrBruker = packet.fnrBruker,
                             nyJournalpostId = packet.nyJournalpostId,
                             sakId = packet.sakId,
-                            soknadId = UUID.fromString(packet.soknadId)
+                            soknadId = UUID.fromString(packet.soknadId),
                         )
                         logger.info { "Tilbakeført sak mottatt, sakId=${oppgaveData.sakId}, soknadsId=${oppgaveData.soknadId}" }
                         val aktorId = pdlClient.hentAktorId(oppgaveData.fnrBruker)
@@ -69,7 +69,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             aktorId,
                             oppgaveData.nyJournalpostId,
                             oppgaveData.sakId,
-                            oppgaveData.soknadId
+                            oppgaveData.soknadId,
                         )
                         logger.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
                         forward(oppgaveData, oppgaveId, context)
@@ -110,8 +110,8 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 opprettBehandleOppgaveData.fnrBruker,
                 opprettBehandleOppgaveData.toJson(
                     joarkRef,
-                    "hm-opprettetJournalføringsoppgaveForTilbakeførtSak"
-                )
+                    "hm-opprettetJournalføringsoppgaveForTilbakeførtSak",
+                ),
             )
             Prometheus.oppgaveOpprettetCounter.inc()
         }.invokeOnCompletion {
@@ -124,7 +124,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 else -> {
                     logger.error(
                         "Klarte ikke å opprette journalføringsoppgave for tilbakeført sak: " +
-                                "${opprettBehandleOppgaveData.sakId}, beskjed:  ${it.message}."
+                            "${opprettBehandleOppgaveData.sakId}, beskjed:  ${it.message}.",
                     )
                 }
             }

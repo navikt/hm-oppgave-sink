@@ -55,7 +55,7 @@ internal class OppgaveDataSink(
                         val soknadData = SoknadData(
                             fnrBruker = packet.fnrBruker,
                             joarkRef = packet.joarkRef,
-                            soknadId = UUID.fromString(packet.soknadId)
+                            soknadId = UUID.fromString(packet.soknadId),
                         )
                         logger.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
                         val aktorId = pdlClient.hentAktorId(soknadData.fnrBruker)

@@ -19,9 +19,9 @@ internal class WiremockServer(private val configuration: Configuration) {
                         "token_type": "Bearer",
                         "expires_in": 3599,
                         "access_token": "1234abc"
-                    }"""
-                            )
-                    )
+                    }""",
+                            ),
+                    ),
             )
         wiremockServer
             .stubFor(
@@ -50,9 +50,9 @@ internal class WiremockServer(private val configuration: Configuration) {
                                   "aktivDato" : "2021-02-02",
                                   "opprettetTidspunkt" : "2021-02-02T14:33:35.177+01:00"
                                 }
-                                      """
-                            )
-                    )
+                                      """,
+                            ),
+                    ),
             )
         wiremockServer
             .stubFor(
@@ -61,9 +61,9 @@ internal class WiremockServer(private val configuration: Configuration) {
                         WireMock.aResponse().withStatus(200)
                             .withHeader("Content-Type", "application/json")
                             .withBody(
-                                """{"data":{"hentIdenter":{"identer": [{"ident": "aktorid","historisk": false,"type": "AKTORID"}]}}}"""
-                            )
-                    )
+                                """{"data":{"hentIdenter":{"identer": [{"ident": "aktorid","historisk": false,"type": "AKTORID"}]}}}""",
+                            ),
+                    ),
             )
         wiremockServer.start()
     }

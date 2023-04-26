@@ -16,18 +16,18 @@ fun main() {
     val azureClient = AzureClient(
         tenantUrl = "${Configuration.azure.tenantBaseUrl}/${Configuration.azure.tenantId}",
         clientId = Configuration.azure.clientId,
-        clientSecret = Configuration.azure.clientSecret
+        clientSecret = Configuration.azure.clientSecret,
     )
     val oppgaveClient = OppgaveClient(
         baseUrl = Configuration.oppgave.baseUrl,
         accesstokenScope = Configuration.azure.proxyScope,
-        azureClient = azureClient
+        azureClient = azureClient,
     )
 
     val pdlClient = PdlClient(
         baseUrl = Configuration.pdl.baseUrl,
         accesstokenScope = Configuration.azure.proxyScope,
-        azureClient = azureClient
+        azureClient = azureClient,
     )
 
     RapidApplication.Builder(RapidApplication.RapidApplicationConfig.fromEnv(Configuration.rapidApplication))

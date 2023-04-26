@@ -43,7 +43,7 @@ class OppgaveClientV2(
         val requestBody = OpprettBehandleSakOppgaveRequest(
             aktorId, journalpostId, dokumentBeskrivelse,
             TEMA_GRUPPE, TEMA, OPPGAVETYPE_BEH_SAK, BEHANDLINGSTYPE,
-            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM, enhet
+            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM, enhet,
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
@@ -64,7 +64,7 @@ class OppgaveClientV2(
                             override fun deserialize(content: String): JsonNode {
                                 return ObjectMapper().readTree(content)
                             }
-                        }
+                        },
                     )
                     .let {
                         when (it.has("id")) {

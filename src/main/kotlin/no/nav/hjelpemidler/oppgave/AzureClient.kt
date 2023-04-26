@@ -60,7 +60,7 @@ class AzureClient(private val tenantUrl: String, private val clientId: String, p
         return Token(
             tokenType = jsonNode["token_type"].textValue(),
             expiresIn = jsonNode["expires_in"].longValue(),
-            accessToken = jsonNode["access_token"].textValue()
+            accessToken = jsonNode["access_token"].textValue(),
         )
     }
 

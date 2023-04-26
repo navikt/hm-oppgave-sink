@@ -47,7 +47,7 @@ internal class RutingOppgaveSink(
                     "prioritet",
                     "opprettetAvEnhetsnr",
                     "fristFerdigstillelse",
-                    "beskrivelse"
+                    "beskrivelse",
                 )
             }
             validate { it.interestedIn("aktoerId", "behandlingstema", "behandlingtype", "tildeltEnhetsnr") }

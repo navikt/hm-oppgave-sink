@@ -46,8 +46,8 @@ class OppgaveClient(
                         Pair("journalpostId", journalpostId),
                         Pair("statuskategori", "AAPEN"),
                         Pair("oppgavetype", "JFR"),
-                        Pair("oppgavetype", "FDR")
-                    )
+                        Pair("oppgavetype", "FDR"),
+                    ),
                 )
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
@@ -58,7 +58,7 @@ class OppgaveClient(
                             override fun deserialize(content: String): JsonNode {
                                 return ObjectMapper().readTree(content)
                             }
-                        }
+                        },
                     )
                     .let {
                         when (it.has("antallTreffTotalt")) {
@@ -84,7 +84,9 @@ class OppgaveClient(
             val nyEnhet = enhetVideresendingMap[oppgave.tildeltEnhetsnr]
             logger.warn { "Mappa om nedlagt/sammenslått enhetsnr ${oppgave.tildeltEnhetsnr} til $nyEnhet for journalpostId ${oppgave.journalpostId}" }
             nyEnhet
-        } else oppgave.tildeltEnhetsnr
+        } else {
+            oppgave.tildeltEnhetsnr
+        }
 
         val requestBody = OppgaveRequestRutingOppgave(
             oppgave.aktoerId,
@@ -99,7 +101,7 @@ class OppgaveClient(
             oppgave.opprettetAvEnhetsnr,
             tildeltEnhetsnr,
             oppgave.behandlingstema,
-            oppgave.behandlingtype
+            oppgave.behandlingtype,
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
@@ -120,7 +122,7 @@ class OppgaveClient(
                             override fun deserialize(content: String): JsonNode {
                                 return ObjectMapper().readTree(content)
                             }
-                        }
+                        },
                     )
                     .let {
                         when (it.has("id")) {
@@ -135,7 +137,7 @@ class OppgaveClient(
                         logger.error(it) {
                             "Klarte ikke opprette oppgave basert på ruting-oppgave: ${
                                 exp.errorData.toString(
-                                    Charsets.UTF_8
+                                    Charsets.UTF_8,
                                 )
                             }"
                         }
@@ -153,7 +155,7 @@ class OppgaveClient(
         val requestBody = OppgaveRequest(
             aktorId, journalpostId, BESKRIVELSE_OPPGAVE,
             TEMA_GRUPPE, TEMA, OPPGAVETYPE_JRF, BEHANDLINGSTYPE,
-            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM
+            hentAktivDato(), hentFristFerdigstillelse(), OPPGAVE_PRIORITET_NORM,
         )
 
         val jsonBody = objectMapper.writeValueAsString(requestBody)
@@ -174,7 +176,7 @@ class OppgaveClient(
                             override fun deserialize(content: String): JsonNode {
                                 return ObjectMapper().readTree(content)
                             }
-                        }
+                        },
                     )
                     .let {
                         when (it.has("id")) {

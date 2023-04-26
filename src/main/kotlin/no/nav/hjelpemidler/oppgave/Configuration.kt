@@ -28,8 +28,8 @@ private val localProperties = ConfigurationMap(
         "PROXY_SCOPE" to "123",
         "PDL_BASEURL" to "http://localhost:9098/pdl",
         "CONSUMED_EVENT_NAME" to "hm-SøknadArkivert",
-        "PRODUCED_EVENT_NAME" to "hm-OppgaveOpprettet"
-    )
+        "PRODUCED_EVENT_NAME" to "hm-OppgaveOpprettet",
+    ),
 )
 private val devProperties = ConfigurationMap(
     mapOf(
@@ -42,8 +42,8 @@ private val devProperties = ConfigurationMap(
         "AZURE_TENANT_BASEURL" to "https://login.microsoftonline.com",
         "OPPGAVE_BASEURL" to System.getenv("OPPGAVE_BASEURL"),
         "PROXY_SCOPE" to System.getenv("PROXY_SCOPE"),
-        "PDL_BASEURL" to System.getenv("PDL_BASEURL")
-    )
+        "PDL_BASEURL" to System.getenv("PDL_BASEURL"),
+    ),
 )
 private val prodProperties = ConfigurationMap(
     mapOf(
@@ -59,8 +59,8 @@ private val prodProperties = ConfigurationMap(
         "PROXY_SCOPE" to "api://8bdfd270-4760-4428-8a6e-540707d61cf9/.default",
         "PDL_BASEURL" to "https://digihot-proxy.prod-fss-pub.nais.io/pdl-aad",
         "CONSUMED_EVENT_NAME" to "hm-SøknadArkivert",
-        "PRODUCED_EVENT_NAME" to "hm-OppgaveOpprettet"
-    )
+        "PRODUCED_EVENT_NAME" to "hm-OppgaveOpprettet",
+    ),
 )
 
 private fun config() = when (System.getenv("NAIS_CLUSTER_NAME") ?: System.getProperty("NAIS_CLUSTER_NAME")) {
@@ -86,7 +86,7 @@ internal object Configuration {
         "KAFKA_TRUSTSTORE_PATH" to config()[Key("KAFKA_TRUSTSTORE_PATH", stringType)],
         "KAFKA_CREDSTORE_PASSWORD" to config()[Key("KAFKA_CREDSTORE_PASSWORD", stringType)],
         "KAFKA_KEYSTORE_PATH" to config()[Key("KAFKA_KEYSTORE_PATH", stringType)],
-        "HTTP_PORT" to config()[Key("application.httpPort", stringType)]
+        "HTTP_PORT" to config()[Key("application.httpPort", stringType)],
     ) + System.getenv().filter { it.key.startsWith("NAIS_") }
 
     data class Application(

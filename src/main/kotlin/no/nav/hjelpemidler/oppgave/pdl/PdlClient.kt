@@ -49,7 +49,7 @@ class PdlClient(
                             override fun deserialize(content: String): JsonNode {
                                 return ObjectMapper().readTree(content)
                             }
-                        }
+                        },
                     )
                     .let {
                         when (it.hasNonNull("errors")) {

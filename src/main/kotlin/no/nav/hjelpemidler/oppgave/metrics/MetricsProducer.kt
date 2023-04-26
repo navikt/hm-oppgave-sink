@@ -52,10 +52,10 @@ class MetricsProducer(
                         "kilde" to "hm-oppgave-sink",
                         "data" to fields.mapValues { it.value.toString() }
                             .plus(tags)
-                            .filterKeys { it != "counter" }
-                    )
-                )
-            )
+                            .filterKeys { it != "counter" },
+                    ),
+                ),
+            ),
         )
     }
 
