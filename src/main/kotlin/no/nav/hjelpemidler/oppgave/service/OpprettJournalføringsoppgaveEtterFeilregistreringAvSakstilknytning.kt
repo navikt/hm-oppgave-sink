@@ -19,7 +19,7 @@ import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import java.time.LocalDateTime
 import java.util.UUID
 
-private val logger = KotlinLogging.logger {}
+private val log = KotlinLogging.logger {}
 
 internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
     rapidsConnection: RapidsConnection,
@@ -53,7 +53,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
             withContext(Dispatchers.IO) {
                 launch {
                     if (skipEvent(UUID.fromString(packet.eventId))) {
-                        logger.info { "Hopper over event i skip-list: ${packet.eventId}" }
+                        log.info { "Hopper over event i skip-list: ${packet.eventId}" }
                         return@launch
                     }
                     try {
@@ -63,15 +63,15 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                             sakId = packet.sakId,
                             soknadId = UUID.fromString(packet.soknadId),
                         )
-                        logger.info { "Tilbakeført sak mottatt, sakId=${oppgaveData.sakId}, soknadsId=${oppgaveData.soknadId}" }
-                        val aktorId = pdlClient.hentAktorId(oppgaveData.fnrBruker)
+                        log.info { "Tilbakeført sak mottatt, sakId=${oppgaveData.sakId}, soknadsId=${oppgaveData.soknadId}" }
+                        val aktorId = pdlClient.hentAktørId(oppgaveData.fnrBruker)
                         val oppgaveId = opprettOppgave(
                             aktorId,
                             oppgaveData.nyJournalpostId,
                             oppgaveData.sakId,
                             oppgaveData.soknadId,
                         )
-                        logger.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
+                        log.info("Tilbakeført oppgave opprettet med oppgaveId=$oppgaveId")
                         forward(oppgaveData, oppgaveId, context)
                     } catch (e: Exception) {
                         throw RuntimeException("Håndtering av event ${packet.eventId} feilet", e)
@@ -93,11 +93,11 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         soknadId: UUID,
     ) =
         kotlin.runCatching {
-            oppgaveClient.arkiverSoknad(aktorId, journalpostId)
+            oppgaveClient.arkiverSøknad(aktorId, journalpostId)
         }.onSuccess {
-            logger.info("Journalføringsoppgave opprettet for tilbakeført sak=$sakId, soknadsId=$soknadId, oppgaveId=$it")
+            log.info("Journalføringsoppgave opprettet for tilbakeført sak=$sakId, soknadsId=$soknadId, oppgaveId=$it")
         }.onFailure {
-            logger.error(it) { "Feilet under opprettelse av journalføringsoppgave for sak: $sakId" }
+            log.error(it) { "Feilet under opprettelse av journalføringsoppgave for sak: $sakId" }
         }.getOrThrow()
 
     private fun CoroutineScope.forward(
@@ -117,12 +117,12 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         }.invokeOnCompletion {
             when (it) {
                 null -> {
-                    logger.info("Journalføringsoppgave opprettet for sak: ${opprettBehandleOppgaveData.sakId}")
+                    log.info("Journalføringsoppgave opprettet for sak: ${opprettBehandleOppgaveData.sakId}")
                 }
 
-                is CancellationException -> logger.warn("Cancelled: ${it.message}")
+                is CancellationException -> log.warn("Cancelled: ${it.message}")
                 else -> {
-                    logger.error(
+                    log.error(
                         "Klarte ikke å opprette journalføringsoppgave for tilbakeført sak: " +
                             "${opprettBehandleOppgaveData.sakId}, beskjed:  ${it.message}.",
                     )

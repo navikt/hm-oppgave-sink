@@ -1,69 +1,63 @@
 package no.nav.hjelpemidler.oppgave.pdl
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.github.kittinunf.fuel.core.ResponseDeserializable
-import com.github.kittinunf.fuel.core.extensions.jsonBody
-import com.github.kittinunf.fuel.coroutines.awaitObject
-import com.github.kittinunf.fuel.httpPost
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
+import com.expediagroup.graphql.client.types.GraphQLClientResponse
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.header
 import mu.KotlinLogging
-import no.nav.hjelpemidler.oppgave.AzureClient
+import no.nav.hjelpemidler.http.openid.OpenIDClient
+import no.nav.hjelpemidler.http.openid.bearerAuth
+import no.nav.hjelpemidler.pdl.HentIdenter
+import no.nav.hjelpemidler.pdl.enums.IdentGruppe
+import java.net.URL
+import java.util.UUID
 
-private val logger = KotlinLogging.logger {}
+private val log = KotlinLogging.logger {}
 
 class PdlClient(
-    private val baseUrl: String,
-    private val accesstokenScope: String,
-    private val azureClient: AzureClient,
+    baseUrl: String,
+    private val scope: String,
+    private val azureAdClient: OpenIDClient,
+    engine: HttpClientEngine = CIO.create(),
 ) {
-
-    companion object {
-        fun aktorQuery(fnr: String) =
-            """
-        {
-            "query": "query(${'$'}ident: ID!) { hentIdenter(ident:${'$'}ident, grupper: [AKTORID]) { identer { ident,gruppe, historisk } } }",
-            "variables": {
-                "ident": "$fnr"
+    private val client = GraphQLKtorClient(
+        url = URL(baseUrl),
+        httpClient = HttpClient(engine = engine) {
+            expectSuccess = true
+            install(HttpRequestRetry) {
+                retryOnExceptionOrServerErrors(maxRetries = 5)
+                exponentialDelay()
             }
-        }            
-        """
-    }
-
-    suspend fun hentAktorId(fnr: String): String {
-        logger.info { "Henter aktørid" }
-
-        return withContext(Dispatchers.IO) {
-            kotlin.runCatching {
-                val token = azureClient.getToken(accesstokenScope).accessToken
-
-                "$baseUrl".httpPost()
-                    .header("Content-Type", "application/json")
-                    .header("Accept", "application/json")
-                    .header("Authorization", "Bearer $token")
-                    .header("Tema", "HJE")
-                    .jsonBody(aktorQuery(fnr))
-                    .awaitObject(
-                        object : ResponseDeserializable<JsonNode> {
-                            override fun deserialize(content: String): JsonNode {
-                                return ObjectMapper().readTree(content)
-                            }
-                        },
-                    )
-                    .let {
-                        when (it.hasNonNull("errors")) {
-                            true -> throw PdlException(it["errors"].toString())
-                            false -> it["data"]["hentIdenter"]["identer"][0]["ident"].asText()
-                        }
-                    }
+            defaultRequest {
+                header("X-Correlation-ID", UUID.randomUUID().toString())
             }
-                .onFailure {
-                    logger.error { it.message }
-                }
+        },
+    )
+
+    suspend fun hentAktørId(fnr: String): String {
+        log.info { "Henter aktørId i PDL" }
+        val tokenSet = azureAdClient.grant(scope)
+        val request = HentIdenter(HentIdenter.Variables(fnr, listOf(IdentGruppe.AKTORID)))
+        val response = client.execute(request) {
+            bearerAuth(tokenSet)
         }
-            .getOrThrow()
+        val result = response.resultOrThrow()
+        return checkNotNull(result.hentIdenter?.identer?.first()?.ident) {
+            "Fant ikke aktørId i PDL"
+        }
     }
 }
 
-internal class PdlException(msg: String) : RuntimeException(msg)
+fun <T> GraphQLClientResponse<T>.resultOrThrow(): T {
+    val errors = this.errors
+    val data = this.data
+    return when {
+        errors != null -> error("Feil fra GraphQL-tjeneste: '${errors.joinToString { it.message }}'")
+        data != null -> data
+        else -> error("Både data og errors var null!")
+    }
+}

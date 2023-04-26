@@ -20,15 +20,15 @@ import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import java.time.LocalDateTime
 import java.util.UUID
 
-private val logger = KotlinLogging.logger {}
-private val sikkerlogg = KotlinLogging.logger("tjenestekall")
+private val log = KotlinLogging.logger {}
+private val secureLog = KotlinLogging.logger("tjenestekall")
 
-internal class OppgaveDataSink(
+class OppgaveDataSink(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
     private val pdlClient: PdlClient,
-    private val producedEventName: String = Configuration.application.producedEventName,
-    private val consumedEventName: String = Configuration.application.consumedEventName,
+    private val consumedEventName: String = Configuration.CONSUMED_EVENT_NAME,
+    private val producedEventName: String = Configuration.PRODUCED_EVENT_NAME,
 ) : PacketListenerWithOnError {
 
     init {
@@ -48,7 +48,7 @@ internal class OppgaveDataSink(
             withContext(Dispatchers.IO) {
                 launch {
                     if (skipEvent(UUID.fromString(packet.eventId))) {
-                        logger.info { "Hopper over event i skip-list: ${packet.eventId}" }
+                        log.info { "Hopper over event i skip-list: ${packet.eventId}" }
                         return@launch
                     }
                     try {
@@ -57,8 +57,8 @@ internal class OppgaveDataSink(
                             joarkRef = packet.joarkRef,
                             soknadId = UUID.fromString(packet.soknadId),
                         )
-                        logger.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
-                        val aktorId = pdlClient.hentAktorId(soknadData.fnrBruker)
+                        log.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
+                        val aktorId = pdlClient.hentAktørId(soknadData.fnrBruker)
                         val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
                         forward(soknadData, oppgaveId, context)
                     } catch (e: Exception) {
@@ -76,12 +76,12 @@ internal class OppgaveDataSink(
 
     private suspend fun opprettOppgave(aktorId: String, journalpostId: String, soknadId: UUID) =
         kotlin.runCatching {
-            oppgaveClient.arkiverSoknad(aktorId, journalpostId)
+            oppgaveClient.arkiverSøknad(aktorId, journalpostId)
         }.onSuccess {
-            logger.info("Oppgave opprettet: $soknadId")
-            Prometheus.hentetAktorIdCounter.inc()
+            log.info("Oppgave opprettet: $soknadId")
+            Prometheus.hentetAktørIdCounter.inc()
         }.onFailure {
-            logger.error(it) { "Feilet under opprettelse av oppgave: $soknadId" }
+            log.error(it) { "Feilet under opprettelse av oppgave: $soknadId" }
         }.getOrThrow()
 
     private fun CoroutineScope.forward(søknadData: SoknadData, joarkRef: String, context: MessageContext) {
@@ -91,13 +91,13 @@ internal class OppgaveDataSink(
         }.invokeOnCompletion {
             when (it) {
                 null -> {
-                    logger.info("Oppgave opprettet for søknad: ${søknadData.soknadId}")
-                    sikkerlogg.info("Oppgave opprettet for søknad: ${søknadData.soknadId}, fnr: ${søknadData.fnrBruker})")
+                    log.info("Oppgave opprettet for søknad: ${søknadData.soknadId}")
+                    secureLog.info("Oppgave opprettet for søknad: ${søknadData.soknadId}, fnr: ${søknadData.fnrBruker})")
                 }
 
-                is CancellationException -> logger.warn("Cancelled: ${it.message}")
+                is CancellationException -> log.warn("Cancelled: ${it.message}")
                 else -> {
-                    logger.error("Failed: ${it.message}. Soknad: ${søknadData.soknadId}")
+                    log.error("Failed: ${it.message}. Soknad: ${søknadData.soknadId}")
                 }
             }
         }

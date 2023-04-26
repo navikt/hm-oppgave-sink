@@ -1,8 +1,11 @@
 {
-  "APPNAVN": "hm-oppgave-sink-q1",
+  "HTTP_PORT": "8080",
+  "KAFKA_RESET_POLICY": "latest",
+  "KAFKA_RAPID_TOPIC": "teamdigihot.hm-soknadsbehandling-v1",
   "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-q1-v1",
-  "OPPGAVE_BASEURL": "https://digihot-proxy-q1.dev-fss-pub.nais.io/oppgave-aad",
-  "PDL_BASEURL": "https://digihot-proxy-q1.dev-fss-pub.nais.io/pdl-aad",
+  "RAPID_APP_NAME": "hm-oppgave-sink",
+  "OPPGAVE_BASE_URL": "https://digihot-proxy-q1.dev-fss-pub.nais.io/oppgave-aad",
+  "PDL_BASE_URL": "https://digihot-proxy-q1.dev-fss-pub.nais.io/pdl-aad",
   "PROXY_SCOPE": "api://dev-fss.teamdigihot.digihot-proxy-q1/.default",
   "CONSUMED_EVENT_NAME": "hm-SøknadArkivert-q1",
   "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet-q1"

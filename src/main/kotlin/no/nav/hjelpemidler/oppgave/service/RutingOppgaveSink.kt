@@ -25,8 +25,8 @@ private val mapper = jacksonObjectMapper()
     .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
-private val logg = KotlinLogging.logger {}
-private val sikkerlogg = KotlinLogging.logger("tjenestekall")
+private val log = KotlinLogging.logger {}
+private val secureLog = KotlinLogging.logger("tjenestekall")
 
 internal class RutingOppgaveSink(
     rapidsConnection: RapidsConnection,
@@ -63,7 +63,7 @@ internal class RutingOppgaveSink(
             withContext(Dispatchers.IO) {
                 launch {
                     if (skipEvent(UUID.fromString(packet.eventId))) {
-                        logg.info { "Hopper over event i skip-list: ${packet.eventId}" }
+                        log.info { "Hopper over event i skip-list: ${packet.eventId}" }
                         return@launch
                     }
 
@@ -71,23 +71,23 @@ internal class RutingOppgaveSink(
 
                     val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
                     try {
-                        logg.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
+                        log.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
 
                         // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte
                         // prosesseringen tidlig.
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
-                            logg.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
+                            log.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
                             metrics.rutingOppgaveEksisterteAllerede(oppgave.oppgavetype)
                             return@launch
                         }
 
-                        logg.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
+                        log.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
 
                         // Opprett oppgave for journalpost
                         opprettOppgave(oppgave)
                         metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
                     } catch (e: Exception) {
-                        logg.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
+                        log.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
                         metrics.rutingOppgaveException(oppgave.oppgavetype)
                         throw e
                     }
@@ -102,9 +102,9 @@ internal class RutingOppgaveSink(
         kotlin.runCatching {
             oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave)
         }.onSuccess {
-            logg.info("Journalføringsoppgave opprettet for ruting-oppgave: journalpostId: ${oppgave.journalpostId}, oppgaveId=$it")
+            log.info("Journalføringsoppgave opprettet for ruting-oppgave: journalpostId: ${oppgave.journalpostId}, oppgaveId=$it")
         }.onFailure {
-            logg.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave: journalpostId: ${oppgave.journalpostId} tildelt enhet: ${oppgave.tildeltEnhetsnr} opprettet av enhet: ${oppgave.opprettetAvEnhetsnr}" }
+            log.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave: journalpostId: ${oppgave.journalpostId} tildelt enhet: ${oppgave.tildeltEnhetsnr} opprettet av enhet: ${oppgave.opprettetAvEnhetsnr}" }
         }.getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
