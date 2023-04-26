@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger {}
 class OppgaveClient(
     private val baseUrl: String,
     private val accesstokenScope: String,
-    private val azureClient: AzureClient
+    private val azureClient: AzureClient,
 ) {
 
     companion object {
@@ -134,9 +134,9 @@ class OppgaveClient(
                         val exp = it
                         logger.error(it) {
                             "Klarte ikke opprette oppgave basert på ruting-oppgave: ${
-                            exp.errorData.toString(
-                                Charsets.UTF_8
-                            )
+                                exp.errorData.toString(
+                                    Charsets.UTF_8
+                                )
                             }"
                         }
                     } else {

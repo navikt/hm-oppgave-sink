@@ -16,7 +16,7 @@ private val logger = KotlinLogging.logger {}
 class PdlClient(
     private val baseUrl: String,
     private val accesstokenScope: String,
-    private val azureClient: AzureClient
+    private val azureClient: AzureClient,
 ) {
 
     companion object {

@@ -94,7 +94,7 @@ internal object Configuration {
         val profile: Profile = config()[Key("application.profile", stringType)].let { Profile.valueOf(it) },
         val httpPort: Int = config()[Key("application.httpPort", intType)],
         val producedEventName: String = config()[Key("PRODUCED_EVENT_NAME", stringType)],
-        val consumedEventName: String = config()[Key("CONSUMED_EVENT_NAME", stringType)]
+        val consumedEventName: String = config()[Key("CONSUMED_EVENT_NAME", stringType)],
     )
 
     data class Azure(
@@ -102,15 +102,15 @@ internal object Configuration {
         val tenantId: String = config()[Key("AZURE_APP_TENANT_ID", stringType)],
         val clientId: String = config()[Key("AZURE_APP_CLIENT_ID", stringType)],
         val clientSecret: String = config()[Key("AZURE_APP_CLIENT_SECRET", stringType)],
-        val proxyScope: String = config()[Key("PROXY_SCOPE", stringType)]
+        val proxyScope: String = config()[Key("PROXY_SCOPE", stringType)],
     )
 
     data class Oppgave(
-        val baseUrl: String = config()[Key("OPPGAVE_BASEURL", stringType)]
+        val baseUrl: String = config()[Key("OPPGAVE_BASEURL", stringType)],
     )
 
     data class Pdl(
-        val baseUrl: String = config()[Key("PDL_BASEURL", stringType)]
+        val baseUrl: String = config()[Key("PDL_BASEURL", stringType)],
     )
 }
 

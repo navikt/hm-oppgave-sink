@@ -10,7 +10,7 @@ data class OppgaveRequest(
     val behandlingstype: String,
     val aktivDato: String,
     val fristFerdigstillelse: String,
-    val prioritet: String
+    val prioritet: String,
 )
 
 data class OppgaveRequestRutingOppgave(
@@ -26,7 +26,7 @@ data class OppgaveRequestRutingOppgave(
     val opprettetAvEnhetsnr: String,
     val tildeltEnhetsnr: String?,
     val behandlingstema: String?,
-    val behandlingstype: String?
+    val behandlingstype: String?,
 )
 
 data class OpprettBehandleSakOppgaveRequest(
@@ -40,7 +40,7 @@ data class OpprettBehandleSakOppgaveRequest(
     val aktivDato: String,
     val fristFerdigstillelse: String,
     val prioritet: String,
-    val tildeltEnhetsnr: String
+    val tildeltEnhetsnr: String,
 )
 
 data class OppgaveResponse(
@@ -59,5 +59,5 @@ data class OppgaveResponse(
     val opprettetTidspunkt: String?,
     val opprettetAv: String?,
     val prioritet: String?,
-    val status: String?
+    val status: String?,
 )

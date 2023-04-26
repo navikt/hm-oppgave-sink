@@ -17,7 +17,6 @@ import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import no.nav.hjelpemidler.oppgave.pdl.PdlClient
-import java.lang.RuntimeException
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -29,7 +28,7 @@ internal class OppgaveDataSink(
     private val oppgaveClient: OppgaveClient,
     private val pdlClient: PdlClient,
     private val producedEventName: String = Configuration.application.producedEventName,
-    private val consumedEventName: String = Configuration.application.consumedEventName
+    private val consumedEventName: String = Configuration.application.consumedEventName,
 ) : PacketListenerWithOnError {
 
     init {
@@ -95,6 +94,7 @@ internal class OppgaveDataSink(
                     logger.info("Oppgave opprettet for søknad: ${søknadData.soknadId}")
                     sikkerlogg.info("Oppgave opprettet for søknad: ${søknadData.soknadId}, fnr: ${søknadData.fnrBruker})")
                 }
+
                 is CancellationException -> logger.warn("Cancelled: ${it.message}")
                 else -> {
                     logger.error("Failed: ${it.message}. Soknad: ${søknadData.soknadId}")
@@ -107,7 +107,7 @@ internal class OppgaveDataSink(
 internal data class SoknadData(
     val fnrBruker: String,
     val soknadId: UUID,
-    val joarkRef: String
+    val joarkRef: String,
 ) {
     internal fun toJson(oppgaveId: String, producedEventName: String): String {
         return JsonMessage("{}", MessageProblems("")).also {

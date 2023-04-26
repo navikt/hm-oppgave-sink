@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
 class OppgaveClientV2(
     private val baseUrl: String,
     private val accesstokenScope: String,
-    private val azureClient: AzureClient
+    private val azureClient: AzureClient,
 ) {
 
     companion object {
@@ -32,7 +32,12 @@ class OppgaveClientV2(
         const val BESKRIVELSE_OPPGAVE = "Digital søknad om hjelpemidler"
     }
 
-    suspend fun opprettBehandleSakOppgave(aktorId: String, journalpostId: String, enhet: String, dokumentBeskrivelse: String): String {
+    suspend fun opprettBehandleSakOppgave(
+        aktorId: String,
+        journalpostId: String,
+        enhet: String,
+        dokumentBeskrivelse: String,
+    ): String {
         logger.info { "Oppretter oppgave for ferdigstilt journalpost" }
 
         val requestBody = OpprettBehandleSakOppgaveRequest(

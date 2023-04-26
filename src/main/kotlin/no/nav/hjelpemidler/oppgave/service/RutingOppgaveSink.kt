@@ -14,7 +14,6 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
-import no.nav.hjelpemidler.oppgave.Configuration.oppgave
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
 import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import java.time.LocalDate
@@ -31,13 +30,26 @@ private val sikkerlogg = KotlinLogging.logger("tjenestekall")
 
 internal class RutingOppgaveSink(
     rapidsConnection: RapidsConnection,
-    private val oppgaveClient: OppgaveClient
+    private val oppgaveClient: OppgaveClient,
 ) : PacketListenerWithOnError {
 
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", "hm-ruting-oppgave") }
-            validate { it.requireKey("eventId", "opprettet", "journalpostId", "tema", "oppgavetype", "aktivDato", "prioritet", "opprettetAvEnhetsnr", "fristFerdigstillelse", "beskrivelse") }
+            validate {
+                it.requireKey(
+                    "eventId",
+                    "opprettet",
+                    "journalpostId",
+                    "tema",
+                    "oppgavetype",
+                    "aktivDato",
+                    "prioritet",
+                    "opprettetAvEnhetsnr",
+                    "fristFerdigstillelse",
+                    "beskrivelse"
+                )
+            }
             validate { it.interestedIn("aktoerId", "behandlingstema", "behandlingtype", "tildeltEnhetsnr") }
         }.register(this)
     }
@@ -85,7 +97,7 @@ internal class RutingOppgaveSink(
     }
 
     private suspend fun opprettOppgave(
-        oppgave: RutingOppgave
+        oppgave: RutingOppgave,
     ) =
         kotlin.runCatching {
             oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave)
@@ -118,5 +130,5 @@ data class RutingOppgave(
     val opprettetAvEnhetsnr: String,
     val fristFerdigstillelse: LocalDate,
     val tildeltEnhetsnr: String?,
-    val beskrivelse: String
+    val beskrivelse: String,
 )

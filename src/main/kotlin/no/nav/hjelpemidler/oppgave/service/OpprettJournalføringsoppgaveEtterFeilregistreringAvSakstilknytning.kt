@@ -24,7 +24,7 @@ private val logger = KotlinLogging.logger {}
 internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
-    private val pdlClient: PdlClient
+    private val pdlClient: PdlClient,
 ) : PacketListenerWithOnError {
 
     init {
@@ -90,7 +90,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         aktorId: String,
         journalpostId: String,
         sakId: String,
-        soknadId: UUID
+        soknadId: UUID,
     ) =
         kotlin.runCatching {
             oppgaveClient.arkiverSoknad(aktorId, journalpostId)
@@ -103,7 +103,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     private fun CoroutineScope.forward(
         opprettBehandleOppgaveData: OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData,
         joarkRef: String,
-        context: MessageContext
+        context: MessageContext,
     ) {
         launch(Dispatchers.IO + SupervisorJob()) {
             context.publish(
@@ -119,11 +119,12 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 null -> {
                     logger.info("Journalføringsoppgave opprettet for sak: ${opprettBehandleOppgaveData.sakId}")
                 }
+
                 is CancellationException -> logger.warn("Cancelled: ${it.message}")
                 else -> {
                     logger.error(
                         "Klarte ikke å opprette journalføringsoppgave for tilbakeført sak: " +
-                            "${opprettBehandleOppgaveData.sakId}, beskjed:  ${it.message}."
+                                "${opprettBehandleOppgaveData.sakId}, beskjed:  ${it.message}."
                     )
                 }
             }
@@ -135,7 +136,7 @@ internal data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveDat
     val fnrBruker: String,
     val sakId: String,
     val nyJournalpostId: String,
-    val soknadId: UUID
+    val soknadId: UUID,
 ) {
     internal fun toJson(oppgaveId: String, producedEventName: String): String {
         return JsonMessage("{}", MessageProblems("")).also {
