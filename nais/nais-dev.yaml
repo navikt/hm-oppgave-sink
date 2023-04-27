@@ -38,3 +38,8 @@ spec:
   azure:
     application:
       enabled: true
+  accessPolicy:
+    outbound:
+      external:
+        - host: digihot-proxy-q1.dev-fss-pub.nais.io # q1
+        - host: digihot-proxy.dev-fss-pub.nais.io #q2
