@@ -2,7 +2,7 @@
   "HTTP_PORT": "8080",
   "KAFKA_RESET_POLICY": "latest",
   "KAFKA_RAPID_TOPIC": "teamdigihot.hm-soknadsbehandling-v1",
-  "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-v3",
+  "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-v2",
   "RAPID_APP_NAME": "hm-oppgave-sink",
   "OPPGAVE_BASE_URL": "https://digihot-proxy.dev-fss-pub.nais.io/oppgave-aad",
   "PDL_BASE_URL": "https://digihot-proxy.dev-fss-pub.nais.io/pdl-aad",

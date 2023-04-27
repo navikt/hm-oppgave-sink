@@ -27,20 +27,10 @@ spec:
       cpu: 200m
       memory: 512Mi
   env:
-    - name: APPNAVN
-      value: "{{ APPNAVN }}"
-    - name: KAFKA_CONSUMER_GROUP_ID
-      value: "{{ KAFKA_CONSUMER_GROUP_ID }}"
-    - name: OPPGAVE_BASEURL
-      value: "{{ OPPGAVE_BASEURL }}"
-    - name: PDL_BASEURL
-      value: "{{ PDL_BASEURL }}"
-    - name: PROXY_SCOPE
-      value: "{{ PROXY_SCOPE }}"
-    - name: CONSUMED_EVENT_NAME
-      value: "{{ CONSUMED_EVENT_NAME }}"
-    - name: PRODUCED_EVENT_NAME
-      value: "{{ PRODUCED_EVENT_NAME }}"
+  {{#each this}}
+     - name: {{@key}}
+       value: "{{this}}"
+  {{/each}}
   secureLogs:
     enabled: true
   kafka:
