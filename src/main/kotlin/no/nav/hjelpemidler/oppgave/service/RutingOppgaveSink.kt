@@ -14,8 +14,9 @@ import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
+import no.nav.hjelpemidler.oppgave.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
-import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -73,8 +74,7 @@ internal class RutingOppgaveSink(
                     try {
                         log.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
 
-                        // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte
-                        // prosesseringen tidlig.
+                        // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
                             log.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
                             metrics.rutingOppgaveEksisterteAllerede(oppgave.oppgavetype)
@@ -102,9 +102,9 @@ internal class RutingOppgaveSink(
         kotlin.runCatching {
             oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave)
         }.onSuccess {
-            log.info("Journalføringsoppgave opprettet for ruting-oppgave: journalpostId: ${oppgave.journalpostId}, oppgaveId=$it")
+            log.info("Journalføringsoppgave opprettet for ruting-oppgave: journalpostId: ${oppgave.journalpostId}, oppgaveId: $it")
         }.onFailure {
-            log.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave: journalpostId: ${oppgave.journalpostId} tildelt enhet: ${oppgave.tildeltEnhetsnr} opprettet av enhet: ${oppgave.opprettetAvEnhetsnr}" }
+            log.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId} tildelt enhet: ${oppgave.tildeltEnhetsnr} opprettet av enhet: ${oppgave.opprettetAvEnhetsnr}" }
         }.getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
@@ -120,13 +120,13 @@ data class RutingOppgave(
 
     val aktoerId: String?,
     val orgnr: String?,
-    val journalpostId: Int,
+    val journalpostId: String,
     val tema: String,
     val behandlingstema: String?,
     val behandlingtype: String?,
     val oppgavetype: String,
     val aktivDato: LocalDate,
-    val prioritet: String,
+    val prioritet: OpprettOppgaveRequest.Prioritet,
     val opprettetAvEnhetsnr: String,
     val fristFerdigstillelse: LocalDate,
     val tildeltEnhetsnr: String?,

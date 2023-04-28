@@ -4,6 +4,7 @@ plugins {
     application
     kotlin("jvm") version "1.8.20"
     id("com.expediagroup.graphql") version "6.4.0"
+    id("org.openapi.generator") version "6.5.0"
     id("com.diffplug.spotless") version "6.18.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -71,5 +72,34 @@ graphql {
         schemaFile = file("src/main/resources/pdl/pdl-api-sdl.graphqls")
         queryFileDirectory = "src/main/resources/pdl"
         packageName = "no.nav.hjelpemidler.pdl"
+    }
+}
+
+openApiGenerate {
+    inputSpec.set("src/main/resources/oppgave/openapi.yaml")
+    outputDir.set("$buildDir/generated/source/openapi")
+    generatorName.set("kotlin")
+    packageName.set("no.nav.hjelpemidler.oppgave.client")
+    globalProperties.set(
+        mapOf(
+            "apis" to "none",
+            "models" to "",
+            "modelDocs" to "false",
+        ),
+    )
+    configOptions.set(
+        mapOf(
+            "serializationLibrary" to "jackson",
+            "enumPropertyNaming" to "UPPERCASE",
+            "sourceFolder" to "main",
+        ),
+    )
+}
+
+sourceSets {
+    main {
+        kotlin {
+            srcDir("$buildDir/generated/source/openapi/main")
+        }
     }
 }

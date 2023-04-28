@@ -14,9 +14,8 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.Configuration
+import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
-import no.nav.hjelpemidler.oppgave.oppgave.OppgaveClient
-import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -26,7 +25,6 @@ private val secureLog = KotlinLogging.logger("tjenestekall")
 class OppgaveDataSink(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
-    private val pdlClient: PdlClient,
     private val consumedEventName: String = Configuration.CONSUMED_EVENT_NAME,
     private val producedEventName: String = Configuration.PRODUCED_EVENT_NAME,
 ) : PacketListenerWithOnError {
@@ -58,8 +56,7 @@ class OppgaveDataSink(
                             soknadId = UUID.fromString(packet.soknadId),
                         )
                         log.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
-                        val aktorId = pdlClient.hentAktørId(soknadData.fnrBruker)
-                        val oppgaveId = opprettOppgave(aktorId, soknadData.joarkRef, soknadData.soknadId)
+                        val oppgaveId = opprettOppgave(soknadData.fnrBruker, soknadData.joarkRef, soknadData.soknadId)
                         forward(soknadData, oppgaveId, context)
                     } catch (e: Exception) {
                         throw RuntimeException("Håndtering av event ${packet.eventId} feilet", e)
@@ -74,9 +71,9 @@ class OppgaveDataSink(
         return skipList.any { it == eventId }
     }
 
-    private suspend fun opprettOppgave(aktorId: String, journalpostId: String, soknadId: UUID) =
+    private suspend fun opprettOppgave(fnrBruker: String, journalpostId: String, soknadId: UUID) =
         kotlin.runCatching {
-            oppgaveClient.arkiverSøknad(aktorId, journalpostId)
+            oppgaveClient.opprettOppgave(fnrBruker, journalpostId)
         }.onSuccess {
             log.info("Oppgave opprettet: $soknadId")
             Prometheus.hentetAktørIdCounter.inc()
