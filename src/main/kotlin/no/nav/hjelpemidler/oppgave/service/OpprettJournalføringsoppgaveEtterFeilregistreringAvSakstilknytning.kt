@@ -46,9 +46,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 it.interestedIn(
                     "journalpostId",
                     "fnrBruker",
-                    "navnBruker",
                     "sakstype",
-                    "dokumentBeskrivelse",
                     "navIdent",
                 )
             }
@@ -62,12 +60,10 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         val journalpostId: String,
         @JsonAlias("fodselNrBruker")
         val fnrBruker: String,
-        val navnBruker: String,
         @JsonAlias("soknadId")
         val søknadId: UUID,
         val sakId: String,
         val sakstype: Sakstype,
-        val dokumentBeskrivelse: String,
         val navIdent: String?,
     )
 

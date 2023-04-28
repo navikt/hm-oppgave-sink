@@ -55,7 +55,6 @@ class OppgaveClient(
             parameter("oppgavetype", "JFR")
             parameter("oppgavetype", "FDR")
         }
-
         return when (response.status) {
             HttpStatusCode.OK -> {
                 val sokOppgaverResponse = response.body<SokOppgaverResponse>()
@@ -64,7 +63,7 @@ class OppgaveClient(
             }
 
             else -> {
-                val body = runCatching { response.bodyAsText() }.getOrElse { "" }
+                val body = runCatching { response.bodyAsText() }.getOrElse { it.message }
                 error("Uventet svar fra oppgave, status: '${response.status}', body: '$body'")
             }
         }
@@ -82,7 +81,6 @@ class OppgaveClient(
 
     suspend fun opprettOppgaveBasertPåRutingOppgave(rutingOppgave: RutingOppgave): String {
         log.info("Oppretter gosys-oppgave basert på ruting oppgave")
-
         val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
             in videresendingEnheter -> {
                 val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
@@ -92,11 +90,8 @@ class OppgaveClient(
                 nyEnhet
             }
 
-            else -> {
-                rutingOppgave.tildeltEnhetsnr
-            }
+            else -> rutingOppgave.tildeltEnhetsnr
         }
-
         return opprettOppgave(
             OpprettOppgaveRequest(
                 personident = rutingOppgave.aktoerId,
