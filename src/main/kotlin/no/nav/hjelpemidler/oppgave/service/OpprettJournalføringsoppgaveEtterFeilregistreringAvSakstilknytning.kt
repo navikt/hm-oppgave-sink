@@ -63,7 +63,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         @JsonAlias("soknadId")
         val søknadId: UUID,
         val sakId: String,
-        val sakstype: Sakstype,
+        val sakstype: Sakstype?,
         val navIdent: String?,
     )
 
