@@ -101,7 +101,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 beskrivelse = "Tilskudd ved kjøp av briller til barn",
                 tema = tema,
                 oppgavetype = oppgavetype,
-                behandlingstype = "ab0317",
+                behandlingstema = "ab0317",
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
                 prioritet = OpprettOppgaveRequest.Prioritet.NORM,
