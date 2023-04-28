@@ -48,6 +48,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "fnrBruker",
                     "sakstype",
                     "navIdent",
+                    "valgteÅrsaker",
                 )
             }
         }.register(this)
@@ -65,6 +66,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         val sakId: String,
         val sakstype: Sakstype?,
         val navIdent: String?,
+        val valgteÅrsaker: Set<String>? = null,
     )
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
@@ -95,18 +97,26 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         val tema = "HJE"
         val oppgavetype = "JFR"
         return when (journalpost.sakstype) {
-            Sakstype.BARNEBRILLER -> OpprettOppgaveRequest(
-                personident = journalpost.fnrBruker,
-                journalpostId = journalpost.journalpostId,
-                beskrivelse = "Tilskudd ved kjøp av briller til barn",
-                tema = tema,
-                oppgavetype = oppgavetype,
-                behandlingstema = "ab0317",
-                aktivDato = nå,
-                fristFerdigstillelse = nå,
-                prioritet = OpprettOppgaveRequest.Prioritet.NORM,
-                tilordnetRessurs = journalpost.navIdent,
-            )
+            Sakstype.BARNEBRILLER -> {
+                val valgteÅrsaker = journalpost.valgteÅrsaker ?: emptySet()
+                val behandlingstema = when {
+                    "Behandlingsbriller/linser ordinære vilkår" in valgteÅrsaker -> "ab0427"
+                    "Behandlingsbriller/linser særskilte vilkår" in valgteÅrsaker -> "ab0428"
+                    else -> "ab0317"
+                }
+                OpprettOppgaveRequest(
+                    personident = journalpost.fnrBruker,
+                    journalpostId = journalpost.journalpostId,
+                    beskrivelse = "Tilskudd ved kjøp av briller til barn",
+                    tema = tema,
+                    oppgavetype = oppgavetype,
+                    behandlingstema = behandlingstema,
+                    aktivDato = nå,
+                    fristFerdigstillelse = nå,
+                    prioritet = OpprettOppgaveRequest.Prioritet.NORM,
+                    tilordnetRessurs = journalpost.navIdent,
+                )
+            }
 
             else -> OpprettOppgaveRequest(
                 personident = journalpost.fnrBruker,
