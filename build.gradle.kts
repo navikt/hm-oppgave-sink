@@ -61,6 +61,7 @@ spotless {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
+    dependsOn("openApiGenerate")
 }
 
 tasks.withType<Test> {
