@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     application
     kotlin("jvm") version "1.8.20"
@@ -59,12 +57,12 @@ spotless {
     }
 }
 
-tasks.withType<KotlinCompile> {
+tasks.compileKotlin {
     kotlinOptions.jvmTarget = "17"
-    dependsOn("openApiGenerate")
+    dependsOn(tasks.openApiGenerate)
 }
 
-tasks.withType<Test> {
+tasks.test {
     useJUnitPlatform()
 }
 
