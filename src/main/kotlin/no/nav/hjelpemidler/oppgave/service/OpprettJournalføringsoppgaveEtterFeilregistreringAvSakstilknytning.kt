@@ -102,15 +102,16 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 val behandlingstema = when {
                     "Behandlingsbriller/linser ordinære vilkår" in valgteÅrsaker -> "ab0427"
                     "Behandlingsbriller/linser særskilte vilkår" in valgteÅrsaker -> "ab0428"
-                    else -> "ab0317"
+                    else -> "ab0317" // "Briller/linser"
                 }
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
-                    beskrivelse = "Tilskudd ved kjøp av briller til barn",
+                    beskrivelse = valgteÅrsaker.firstOrNull() ?: "Tilskudd ved kjøp av briller til barn",
                     tema = tema,
                     oppgavetype = oppgavetype,
                     behandlingstema = behandlingstema,
+                    behandlingstype = "ANY",
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
