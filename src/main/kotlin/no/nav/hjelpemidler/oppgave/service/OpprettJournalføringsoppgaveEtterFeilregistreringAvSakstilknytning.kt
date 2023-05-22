@@ -111,7 +111,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     tema = tema,
                     oppgavetype = oppgavetype,
                     behandlingstema = behandlingstema,
-                    behandlingstype = "ANY",
+//                    behandlingstype = "ANY",
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
