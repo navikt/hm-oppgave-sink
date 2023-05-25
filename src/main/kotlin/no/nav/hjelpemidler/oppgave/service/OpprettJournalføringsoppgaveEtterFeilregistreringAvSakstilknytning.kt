@@ -49,6 +49,8 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "sakstype",
                     "navIdent",
                     "valgteÅrsaker",
+                    "enhet",
+                    "begrunnelse",
                 )
             }
         }.register(this)
@@ -65,8 +67,10 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         val søknadId: UUID,
         val sakId: String,
         val sakstype: Sakstype?,
+        val enhet: String,
         val navIdent: String?,
         val valgteÅrsaker: Set<String>? = null,
+        val begrunnelse: String?,
     )
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
@@ -104,18 +108,23 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "Behandlingsbriller/linser særskilte vilkår" in valgteÅrsaker -> "ab0428"
                     else -> "ab0317" // "Briller/linser"
                 }
+                val beskrivelse = valgteÅrsaker.firstOrNull() ?: "Tilskudd ved kjøp av briller til barn"
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
-                    beskrivelse = valgteÅrsaker.firstOrNull() ?: "Tilskudd ved kjøp av briller til barn",
+                    beskrivelse = when {
+                        journalpost.begrunnelse.isNullOrBlank() -> beskrivelse
+                        else -> "$beskrivelse: ${journalpost.begrunnelse}"
+                    },
                     tema = tema,
                     oppgavetype = oppgavetype,
                     behandlingstema = behandlingstema,
-//                    behandlingstype = "ANY",
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
                     tilordnetRessurs = journalpost.navIdent,
+                    opprettetAvEnhetsnr = journalpost.enhet,
+                    tildeltEnhetsnr = journalpost.enhet,
                 )
             }
 
