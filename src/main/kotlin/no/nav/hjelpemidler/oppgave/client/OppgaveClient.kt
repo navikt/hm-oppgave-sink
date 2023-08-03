@@ -33,10 +33,6 @@ class OppgaveClient(
     private val azureAdClient: OpenIDClient,
     engine: HttpClientEngine = CIO.create(),
 ) {
-    companion object {
-        const val TEMA_GRUPPE = "HJLPM" // fixme -> hidden i spec
-    }
-
     private val client = createHttpClient(engine) {
         expectSuccess = false
         defaultRequest {

@@ -35,7 +35,7 @@ fun main() {
 
     val oppgaveClient = OppgaveClient(
         baseUrl = Configuration.OPPGAVE_BASE_URL,
-        scope = Configuration.PROXY_SCOPE,
+        scope = Configuration.OPPGAVE_SCOPE,
         azureAdClient = azureAdClient,
     )
 

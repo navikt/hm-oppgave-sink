@@ -80,9 +80,6 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         log.info { "Tilbakeført sak mottatt, sakId: ${journalpost.sakId}, sakstype: ${journalpost.sakstype}, søknadId: ${journalpost.søknadId}, journalpostId: ${journalpost.journalpostId}" }
         runBlocking(Dispatchers.IO) {
             try {
-                // trenger ikke gjøre dette, kan kalle med fnr/aktørid osv ref https://oppgave.dev-fss-pub.nais.io/ hvor
-                // det under Oppgave: Personident står "ident for person, dvs. fnr, dnr, npid eller aktørid"
-                // fjerne PDL-integrasjon + graphql
                 val oppgave = oppgaveClient.opprettOppgave(lagOpprettJournalføringsoppgaveRequest(journalpost))
                 log.info("Oppgave for journalpostId: ${journalpost.journalpostId} opprettet med oppgaveId: ${oppgave.id}")
                 forward(journalpost, oppgave, context)

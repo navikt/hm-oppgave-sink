@@ -76,7 +76,6 @@ class OppgaveDataSink(
             oppgaveClient.opprettOppgave(fnrBruker, journalpostId)
         }.onSuccess {
             log.info("Oppgave opprettet: $soknadId")
-            Prometheus.hentetAktørIdCounter.inc()
         }.onFailure {
             log.error(it) { "Feilet under opprettelse av oppgave: $soknadId" }
         }.getOrThrow()

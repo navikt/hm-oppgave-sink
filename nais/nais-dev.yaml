@@ -41,5 +41,5 @@ spec:
   accessPolicy:
     outbound:
       external:
-        - host: digihot-proxy-q1.dev-fss-pub.nais.io # q1
-        - host: digihot-proxy.dev-fss-pub.nais.io #q2
+        - host: oppgave-q1.dev-fss-pub.nais.io # q1
+        - host: oppgave.dev-fss-pub.nais.io #q2
