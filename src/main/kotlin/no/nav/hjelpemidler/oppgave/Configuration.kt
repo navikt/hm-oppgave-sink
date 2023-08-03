@@ -3,9 +3,6 @@ package no.nav.hjelpemidler.oppgave
 import no.nav.hjelpemidler.configuration.EnvironmentVariable
 
 object Configuration {
-    // PDL
-    val PDL_BASE_URL by EnvironmentVariable
-
     // Oppgave
     val OPPGAVE_BASE_URL by EnvironmentVariable
 

@@ -1,7 +1,0 @@
-query($ident: ID!, $grupper: [IdentGruppe!], ) {
-    hentIdenter(ident: $ident, grupper: $grupper) {
-        identer {
-            ident
-        }
-    }
-}

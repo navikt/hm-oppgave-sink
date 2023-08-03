@@ -10,7 +10,6 @@ import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.configuration.LocalEnvironment
 import no.nav.hjelpemidler.http.openid.azureADClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
-import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
 import no.nav.hjelpemidler.oppgave.service.OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning
 import no.nav.hjelpemidler.oppgave.service.RutingOppgaveSink
@@ -40,18 +39,12 @@ fun main() {
         azureAdClient = azureAdClient,
     )
 
-    val pdlClient = PdlClient(
-        baseUrl = Configuration.PDL_BASE_URL,
-        scope = Configuration.PROXY_SCOPE,
-        azureAdClient = azureAdClient,
-    )
-
     RapidApplication
         .create(no.nav.hjelpemidler.configuration.Configuration.current)
         .apply {
             OppgaveDataSink(this, oppgaveClient)
             RutingOppgaveSink(this, oppgaveClient)
-            OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(this, oppgaveClient, pdlClient)
+            OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(this, oppgaveClient)
         }
         .start()
 }

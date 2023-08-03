@@ -5,7 +5,6 @@
   "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-v1",
   "RAPID_APP_NAME": "hm-oppgave-sink",
   "OPPGAVE_BASE_URL": "https://digihot-proxy.prod-fss-pub.nais.io/oppgave-aad",
-  "PDL_BASE_URL": "https://digihot-proxy.prod-fss-pub.nais.io/pdl-aad",
   "PROXY_SCOPE": "api://8bdfd270-4760-4428-8a6e-540707d61cf9/.default",
   "CONSUMED_EVENT_NAME": "hm-SøknadArkivert",
   "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet"

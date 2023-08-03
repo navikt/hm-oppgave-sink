@@ -28,14 +28,6 @@ dependencies {
     // Logging
     implementation("io.github.microutils:kotlin-logging:3.0.5")
 
-    // GraphQL
-    val graphQLVersion = "6.4.0"
-    implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphQLVersion") {
-        exclude("com.expediagroup", "graphql-kotlin-client-serialization") // prefer jackson
-        exclude("io.ktor", "ktor-client-serialization") // prefer ktor-client-jackson
-    }
-    implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphQLVersion")
-
     // fixme -> bytt med MockEngine
     implementation("com.github.tomakehurst:wiremock:2.27.2")
 
@@ -64,14 +56,6 @@ tasks.compileKotlin {
 
 tasks.test {
     useJUnitPlatform()
-}
-
-graphql {
-    client {
-        schemaFile = file("src/main/resources/pdl/pdl-api-sdl.graphqls")
-        queryFileDirectory = "src/main/resources/pdl"
-        packageName = "no.nav.hjelpemidler.pdl"
-    }
 }
 
 openApiGenerate {

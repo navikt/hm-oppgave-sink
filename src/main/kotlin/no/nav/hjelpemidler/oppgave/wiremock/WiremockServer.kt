@@ -51,18 +51,6 @@ class WiremockServer {
                             ),
                     ),
             )
-        wiremockServer
-            .stubFor(
-                WireMock.post(WireMock.urlPathMatching("/pdl"))
-                    .willReturn(
-                        WireMock.aResponse().withStatus(200)
-                            .withHeader("Content-Type", "application/json")
-                            .withBody(
-                                // language=JSON
-                                """{"data":{"hentIdenter":{"identer": [{"ident": "aktorid","historisk": false,"type": "AKTORID"}]}}}""",
-                            ),
-                    ),
-            )
         wiremockServer.start()
     }
 }

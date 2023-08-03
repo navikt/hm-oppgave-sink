@@ -111,11 +111,11 @@ class OppgaveClient(
         ).id.toString()
     }
 
-    suspend fun opprettOppgave(aktørId: String, journalpostId: String): String {
+    suspend fun opprettOppgave(fnrBruker: String, journalpostId: String): String {
         val nå = LocalDate.now()
         return opprettOppgave(
             OpprettOppgaveRequest(
-                personident = aktørId,
+                personident = fnrBruker,
                 journalpostId = journalpostId,
                 beskrivelse = "Digital søknad om hjelpemidler",
                 tema = "HJE",

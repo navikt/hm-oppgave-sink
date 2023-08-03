@@ -19,7 +19,6 @@ import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.jsonMapper
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
-import no.nav.hjelpemidler.oppgave.pdl.PdlClient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -29,7 +28,6 @@ private val log = KotlinLogging.logger {}
 internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
-    private val pdlClient: PdlClient,
 ) : PacketListenerWithOnError {
 
     init {
@@ -82,11 +80,12 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         log.info { "Tilbakeført sak mottatt, sakId: ${journalpost.sakId}, sakstype: ${journalpost.sakstype}, søknadId: ${journalpost.søknadId}, journalpostId: ${journalpost.journalpostId}" }
         runBlocking(Dispatchers.IO) {
             try {
-                val aktørId =
-                    pdlClient.hentAktørId(journalpost.fnrBruker) // fixme -> fjern hvis senere konsumenter ikke trenger denne verdien
+                // trenger ikke gjøre dette, kan kalle med fnr/aktørid osv ref https://oppgave.dev-fss-pub.nais.io/ hvor
+                // det under Oppgave: Personident står "ident for person, dvs. fnr, dnr, npid eller aktørid"
+                // fjerne PDL-integrasjon + graphql
                 val oppgave = oppgaveClient.opprettOppgave(lagOpprettJournalføringsoppgaveRequest(journalpost))
                 log.info("Oppgave for journalpostId: ${journalpost.journalpostId} opprettet med oppgaveId: ${oppgave.id}")
-                forward(journalpost, oppgave, aktørId, context)
+                forward(journalpost, oppgave, context)
             } catch (e: Exception) {
                 throw IllegalStateException(
                     "Opprettelse av oppgave for journalpostId: ${journalpost.journalpostId} feilet",
@@ -151,12 +150,10 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     private fun CoroutineScope.forward(
         journalpost: OpprettetMottattJournalpost,
         oppgave: Oppgave,
-        aktørId: String,
         context: MessageContext,
     ) {
         launch(Dispatchers.IO + SupervisorJob()) {
             val data = OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
-                aktørId = aktørId,
                 fnrBruker = journalpost.fnrBruker,
                 sakId = journalpost.sakId,
                 sakstype = journalpost.sakstype,
@@ -184,7 +181,6 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
 }
 
 data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
-    val aktørId: String,
     val fnrBruker: String,
     val sakId: String,
     val sakstype: Sakstype?,
