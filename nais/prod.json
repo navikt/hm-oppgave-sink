@@ -4,7 +4,7 @@
   "KAFKA_RAPID_TOPIC": "teamdigihot.hm-soknadsbehandling-v1",
   "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-v1",
   "RAPID_APP_NAME": "hm-oppgave-sink",
-  "OPPGAVE_BASE_URL": "https://oppgave.prod-fss-pub.nais.io",
+  "OPPGAVE_BASE_URL": "https://oppgave.prod-fss-pub.nais.io/api/v1/oppgaver",
   "OPPGAVE_SCOPE": "api://prod-fss.oppgavehandtering.oppgave/.default",
   "CONSUMED_EVENT_NAME": "hm-SøknadArkivert",
   "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet"
