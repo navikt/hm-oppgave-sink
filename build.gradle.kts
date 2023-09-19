@@ -1,16 +1,8 @@
 plugins {
-    application
-    kotlin("jvm") version "1.8.20"
-    id("com.expediagroup.graphql") version "6.4.0"
-    id("org.openapi.generator") version "6.5.0"
-    id("com.diffplug.spotless") version "6.18.0"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-}
-
-repositories {
-    mavenCentral()
-    maven("https://packages.confluent.io/maven/")
-    maven("https://jitpack.io")
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.ktor)
+    alias(libs.plugins.openapi)
+    alias(libs.plugins.spotless)
 }
 
 application {
@@ -19,23 +11,22 @@ application {
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation("com.github.navikt:rapids-and-rivers:2023041310341681374880.67ced5ad4dda")
-
-    // Http
-    implementation("no.nav.hjelpemidler.http:hm-http:v0.0.29")
-
-    // Logging
-    implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kotlin.logging)
+    implementation(libs.rapidsAndRivers)
+    implementation(libs.hm.http)
 
     // fixme -> bytt med MockEngine
-    implementation("com.github.tomakehurst:wiremock:2.27.2")
+    implementation("com.github.tomakehurst:wiremock:3.0.1")
 
     // Test
-    testImplementation(kotlin("test"))
-    testImplementation("io.mockk:mockk:1.13.4")
-    testImplementation("io.kotest:kotest-runner-junit5:5.5.5")
-    testImplementation("io.kotest:kotest-assertions-core:5.5.5")
+    testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotest.assertions.core)
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 spotless {
@@ -50,7 +41,6 @@ spotless {
 }
 
 tasks.compileKotlin {
-    kotlinOptions.jvmTarget = "17"
     dependsOn(tasks.openApiGenerate)
 }
 
