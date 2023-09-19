@@ -55,7 +55,7 @@ internal class RutingOppgaveSink(
         }.register(this)
     }
 
-    private val JsonMessage.eventId get() = this["eventId"].textValue()
+    private val JsonMessage.eventId get() = this["eventId"].textValue().let(UUID::fromString)
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val metrics = MetricsProducer(context)
@@ -63,7 +63,7 @@ internal class RutingOppgaveSink(
         runBlocking {
             withContext(Dispatchers.IO) {
                 launch {
-                    if (skipEvent(UUID.fromString(packet.eventId))) {
+                    if (skipEvent(packet.eventId)) {
                         log.info { "Hopper over event i skip-list: ${packet.eventId}" }
                         return@launch
                     }
@@ -76,7 +76,7 @@ internal class RutingOppgaveSink(
 
                         // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
                         if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
-                            log.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId=${oppgave.journalpostId}")
+                            log.info("Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId: ${oppgave.journalpostId}")
                             metrics.rutingOppgaveEksisterteAllerede(oppgave.oppgavetype)
                             return@launch
                         }
@@ -87,7 +87,7 @@ internal class RutingOppgaveSink(
                         opprettOppgave(oppgave)
                         metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
                     } catch (e: Exception) {
-                        log.error(e) { "Håndtering av ruting oppgave feilet (eventID=${packet.eventId})" }
+                        log.error(e) { "Håndtering av ruting oppgave feilet (eventId: ${packet.eventId})" }
                         metrics.rutingOppgaveException(oppgave.oppgavetype)
                         throw e
                     }
@@ -109,7 +109,7 @@ internal class RutingOppgaveSink(
 
     private fun skipEvent(eventId: UUID): Boolean {
         val skipList = setOf(
-            UUID.fromString("47376212-4289-4c0c-b6e6-417e4c989193")
+            UUID.fromString("47376212-4289-4c0c-b6e6-417e4c989193"),
         )
         return eventId in skipList
     }
