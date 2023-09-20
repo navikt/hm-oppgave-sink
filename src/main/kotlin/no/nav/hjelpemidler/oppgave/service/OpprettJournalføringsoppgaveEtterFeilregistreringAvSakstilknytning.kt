@@ -72,7 +72,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     )
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
-        if (skipEvent(UUID.fromString(packet.eventId))) {
+        if (skipEvent(packet.eventId)) {
             log.info { "Hopper over event i skip: ${packet.eventId}" }
             return
         }
@@ -139,8 +139,8 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         }
     }
 
-    private fun skipEvent(eventId: UUID): Boolean {
-        val skip = setOf<UUID>()
+    private fun skipEvent(eventId: String): Boolean {
+        val skip = setOf<String>("47376212-4289-4c0c-b6e6-417e4c989193")
         return eventId in skip
     }
 
