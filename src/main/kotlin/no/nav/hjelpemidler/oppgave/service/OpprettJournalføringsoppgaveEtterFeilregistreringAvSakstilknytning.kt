@@ -17,6 +17,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.jsonMapper
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import java.time.LocalDate
@@ -198,10 +199,4 @@ data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
             it["soknadId"] = this.søknadId
         }.toJson()
     }
-}
-
-enum class Sakstype {
-    SØKNAD,
-    BESTILLING,
-    BARNEBRILLER,
 }
