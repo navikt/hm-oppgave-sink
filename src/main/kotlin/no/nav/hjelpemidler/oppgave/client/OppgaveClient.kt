@@ -143,12 +143,12 @@ class OppgaveClient(
     }
 }
 
-private fun Sakstype.toBeskrivelse() = when(this) {
+private fun Sakstype.toBeskrivelse() = when (this) {
     Sakstype.BYTTE -> "Digital byttesak om hjelpemidler"
     else -> "Digital søknad om hjelpemidler"
 }
 
-private fun Sakstype.toBehandlingstype() = when(this) {
+private fun Sakstype.toBehandlingstype() = when (this) {
     Sakstype.BYTTE -> "ae0227" // TODO
     else -> "ae0227"
 }
