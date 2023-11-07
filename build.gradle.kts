@@ -49,7 +49,7 @@ tasks.test {
 }
 
 openApiGenerate {
-    inputSpec.set("src/main/resources/oppgave/openapi.yaml")
+    inputSpec.set("$rootDir/src/main/resources/oppgave/openapi.yaml")
     outputDir.set("$buildDir/generated/source/openapi")
     generatorName.set("kotlin")
     packageName.set("no.nav.hjelpemidler.oppgave.client")
