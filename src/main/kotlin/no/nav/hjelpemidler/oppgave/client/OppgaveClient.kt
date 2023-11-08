@@ -144,7 +144,7 @@ class OppgaveClient(
 }
 
 private fun Sakstype.toBeskrivelse() = when (this) {
-    Sakstype.BYTTE -> "Digital byttesak om hjelpemidler"
+    Sakstype.BYTTE -> "Digitalt bytte av hjelpemidler"
     else -> "Digital søknad om hjelpemidler"
 }
 
