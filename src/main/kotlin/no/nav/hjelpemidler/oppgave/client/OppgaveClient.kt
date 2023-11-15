@@ -21,6 +21,8 @@ import no.nav.hjelpemidler.http.openid.bearerAuth
 import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
+import no.nav.hjelpemidler.oppgave.domain.Sakstype
+import no.nav.hjelpemidler.oppgave.domain.SoknadData
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
 import java.util.UUID
@@ -107,16 +109,16 @@ class OppgaveClient(
         ).id.toString()
     }
 
-    suspend fun opprettOppgave(fnrBruker: String, journalpostId: String): String {
+    suspend fun opprettOppgave(soknadData: SoknadData): String {
         val nå = LocalDate.now()
         return opprettOppgave(
             OpprettOppgaveRequest(
-                personident = fnrBruker,
-                journalpostId = journalpostId,
-                beskrivelse = "Digital søknad om hjelpemidler",
+                personident = soknadData.fnrBruker,
+                journalpostId = soknadData.joarkRef,
+                beskrivelse = soknadData.sakstype.toBeskrivelse(),
                 tema = "HJE",
                 oppgavetype = "JFR",
-                behandlingstype = "ae0227",
+                behandlingstype = soknadData.sakstype.toBehandlingstype(),
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
                 prioritet = OpprettOppgaveRequest.Prioritet.NORM,
@@ -139,4 +141,14 @@ class OppgaveClient(
             }
         }
     }
+}
+
+private fun Sakstype.toBeskrivelse() = when (this) {
+    Sakstype.BYTTE -> "Digitalt bytte av hjelpemidler"
+    else -> "Digital søknad om hjelpemidler"
+}
+
+private fun Sakstype.toBehandlingstype() = when (this) {
+    Sakstype.BYTTE -> "ae0273"
+    else -> "ae0227"
 }

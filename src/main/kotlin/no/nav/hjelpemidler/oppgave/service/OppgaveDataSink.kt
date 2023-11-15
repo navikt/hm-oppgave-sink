@@ -15,6 +15,8 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.domain.Sakstype
+import no.nav.hjelpemidler.oppgave.domain.SoknadData
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import java.time.LocalDateTime
 import java.util.UUID
@@ -32,7 +34,7 @@ class OppgaveDataSink(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", consumedEventName) }
-            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId") }
+            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype") }
         }.register(this)
     }
 
@@ -40,6 +42,8 @@ class OppgaveDataSink(
     private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
     private val JsonMessage.joarkRef get() = this["joarkRef"].textValue()
     private val JsonMessage.soknadId get() = this["soknadId"].textValue()
+
+    private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
 
     override fun onPacket(packet: JsonMessage, context: MessageContext) {
         runBlocking {
@@ -54,9 +58,10 @@ class OppgaveDataSink(
                             fnrBruker = packet.fnrBruker,
                             joarkRef = packet.joarkRef,
                             soknadId = UUID.fromString(packet.soknadId),
+                            sakstype = packet.sakstype,
                         )
                         log.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
-                        val oppgaveId = opprettOppgave(soknadData.fnrBruker, soknadData.joarkRef, soknadData.soknadId)
+                        val oppgaveId = opprettOppgave(soknadData)
                         forward(soknadData, oppgaveId, context)
                     } catch (e: Exception) {
                         throw RuntimeException("Håndtering av event ${packet.eventId} feilet", e)
@@ -71,18 +76,18 @@ class OppgaveDataSink(
         return skipList.any { it == eventId }
     }
 
-    private suspend fun opprettOppgave(fnrBruker: String, journalpostId: String, soknadId: UUID) =
+    private suspend fun opprettOppgave(soknadData: SoknadData) =
         kotlin.runCatching {
-            oppgaveClient.opprettOppgave(fnrBruker, journalpostId)
+            oppgaveClient.opprettOppgave(soknadData)
         }.onSuccess {
-            log.info("Oppgave opprettet: $soknadId")
+            log.info("Oppgave opprettet: ${soknadData.soknadId}")
         }.onFailure {
-            log.error(it) { "Feilet under opprettelse av oppgave: $soknadId" }
+            log.error(it) { "Feilet under opprettelse av oppgave: ${soknadData.soknadId}" }
         }.getOrThrow()
 
     private fun CoroutineScope.forward(søknadData: SoknadData, joarkRef: String, context: MessageContext) {
         launch(Dispatchers.IO + SupervisorJob()) {
-            context.publish(søknadData.fnrBruker, søknadData.toJson(joarkRef, producedEventName))
+            context.publish(søknadData.fnrBruker, toJson(søknadData, joarkRef, producedEventName))
             Prometheus.oppgaveOpprettetCounter.inc()
         }.invokeOnCompletion {
             when (it) {
@@ -100,18 +105,12 @@ class OppgaveDataSink(
     }
 }
 
-internal data class SoknadData(
-    val fnrBruker: String,
-    val soknadId: UUID,
-    val joarkRef: String,
-) {
-    internal fun toJson(oppgaveId: String, producedEventName: String): String {
-        return JsonMessage("{}", MessageProblems("")).also {
-            it["soknadId"] = this.soknadId
-            it["eventName"] = producedEventName
-            it["opprettet"] = LocalDateTime.now()
-            it["fnrBruker"] = this.fnrBruker
-            it["oppgaveId"] = oppgaveId
-        }.toJson()
-    }
+internal fun toJson(soknadData: SoknadData, oppgaveId: String, producedEventName: String): String {
+    return JsonMessage("{}", MessageProblems("")).also {
+        it["soknadId"] = soknadData.soknadId
+        it["eventName"] = producedEventName
+        it["opprettet"] = LocalDateTime.now()
+        it["fnrBruker"] = soknadData.fnrBruker
+        it["oppgaveId"] = oppgaveId
+    }.toJson()
 }
