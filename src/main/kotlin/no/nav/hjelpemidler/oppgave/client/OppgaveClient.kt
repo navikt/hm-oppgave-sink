@@ -149,6 +149,6 @@ private fun Sakstype.toBeskrivelse() = when (this) {
 }
 
 private fun Sakstype.toBehandlingstype() = when (this) {
-    Sakstype.BYTTE -> "ae0227" // TODO
+    Sakstype.BYTTE -> "ae0273"
     else -> "ae0227"
 }
