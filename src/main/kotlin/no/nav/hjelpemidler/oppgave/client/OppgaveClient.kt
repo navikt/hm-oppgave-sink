@@ -35,24 +35,26 @@ class OppgaveClient(
     private val azureAdClient: OpenIDClient,
     engine: HttpClientEngine = CIO.create(),
 ) {
-    private val client = createHttpClient(engine) {
-        expectSuccess = false
-        defaultRequest {
-            header("X-Correlation-ID", UUID.randomUUID().toString())
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
+    private val client =
+        createHttpClient(engine) {
+            expectSuccess = false
+            defaultRequest {
+                header("X-Correlation-ID", UUID.randomUUID().toString())
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+            }
         }
-    }
 
     suspend fun harAlleredeOppgaveForJournalpost(journalpostId: String): Boolean {
         val tokenSet = azureAdClient.grant(scope)
-        val response = client.get(baseUrl) {
-            bearerAuth(tokenSet)
-            parameter("journalpostId", journalpostId)
-            parameter("statuskategori", "AAPEN")
-            parameter("oppgavetype", "JFR")
-            parameter("oppgavetype", "FDR")
-        }
+        val response =
+            client.get(baseUrl) {
+                bearerAuth(tokenSet)
+                parameter("journalpostId", journalpostId)
+                parameter("statuskategori", "AAPEN")
+                parameter("oppgavetype", "JFR")
+                parameter("oppgavetype", "FDR")
+            }
         return when (response.status) {
             HttpStatusCode.OK -> {
                 val sokOppgaverResponse = response.body<SokOppgaverResponse>()
@@ -70,26 +72,29 @@ class OppgaveClient(
     /**
      * Nedlagte/sammenslåtte enheter som skal sendes til ny enhet. Kan skje av og til f.eks. pga. at avsender har brukt en gammel forside som de hadde liggende
      */
-    private val videresendingEnheter = mapOf(
-        "4708" to "4707",
-        "4709" to "4710",
-        "4717" to "4716",
-        "4720" to "4719",
-    )
+    private val videresendingEnheter =
+        mapOf(
+            "4708" to "4707",
+            "4709" to "4710",
+            "4717" to "4716",
+            "4720" to "4719",
+        )
 
     suspend fun opprettOppgaveBasertPåRutingOppgave(rutingOppgave: RutingOppgave): String {
         log.info("Oppretter gosys-oppgave basert på ruting oppgave")
-        val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
-            in videresendingEnheter -> {
-                val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
-                log.warn {
-                    "Mappet om nedlagt/sammenslått enhet: ${rutingOppgave.tildeltEnhetsnr} til ny enhet: $nyEnhet for journalpostId: ${rutingOppgave.journalpostId}"
+        val tildeltEnhet =
+            when (rutingOppgave.tildeltEnhetsnr) {
+                in videresendingEnheter -> {
+                    val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
+                    log.warn {
+                        "Mappet om nedlagt/sammenslått enhet: ${rutingOppgave.tildeltEnhetsnr} til ny enhet: " +
+                            "$nyEnhet for journalpostId: ${rutingOppgave.journalpostId}"
+                    }
+                    nyEnhet
                 }
-                nyEnhet
-            }
 
-            else -> rutingOppgave.tildeltEnhetsnr
-        }
+                else -> rutingOppgave.tildeltEnhetsnr
+            }
         return opprettOppgave(
             OpprettOppgaveRequest(
                 personident = rutingOppgave.aktoerId,
@@ -129,10 +134,11 @@ class OppgaveClient(
     suspend fun opprettOppgave(request: OpprettOppgaveRequest): Oppgave {
         log.info { "Oppretter oppgave, journalpostId: ${request.journalpostId}" }
         val tokenSet = azureAdClient.grant(scope)
-        val response = client.post(baseUrl) {
-            bearerAuth(tokenSet)
-            setBody(request)
-        }
+        val response =
+            client.post(baseUrl) {
+                bearerAuth(tokenSet)
+                setBody(request)
+            }
         return when (response.status) {
             HttpStatusCode.Created -> response.body<Oppgave>()
             else -> {
@@ -143,12 +149,14 @@ class OppgaveClient(
     }
 }
 
-private fun Sakstype.toBeskrivelse() = when (this) {
-    Sakstype.BYTTE -> "Digitalt bytte av hjelpemidler"
-    else -> "Digital søknad om hjelpemidler"
-}
+private fun Sakstype.toBeskrivelse() =
+    when (this) {
+        Sakstype.BYTTE -> "Digitalt bytte av hjelpemidler"
+        else -> "Digital søknad om hjelpemidler"
+    }
 
-private fun Sakstype.toBehandlingstype() = when (this) {
-    Sakstype.BYTTE -> "ae0273"
-    else -> "ae0227"
-}
+private fun Sakstype.toBehandlingstype() =
+    when (this) {
+        Sakstype.BYTTE -> "ae0273"
+        else -> "ae0227"
+    }

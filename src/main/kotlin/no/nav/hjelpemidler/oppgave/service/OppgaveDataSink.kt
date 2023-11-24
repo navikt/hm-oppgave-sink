@@ -30,7 +30,6 @@ class OppgaveDataSink(
     private val consumedEventName: String = Configuration.CONSUMED_EVENT_NAME,
     private val producedEventName: String = Configuration.PRODUCED_EVENT_NAME,
 ) : PacketListenerWithOnError {
-
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", consumedEventName) }
@@ -45,7 +44,10 @@ class OppgaveDataSink(
 
     private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         runBlocking {
             withContext(Dispatchers.IO) {
                 launch {
@@ -54,12 +56,13 @@ class OppgaveDataSink(
                         return@launch
                     }
                     try {
-                        val soknadData = SoknadData(
-                            fnrBruker = packet.fnrBruker,
-                            joarkRef = packet.joarkRef,
-                            soknadId = UUID.fromString(packet.soknadId),
-                            sakstype = packet.sakstype,
-                        )
+                        val soknadData =
+                            SoknadData(
+                                fnrBruker = packet.fnrBruker,
+                                joarkRef = packet.joarkRef,
+                                soknadId = UUID.fromString(packet.soknadId),
+                                sakstype = packet.sakstype,
+                            )
                         log.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
                         val oppgaveId = opprettOppgave(soknadData)
                         forward(soknadData, oppgaveId, context)
@@ -85,7 +88,11 @@ class OppgaveDataSink(
             log.error(it) { "Feilet under opprettelse av oppgave: ${soknadData.soknadId}" }
         }.getOrThrow()
 
-    private fun CoroutineScope.forward(søknadData: SoknadData, joarkRef: String, context: MessageContext) {
+    private fun CoroutineScope.forward(
+        søknadData: SoknadData,
+        joarkRef: String,
+        context: MessageContext,
+    ) {
         launch(Dispatchers.IO + SupervisorJob()) {
             context.publish(søknadData.fnrBruker, toJson(søknadData, joarkRef, producedEventName))
             Prometheus.oppgaveOpprettetCounter.inc()
@@ -105,7 +112,11 @@ class OppgaveDataSink(
     }
 }
 
-internal fun toJson(soknadData: SoknadData, oppgaveId: String, producedEventName: String): String {
+internal fun toJson(
+    soknadData: SoknadData,
+    oppgaveId: String,
+    producedEventName: String,
+): String {
     return JsonMessage("{}", MessageProblems("")).also {
         it["soknadId"] = soknadData.soknadId
         it["eventName"] = producedEventName

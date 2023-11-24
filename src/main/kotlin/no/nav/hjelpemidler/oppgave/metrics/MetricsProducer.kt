@@ -13,10 +13,11 @@ private val log = KotlinLogging.logger {}
 class MetricsProducer(
     private val messageContext: MessageContext,
 ) {
-    private val mapper = jacksonMapperBuilder()
-        .addModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .build()
+    private val mapper =
+        jacksonMapperBuilder()
+            .addModule(JavaTimeModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .build()
 
     fun rutingOppgaveForsøktHåndtert(type: String) {
         hendelseOpprettet(RUTING_OPPGAVE_FORSØKT_HÅNDTERT, mapOf("type" to type), emptyMap())
@@ -46,14 +47,16 @@ class MetricsProducer(
                     "eventId" to UUID.randomUUID(),
                     "eventName" to "hm-bigquery-sink-hendelse",
                     "schemaId" to "hendelse_v2",
-                    "payload" to mapOf(
-                        "opprettet" to LocalDateTime.now(),
-                        "navn" to measurement,
-                        "kilde" to "hm-oppgave-sink",
-                        "data" to fields.mapValues { it.value.toString() }
-                            .plus(tags)
-                            .filterKeys { it != "counter" },
-                    ),
+                    "payload" to
+                        mapOf(
+                            "opprettet" to LocalDateTime.now(),
+                            "navn" to measurement,
+                            "kilde" to "hm-oppgave-sink",
+                            "data" to
+                                fields.mapValues { it.value.toString() }
+                                    .plus(tags)
+                                    .filterKeys { it != "counter" },
+                        ),
                 ),
             ),
         )

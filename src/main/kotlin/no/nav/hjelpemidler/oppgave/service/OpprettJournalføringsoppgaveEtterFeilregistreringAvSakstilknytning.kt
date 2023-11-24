@@ -30,7 +30,6 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
 ) : PacketListenerWithOnError {
-
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", "hm-opprettetMottattJournalpost") }
@@ -72,13 +71,19 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         val begrunnelse: String?,
     )
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+    ) {
         if (skipEvent(packet.eventId)) {
             log.info { "Hopper over event i skip: ${packet.eventId}" }
             return
         }
         val journalpost = jsonMapper.readValue<OpprettetMottattJournalpost>(packet.toJson())
-        log.info { "Tilbakeført sak mottatt, sakId: ${journalpost.sakId}, sakstype: ${journalpost.sakstype}, søknadId: ${journalpost.søknadId}, journalpostId: ${journalpost.journalpostId}" }
+        log.info {
+            "Tilbakeført sak mottatt, sakId: ${journalpost.sakId}, sakstype: ${journalpost.sakstype}" +
+                ", søknadId: ${journalpost.søknadId}, journalpostId: ${journalpost.journalpostId}"
+        }
         runBlocking(Dispatchers.IO) {
             try {
                 val oppgave = oppgaveClient.opprettOppgave(lagOpprettJournalføringsoppgaveRequest(journalpost))
@@ -100,19 +105,21 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         return when (journalpost.sakstype) {
             Sakstype.BARNEBRILLER -> {
                 val valgteÅrsaker = journalpost.valgteÅrsaker ?: emptySet()
-                val behandlingstema = when {
-                    "Behandlingsbriller/linser ordinære vilkår" in valgteÅrsaker -> "ab0427"
-                    "Behandlingsbriller/linser særskilte vilkår" in valgteÅrsaker -> "ab0428"
-                    else -> "ab0317" // "Briller/linser"
-                }
+                val behandlingstema =
+                    when {
+                        "Behandlingsbriller/linser ordinære vilkår" in valgteÅrsaker -> "ab0427"
+                        "Behandlingsbriller/linser særskilte vilkår" in valgteÅrsaker -> "ab0428"
+                        else -> "ab0317" // "Briller/linser"
+                    }
                 val beskrivelse = valgteÅrsaker.firstOrNull() ?: "Tilskudd ved kjøp av briller til barn"
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
-                    beskrivelse = when {
-                        journalpost.begrunnelse.isNullOrBlank() -> beskrivelse
-                        else -> "$beskrivelse: ${journalpost.begrunnelse}"
-                    },
+                    beskrivelse =
+                        when {
+                            journalpost.begrunnelse.isNullOrBlank() -> beskrivelse
+                            else -> "$beskrivelse: ${journalpost.begrunnelse}"
+                        },
                     tema = tema,
                     oppgavetype = oppgavetype,
                     behandlingstema = behandlingstema,
@@ -125,18 +132,19 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 )
             }
 
-            else -> OpprettOppgaveRequest(
-                personident = journalpost.fnrBruker,
-                journalpostId = journalpost.journalpostId,
-                beskrivelse = "Digital søknad om hjelpemidler",
-                tema = tema,
-                oppgavetype = oppgavetype,
-                behandlingstype = "ae0227",
-                aktivDato = nå,
-                fristFerdigstillelse = nå,
-                prioritet = OpprettOppgaveRequest.Prioritet.NORM,
-                tilordnetRessurs = journalpost.navIdent,
-            )
+            else ->
+                OpprettOppgaveRequest(
+                    personident = journalpost.fnrBruker,
+                    journalpostId = journalpost.journalpostId,
+                    beskrivelse = "Digital søknad om hjelpemidler",
+                    tema = tema,
+                    oppgavetype = oppgavetype,
+                    behandlingstype = "ae0227",
+                    aktivDato = nå,
+                    fristFerdigstillelse = nå,
+                    prioritet = OpprettOppgaveRequest.Prioritet.NORM,
+                    tilordnetRessurs = journalpost.navIdent,
+                )
         }
     }
 
@@ -151,13 +159,14 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         context: MessageContext,
     ) {
         launch(Dispatchers.IO + SupervisorJob()) {
-            val data = OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
-                fnrBruker = journalpost.fnrBruker,
-                sakId = journalpost.sakId,
-                sakstype = journalpost.sakstype,
-                søknadId = journalpost.søknadId,
-                nyJournalpostId = journalpost.journalpostId,
-            )
+            val data =
+                OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
+                    fnrBruker = journalpost.fnrBruker,
+                    sakId = journalpost.sakId,
+                    sakstype = journalpost.sakstype,
+                    søknadId = journalpost.søknadId,
+                    nyJournalpostId = journalpost.journalpostId,
+                )
             context.publish(
                 data.fnrBruker,
                 data.toJson(
@@ -168,11 +177,16 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
             Prometheus.oppgaveOpprettetCounter.inc()
         }.invokeOnCompletion {
             when (it) {
-                null -> log.info("Journalføringsoppgave opprettet for sak, sakId: ${journalpost.sakId}, journalpostId: ${journalpost.journalpostId}")
+                null ->
+                    log.info(
+                        "Journalføringsoppgave opprettet for sak, sakId: ${journalpost.sakId}, journalpostId: ${journalpost.journalpostId}",
+                    )
                 is CancellationException -> log.warn("Cancelled: ${it.message}")
-                else -> log.error(
-                    "Klarte ikke å opprette journalføringsoppgave for tilbakeført sak, sakId: ${journalpost.sakId}, journalpostId: ${journalpost.journalpostId}, melding: '${it.message}'",
-                )
+                else ->
+                    log.error(
+                        "Klarte ikke å opprette journalføringsoppgave for tilbakeført sak, sakId: ${journalpost.sakId}, " +
+                            "journalpostId: ${journalpost.journalpostId}, melding: '${it.message}'",
+                    )
             }
         }
     }
@@ -185,7 +199,10 @@ data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
     val søknadId: UUID,
     val nyJournalpostId: String,
 ) {
-    internal fun toJson(oppgaveId: String, producedEventName: String): String {
+    internal fun toJson(
+        oppgaveId: String,
+        producedEventName: String,
+    ): String {
         return JsonMessage("{}", MessageProblems("")).also {
             it["eventName"] = producedEventName
             it["opprettet"] = LocalDateTime.now()

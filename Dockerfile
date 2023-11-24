@@ -1,4 +1,4 @@
-FROM ghcr.io/navikt/baseimages/temurin:17
-
-COPY build/libs/hm-oppgave-sink-all.jar app.jar
-
+FROM gcr.io/distroless/java17-debian12:latest
+COPY /build/libs/hm-oppgave-sink-all.jar /app.jar
+ENV TZ="Europe/Oslo"
+CMD ["/app.jar"]
