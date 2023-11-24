@@ -17,7 +17,7 @@ dependencies {
     implementation(libs.hm.http)
 
     // fixme -> bytt med MockEngine
-    implementation("com.github.tomakehurst:wiremock:3.0.1")
+    implementation("org.wiremock:wiremock:3.3.1")
 
     // Test
     testImplementation(libs.kotlin.test.junit5)
