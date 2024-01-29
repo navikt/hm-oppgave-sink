@@ -117,6 +117,7 @@ internal class RutingOppgaveSink(
         val skipList =
             setOf(
                 UUID.fromString("47376212-4289-4c0c-b6e6-417e4c989193"),
+                UUID.fromString("d0a68746-4804-44f1-931f-0b52ec9f9c95"),
             )
         return eventId in skipList
     }
