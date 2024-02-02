@@ -66,9 +66,6 @@ internal class RutingOppgaveSink(
         runBlocking {
             withContext(Dispatchers.IO) {
                 launch {
-                    log.info { "Skipper ${packet.eventId} for å løsne opp i propp" }
-                    return@launch
-
                     if (skipEvent(packet.eventId)) {
                         log.info { "Hopper over event i skip-list: ${packet.eventId}" }
                         return@launch
