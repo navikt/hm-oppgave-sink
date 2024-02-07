@@ -4,6 +4,6 @@ enum class Sakstype {
     SØKNAD,
     BESTILLING,
     BYTTE,
-    BRUKERPASS_BYTTE,
+    BRUKERPASSBYTTE,
     BARNEBRILLER,
 }
