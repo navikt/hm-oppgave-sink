@@ -123,5 +123,6 @@ internal fun toJson(
         it["opprettet"] = LocalDateTime.now()
         it["fnrBruker"] = soknadData.fnrBruker
         it["oppgaveId"] = oppgaveId
+        it["sakstype"] = soknadData.sakstype
     }.toJson()
 }
