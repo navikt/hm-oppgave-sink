@@ -4,17 +4,9 @@ dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositories {
         mavenCentral()
-        maven("https://jitpack.io")
         maven("https://packages.confluent.io/maven/")
         maven {
-            url = uri("https://maven.pkg.github.com/navikt/hm-http")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-        maven {
-            url = uri("https://maven.pkg.github.com/navikt/hm-katalog")
+            url = uri("https://maven.pkg.github.com/navikt/*")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
@@ -26,7 +18,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nav.hjelpemidler:hm-katalog:0.1.10")
+            from("no.nav.hjelpemidler:hm-katalog:0.1.21")
         }
     }
 }
