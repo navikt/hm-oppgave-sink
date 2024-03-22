@@ -78,6 +78,7 @@ class OppgaveClient(
             "4709" to "4710",
             "4717" to "4716",
             "4720" to "4719",
+            "1190" to null, // vi lar arbeidsfordelingen i Norg ta seg av denne
         )
 
     suspend fun opprettOppgaveBasertPåRutingOppgave(rutingOppgave: RutingOppgave): String {
@@ -87,8 +88,7 @@ class OppgaveClient(
                 in videresendingEnheter -> {
                     val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
                     log.warn {
-                        "Mappet om nedlagt/sammenslått enhet: ${rutingOppgave.tildeltEnhetsnr} til ny enhet: " +
-                            "$nyEnhet for journalpostId: ${rutingOppgave.journalpostId}"
+                        "Mappet om nedlagt/sammenslått enhet: ${rutingOppgave.tildeltEnhetsnr} til ny enhet: $nyEnhet for journalpostId: ${rutingOppgave.journalpostId}"
                     }
                     nyEnhet
                 }
