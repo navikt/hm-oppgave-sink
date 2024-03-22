@@ -31,7 +31,16 @@ kotlin {
 
 spotless {
     kotlin {
-        ktlint()
+        ktlint().editorConfigOverride(
+            mapOf(
+                "ktlint_standard_enum-entry-name-case" to "disabled",
+                "ktlint_standard_filename" to "disabled",
+                "ktlint_standard_function-naming" to "disabled",
+                "ktlint_standard_property-naming" to "disabled",
+                "ktlint_standard_value-argument-comment" to "disabled",
+                "ktlint_standard_value-parameter-comment" to "disabled",
+            ),
+        )
         targetExclude("build/generated/**/*")
     }
     kotlinGradle {

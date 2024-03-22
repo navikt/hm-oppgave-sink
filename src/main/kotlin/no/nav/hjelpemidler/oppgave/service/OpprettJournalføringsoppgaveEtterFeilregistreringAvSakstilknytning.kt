@@ -116,10 +116,10 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
                     beskrivelse =
-                        when {
-                            journalpost.begrunnelse.isNullOrBlank() -> beskrivelse
-                            else -> "$beskrivelse: ${journalpost.begrunnelse}"
-                        },
+                    when {
+                        journalpost.begrunnelse.isNullOrBlank() -> beskrivelse
+                        else -> "$beskrivelse: ${journalpost.begrunnelse}"
+                    },
                     tema = tema,
                     oppgavetype = oppgavetype,
                     behandlingstema = behandlingstema,
