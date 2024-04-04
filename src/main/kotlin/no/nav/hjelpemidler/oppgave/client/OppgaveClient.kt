@@ -115,6 +115,8 @@ class OppgaveClient(
     }
 
     suspend fun opprettOppgave(soknadData: SoknadData): String {
+        log.info { "Oppretter oppgave for sokandData ${soknadData.copy(fnrBruker = "xxx")}" }
+
         val nå = LocalDate.now()
         return opprettOppgave(
             OpprettOppgaveRequest(
