@@ -9,7 +9,7 @@ on:
       - "CODEOWNERS"
     branches:
       - main
-      - brukerpassbytte
+      - hast
 
 jobs:
   build:

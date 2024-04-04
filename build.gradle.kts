@@ -53,6 +53,11 @@ tasks.compileKotlin {
     dependsOn(tasks.openApiGenerate)
 }
 
+tasks.named("compileKotlin") {
+    dependsOn("spotlessApply")
+    dependsOn("spotlessCheck")
+}
+
 tasks.test {
     useJUnitPlatform()
 }

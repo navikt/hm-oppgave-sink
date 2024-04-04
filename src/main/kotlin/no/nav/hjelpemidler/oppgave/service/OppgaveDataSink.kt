@@ -33,7 +33,7 @@ class OppgaveDataSink(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", consumedEventName) }
-            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype") }
+            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype", "erHast") }
         }.register(this)
     }
 
@@ -41,8 +41,8 @@ class OppgaveDataSink(
     private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
     private val JsonMessage.joarkRef get() = this["joarkRef"].textValue()
     private val JsonMessage.soknadId get() = this["soknadId"].textValue()
-
     private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
+    private val JsonMessage.erHast get() = this["erHast"].booleanValue()
 
     override fun onPacket(
         packet: JsonMessage,
@@ -62,6 +62,7 @@ class OppgaveDataSink(
                                 joarkRef = packet.joarkRef,
                                 soknadId = UUID.fromString(packet.soknadId),
                                 sakstype = packet.sakstype,
+                                erHast = packet.erHast,
                             )
                         log.info { "Arkivert søknad mottatt: ${soknadData.soknadId}" }
                         val oppgaveId = opprettOppgave(soknadData)

@@ -7,4 +7,5 @@ data class SoknadData(
     val soknadId: UUID,
     val joarkRef: String,
     val sakstype: Sakstype,
+    val erHast: Boolean,
 )

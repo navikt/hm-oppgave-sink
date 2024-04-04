@@ -123,7 +123,8 @@ class OppgaveClient(
                 beskrivelse = soknadData.sakstype.toBeskrivelse(),
                 tema = "HJE",
                 oppgavetype = "JFR",
-                behandlingstype = soknadData.sakstype.toBehandlingstype(),
+                behandlingstype = behandlingstype(soknadData.sakstype, soknadData.erHast),
+                behandlingstema = behandlingstema(soknadData.sakstype, soknadData.erHast),
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
                 prioritet = OpprettOppgaveRequest.Prioritet.NORM,
@@ -155,8 +156,18 @@ private fun Sakstype.toBeskrivelse() =
         else -> "Digital søknad om hjelpemidler"
     }
 
-private fun Sakstype.toBehandlingstype() =
-    when (this) {
-        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "ae0273"
-        else -> "ae0227"
+private fun behandlingstype(sakstype: Sakstype, erHast: Boolean): String? {
+    if (erHast) return null
+    return when (sakstype) {
+        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "ae0273" // Digitalt bytte
+        else -> "ae0227" // Digital søknad
     }
+}
+
+private fun behandlingstema(sakstype: Sakstype, erHast: Boolean): String? {
+    if (!erHast) return null
+    return when (sakstype) {
+        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "ab0521" // Hastebytte
+        else -> "ab0520" // Hastesøknad
+    }
+}
