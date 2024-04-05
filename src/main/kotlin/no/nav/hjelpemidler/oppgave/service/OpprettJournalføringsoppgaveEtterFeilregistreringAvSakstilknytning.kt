@@ -139,7 +139,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     beskrivelse = "Digital søknad om hjelpemidler",
                     tema = tema,
                     oppgavetype = oppgavetype,
-                    behandlingstype = "ae0227",
+                    behandlingstype = "ae0227", // TODO Sett til Hastesøknad eller Digital søknad alt etter som.
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
