@@ -102,7 +102,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         val nå = LocalDate.now()
         val tema = "HJE"
         val oppgavetype = "JFR"
-        return when (journalpost.sakstype) {
+        return when (val sakstype = journalpost.sakstype) {
             Sakstype.BARNEBRILLER -> {
                 val valgteÅrsaker = journalpost.valgteÅrsaker ?: emptySet()
                 val behandlingstema =
@@ -132,7 +132,12 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 )
             }
 
-            else ->
+            else -> {
+                log.info { "lagOpprettJournalføringsoppgaveRequest sasktype: $sakstype" }
+                if (sakstype == null) {
+                    log.info { "lagOpprettJournalføringsoppgaveRequest sakstype er null" }
+                }
+
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
@@ -145,6 +150,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
                     tilordnetRessurs = journalpost.navIdent,
                 )
+            }
         }
     }
 
@@ -181,6 +187,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     log.info(
                         "Journalføringsoppgave opprettet for sak, sakId: ${journalpost.sakId}, journalpostId: ${journalpost.journalpostId}",
                     )
+
                 is CancellationException -> log.warn("Cancelled: ${it.message}")
                 else ->
                     log.error(
