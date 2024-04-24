@@ -21,7 +21,6 @@ import no.nav.hjelpemidler.http.openid.bearerAuth
 import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
-import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.domain.SoknadData
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
@@ -123,8 +122,8 @@ class OppgaveClient(
                 beskrivelse = soknadData.sakstype.toBeskrivelse(),
                 tema = "HJE",
                 oppgavetype = "JFR",
-                behandlingstype = behandlingstype(soknadData.sakstype, soknadData.erHast),
-                behandlingstema = behandlingstema(soknadData.sakstype, soknadData.erHast),
+                behandlingstype = soknadData.sakstype.toBehandlingstype(soknadData.erHast),
+                behandlingstema = soknadData.sakstype.toBehandlingstema(soknadData.erHast),
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
                 prioritet = OpprettOppgaveRequest.Prioritet.NORM,
@@ -147,27 +146,5 @@ class OppgaveClient(
                 oppgaveApiError("Uventet svar fra oppgave, status: '${response.status}', body: '$body'")
             }
         }
-    }
-}
-
-private fun Sakstype.toBeskrivelse() =
-    when (this) {
-        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "Digitalt bytte av hjelpemidler"
-        else -> "Digital søknad om hjelpemidler"
-    }
-
-private fun behandlingstype(sakstype: Sakstype, erHast: Boolean): String? {
-    if (erHast) return null
-    return when (sakstype) {
-        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "ae0273" // Digitalt bytte
-        else -> "ae0227" // Digital søknad
-    }
-}
-
-private fun behandlingstema(sakstype: Sakstype, erHast: Boolean): String? {
-    if (!erHast) return null
-    return when (sakstype) {
-        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "ab0521" // Hastebytte
-        else -> "ab0520" // Hastesøknad
     }
 }

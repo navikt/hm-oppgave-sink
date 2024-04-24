@@ -15,6 +15,7 @@ import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.client.SoknadsbehandlingDbClient
 import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
@@ -29,6 +30,7 @@ private val log = KotlinLogging.logger {}
 internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
+    private val soknadsbehandlingDbClient: SoknadsbehandlingDbClient,
 ) : PacketListenerWithOnError {
     init {
         River(rapidsConnection).apply {
@@ -40,11 +42,11 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                     "eventId",
                     "sakId",
                     "soknadId",
+                    "sakstype",
                 )
                 it.interestedIn(
                     "journalpostId",
                     "fnrBruker",
-                    "sakstype",
                     "navIdent",
                     "valgteÅrsaker",
                     "enhet",
@@ -64,7 +66,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         @JsonAlias("soknadId")
         val søknadId: UUID,
         val sakId: String,
-        val sakstype: Sakstype?,
+        val sakstype: Sakstype,
         val enhet: String,
         val navIdent: String?,
         val valgteÅrsaker: Set<String>? = null,
@@ -98,11 +100,11 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
         }
     }
 
-    private fun lagOpprettJournalføringsoppgaveRequest(journalpost: OpprettetMottattJournalpost): OpprettOppgaveRequest {
+    private suspend fun lagOpprettJournalføringsoppgaveRequest(journalpost: OpprettetMottattJournalpost): OpprettOppgaveRequest {
         val nå = LocalDate.now()
         val tema = "HJE"
         val oppgavetype = "JFR"
-        return when (journalpost.sakstype) {
+        return when (val sakstype = journalpost.sakstype) {
             Sakstype.BARNEBRILLER -> {
                 val valgteÅrsaker = journalpost.valgteÅrsaker ?: emptySet()
                 val behandlingstema =
@@ -132,19 +134,22 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
                 )
             }
 
-            else ->
+            else -> {
+                val erHast = soknadsbehandlingDbClient.hentBehovsmelding(journalpost.søknadId).erHast()
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
-                    beskrivelse = "Digital søknad om hjelpemidler",
+                    beskrivelse = sakstype.toBeskrivelse(),
                     tema = tema,
                     oppgavetype = oppgavetype,
-                    behandlingstype = "ae0227", // TODO Sett til Hastesøknad eller Digital søknad alt etter som.
+                    behandlingstype = sakstype.toBehandlingstype(erHast),
+                    behandlingstema = sakstype.toBehandlingstema(erHast),
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
                     tilordnetRessurs = journalpost.navIdent,
                 )
+            }
         }
     }
 

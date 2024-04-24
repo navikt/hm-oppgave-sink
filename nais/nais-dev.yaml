@@ -42,3 +42,5 @@ spec:
       external:
         - host: oppgave-q1.dev-fss-pub.nais.io # q1
         - host: oppgave.dev-fss-pub.nais.io #q2
+      rules:
+        - application: hm-soknadsbehandling-db

@@ -7,5 +7,7 @@
   "OPPGAVE_BASE_URL": "https://oppgave.dev-fss-pub.nais.io/api/v1/oppgaver",
   "OPPGAVE_SCOPE": "api://dev-fss.oppgavehandtering.oppgave/.default",
   "CONSUMED_EVENT_NAME": "hm-SøknadArkivert",
-  "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet"
+  "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet",
+  "SOKNADSBEHANDLING_DB_URL": "http://hm-soknadsbehandling-db.teamdigihot.svc.cluster.local",
+  "SOKNADSBEHANDLING_DB_SCOPE": "api://dev-gcp.teamdigihot.hm-soknadsbehandling-db/.default"
 }
