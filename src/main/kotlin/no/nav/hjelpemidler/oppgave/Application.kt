@@ -1,10 +1,5 @@
 package no.nav.hjelpemidler.oppgave
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.json.JsonMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonMapperBuilder
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.configuration.LocalEnvironment
@@ -15,13 +10,6 @@ import no.nav.hjelpemidler.oppgave.service.OpprettJournalføringsoppgaveEtterFei
 import no.nav.hjelpemidler.oppgave.service.RutingOppgaveSink
 import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 import kotlin.time.Duration.Companion.seconds
-
-val jsonMapper: JsonMapper =
-    jacksonMapperBuilder()
-        .addModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        .build()
 
 fun main() {
     if (Environment.current == LocalEnvironment) {

@@ -105,7 +105,7 @@ class OppgaveClient(
         return opprettOppgave(
             OpprettOppgaveRequest(
                 personident = søknadData.fnrBruker,
-                journalpostId = søknadData.joarkRef,
+                journalpostId = søknadData.journalpostId,
                 beskrivelse = søknadData.sakstype.beskrivelse,
                 tema = "HJE",
                 oppgavetype = "JFR",

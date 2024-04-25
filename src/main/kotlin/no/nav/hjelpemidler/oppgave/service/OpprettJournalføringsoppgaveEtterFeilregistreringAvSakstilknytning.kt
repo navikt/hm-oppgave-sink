@@ -1,13 +1,13 @@
 package no.nav.hjelpemidler.oppgave.service
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.helse.rapids_rivers.MessageProblems
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
@@ -15,6 +15,8 @@ import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.jsonMapper
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
+import no.nav.hjelpemidler.oppgave.publish
+import no.nav.hjelpemidler.oppgave.uuidValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -49,7 +51,7 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
         }.register(this)
     }
 
-    private val JsonMessage.eventId get() = this["eventId"].textValue()
+    private val JsonMessage.eventId get() = this["eventId"].uuidValue()
 
     data class OpprettetMottattJournalpost(
         @JsonAlias("joarkRef")
@@ -70,8 +72,9 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
         packet: JsonMessage,
         context: MessageContext,
     ) {
-        if (skipEvent(packet.eventId)) {
-            log.info { "Hopper over event i skipList, eventId: ${packet.eventId}" }
+        val eventId = packet.eventId
+        if (skipEvent(eventId)) {
+            log.info { "Hopper over event i skipList, eventId: $eventId" }
             return
         }
         val journalpost = jsonMapper.readValue<OpprettetMottattJournalpost>(packet.toJson())
@@ -84,18 +87,15 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
             }
             log.info("Oppgave for journalpostId: ${journalpost.journalpostId} opprettet med oppgaveId: ${oppgave.id}")
 
-            val data = OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
-                fnrBruker = journalpost.fnrBruker,
-                sakId = journalpost.sakId,
-                sakstype = journalpost.sakstype,
-                søknadId = journalpost.søknadId,
-                nyJournalpostId = journalpost.journalpostId,
-            )
             context.publish(
-                data.fnrBruker,
-                data.toJson(
-                    oppgave.id.toString(),
-                    "hm-opprettetJournalføringsoppgaveForTilbakeførtSak",
+                journalpost.fnrBruker,
+                OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
+                    søknadId = journalpost.søknadId,
+                    oppgaveId = oppgave.id.toString(),
+                    sakId = journalpost.sakId,
+                    sakstype = journalpost.sakstype,
+                    fnrBruker = journalpost.fnrBruker,
+                    nyJournalpostId = journalpost.journalpostId,
                 ),
             )
             Prometheus.oppgaveOpprettetCounter.inc()
@@ -165,34 +165,25 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
         }
     }
 
-    private fun skipEvent(eventId: String): Boolean {
-        val skip = setOf("47376212-4289-4c0c-b6e6-417e4c989193")
+    private fun skipEvent(eventId: UUID): Boolean {
+        val skip = setOf(
+            "47376212-4289-4c0c-b6e6-417e4c989193",
+        ).map(UUID::fromString)
         return eventId in skip
     }
 }
 
+@Suppress("unused")
 data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
-    val fnrBruker: String,
+    @JsonProperty("soknadId")
+    val søknadId: UUID,
+    val oppgaveId: String,
     val sakId: String,
     val sakstype: Sakstype?,
-    val søknadId: UUID,
+    val fnrBruker: String,
     val nyJournalpostId: String,
 ) {
-    fun toJson(
-        oppgaveId: String,
-        producedEventName: String,
-    ): String {
-        return JsonMessage("{}", MessageProblems("")).also {
-            it["eventName"] = producedEventName
-            it["opprettet"] = LocalDateTime.now()
-            it["fnrBruker"] = this.fnrBruker
-            it["oppgaveId"] = oppgaveId
-            it["sakId"] = sakId
-            if (sakstype != null) {
-                it["sakstype"] = sakstype.toString()
-            }
-            it["nyJournalpostId"] = nyJournalpostId
-            it["soknadId"] = this.søknadId
-        }.toJson()
-    }
+    val eventId: UUID = UUID.randomUUID()
+    val eventName: String = "hm-opprettetJournalføringsoppgaveForTilbakeførtSak"
+    val opprettet: LocalDateTime = LocalDateTime.now()
 }
