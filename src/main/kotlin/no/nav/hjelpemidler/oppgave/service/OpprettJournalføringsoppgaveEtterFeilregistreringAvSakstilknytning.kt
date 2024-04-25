@@ -89,7 +89,7 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
 
             context.publish(
                 journalpost.fnrBruker,
-                OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
+                OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
                     søknadId = journalpost.søknadId,
                     oppgaveId = oppgave.id.toString(),
                     sakId = journalpost.sakId,
@@ -177,7 +177,7 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
 }
 
 @Suppress("unused")
-data class OpprettJournalføringsoppgaveEtterFeilregistreringOppgaveData(
+data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
     @JsonProperty("soknadId")
     val søknadId: UUID,
     val oppgaveId: String,
