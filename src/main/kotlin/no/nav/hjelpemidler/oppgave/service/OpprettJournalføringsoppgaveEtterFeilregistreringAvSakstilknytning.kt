@@ -133,7 +133,7 @@ internal class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytni
             }
 
             else -> {
-                log.info { "lagOpprettJournalføringsoppgaveRequest sasktype: $sakstype" }
+                log.info { "lagOpprettJournalføringsoppgaveRequest sakstype: $sakstype" }
                 if (sakstype == null) {
                     log.info { "lagOpprettJournalføringsoppgaveRequest sakstype er null" }
                 }
