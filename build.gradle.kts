@@ -15,9 +15,7 @@ dependencies {
     implementation(libs.kotlin.logging)
     implementation(libs.rapidsAndRivers)
     implementation(libs.hm.http)
-
-    // fixme -> bytt med MockEngine
-    implementation("org.wiremock:wiremock:3.3.1")
+    implementation(libs.wiremock)
 
     // Test
     testImplementation(libs.kotlin.test.junit5)

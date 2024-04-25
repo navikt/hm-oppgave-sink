@@ -1,5 +1,3 @@
-rootProject.name = "hm-oppgave-sink"
-
 dependencyResolutionManagement {
     @Suppress("UnstableApiUsage")
     repositories {
@@ -18,7 +16,9 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            from("no.nav.hjelpemidler:hm-katalog:0.1.34")
+            from("no.nav.hjelpemidler:hm-katalog:0.1.39")
         }
     }
 }
+
+rootProject.name = "hm-oppgave-sink"
