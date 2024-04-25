@@ -6,9 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import mu.KotlinLogging
 import no.nav.helse.rapids_rivers.JsonMessage
 import no.nav.helse.rapids_rivers.MessageContext
@@ -28,9 +26,8 @@ private val mapper =
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 
 private val log = KotlinLogging.logger {}
-private val secureLog = KotlinLogging.logger("tjenestekall")
 
-internal class RutingOppgaveSink(
+class RutingOppgaveSink(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
 ) : PacketListenerWithOnError {
@@ -63,64 +60,54 @@ internal class RutingOppgaveSink(
     ) {
         val metrics = MetricsProducer(context)
 
-        runBlocking {
-            withContext(Dispatchers.IO) {
-                launch {
-                    if (skipEvent(packet.eventId)) {
-                        log.info { "Hopper over event i skip-list: ${packet.eventId}" }
-                        return@launch
-                    }
+        if (skipEvent(packet.eventId)) {
+            log.info { "Hopper over event i skipList, eventId: ${packet.eventId}" }
+            return
+        }
 
-                    metrics.rutingOppgaveForsøktHåndtert(packet["oppgavetype"].asText())
+        metrics.rutingOppgaveForsøktHåndtert(packet["oppgavetype"].asText())
 
-                    val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
-                    try {
-                        log.info("Ruting oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
+        val oppgave: RutingOppgave = mapper.readValue(packet.toJson())
+        try {
+            log.info("Ruting-oppgave mottatt: ${mapper.writeValueAsString(oppgave)}")
 
-                        // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
-                        if (oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)) {
-                            log.info(
-                                "Ruting oppgave ble skippet da det allerede finnes en oppgave for journalpostId: ${oppgave.journalpostId}",
-                            )
-                            metrics.rutingOppgaveEksisterteAllerede(oppgave.oppgavetype)
-                            return@launch
-                        }
-
-                        log.info("Ruting oppgave kan opprettes, den finnes ikke fra før!")
-
-                        // Opprett oppgave for journalpost
-                        opprettOppgave(oppgave)
-                        metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
-                    } catch (e: Exception) {
-                        log.error(e) { "Håndtering av ruting oppgave feilet (eventId: ${packet.eventId})" }
-                        metrics.rutingOppgaveException(oppgave.oppgavetype)
-                        throw e
-                    }
-                }
+            // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
+            val harAlleredeOppgaveForJournalpost = runBlocking(Dispatchers.IO) {
+                oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)
             }
+            if (harAlleredeOppgaveForJournalpost) {
+                log.info(
+                    "Ruting-oppgave ble skippet da det allerede finnes en oppgave for journalpostId: ${oppgave.journalpostId}",
+                )
+                metrics.rutingOppgaveEksisterteAllerede(oppgave.oppgavetype)
+                return
+            }
+
+            log.info("Ruting-oppgave kan opprettes, den finnes ikke fra før, journalpostId: ${oppgave.journalpostId}")
+
+            // Opprett oppgave for journalpost
+            opprettOppgave(oppgave)
+            metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
+        } catch (e: Exception) {
+            log.error(e) { "Håndtering av ruting-oppgave feilet, eventId: ${packet.eventId}, journalpostId: ${oppgave.journalpostId}" }
+            metrics.rutingOppgaveException(oppgave.oppgavetype)
+            throw e
         }
     }
 
-    private suspend fun opprettOppgave(oppgave: RutingOppgave) =
-        kotlin.runCatching {
-            oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave)
-        }.onSuccess {
-            log.info("Journalføringsoppgave opprettet for ruting-oppgave: journalpostId: ${oppgave.journalpostId}, oppgaveId: $it")
-        }.onFailure {
-            log.error(it) {
-                "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}" +
-                    " tildelt enhet: ${oppgave.tildeltEnhetsnr} opprettet av enhet: ${oppgave.opprettetAvEnhetsnr}"
-            }
-        }.getOrThrow()
+    private fun opprettOppgave(oppgave: RutingOppgave) =
+        runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave) } }
+            .onSuccess { log.info("Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $it") }
+            .onFailure { log.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
+            .getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
-        val skipList =
-            setOf(
-                UUID.fromString("47376212-4289-4c0c-b6e6-417e4c989193"),
-                UUID.fromString("d0a68746-4804-44f1-931f-0b52ec9f9c95"),
-                UUID.fromString("6b8d59cd-3b7c-48a4-86bc-fea690758f85"),
-                UUID.fromString("14f09097-d2bf-4d4e-97cc-709a3854ec98"),
-            )
+        val skipList = setOf(
+            "47376212-4289-4c0c-b6e6-417e4c989193",
+            "d0a68746-4804-44f1-931f-0b52ec9f9c95",
+            "6b8d59cd-3b7c-48a4-86bc-fea690758f85",
+            "14f09097-d2bf-4d4e-97cc-709a3854ec98",
+        ).map(UUID::fromString)
         return eventId in skipList
     }
 }

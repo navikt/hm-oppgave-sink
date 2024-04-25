@@ -6,15 +6,16 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import mu.KotlinLogging
+import no.nav.hjelpemidler.http.correlationId
 import no.nav.hjelpemidler.http.createHttpClient
 import no.nav.hjelpemidler.http.openid.OpenIDClient
 import no.nav.hjelpemidler.http.openid.bearerAuth
@@ -22,10 +23,9 @@ import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
-import no.nav.hjelpemidler.oppgave.domain.SoknadData
+import no.nav.hjelpemidler.oppgave.domain.SøknadData
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
-import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
@@ -39,7 +39,7 @@ class OppgaveClient(
         createHttpClient(engine) {
             expectSuccess = false
             defaultRequest {
-                header("X-Correlation-ID", UUID.randomUUID().toString())
+                correlationId()
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
             }
@@ -63,38 +63,24 @@ class OppgaveClient(
             }
 
             else -> {
-                val body = runCatching { response.bodyAsText() }.getOrElse { it.message }
-                error("Uventet svar fra oppgave, status: '${response.status}', body: '$body'")
+                error("Uventet svar fra oppgave, status: '${response.status}', body: '${response.bodyAsTextOrNull()}'")
             }
         }
     }
 
-    /**
-     * Nedlagte/sammenslåtte enheter som skal sendes til ny enhet. Kan skje av og til f.eks. pga. at avsender har brukt en gammel forside som de hadde liggende
-     */
-    private val videresendingEnheter =
-        mapOf(
-            "4708" to "4707",
-            "4709" to "4710",
-            "4717" to "4716",
-            "4720" to "4719",
-            "1190" to null, // vi lar arbeidsfordelingen i Norg ta seg av denne
-        )
-
     suspend fun opprettOppgaveBasertPåRutingOppgave(rutingOppgave: RutingOppgave): String {
-        log.info("Oppretter gosys-oppgave basert på ruting oppgave")
-        val tildeltEnhet =
-            when (rutingOppgave.tildeltEnhetsnr) {
-                in videresendingEnheter -> {
-                    val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
-                    log.warn {
-                        "Mappet om nedlagt/sammenslått enhet: ${rutingOppgave.tildeltEnhetsnr} til ny enhet: $nyEnhet for journalpostId: ${rutingOppgave.journalpostId}"
-                    }
-                    nyEnhet
+        log.info("Oppretter gosys-oppgave basert på ruting oppgave, journalpostId: ${rutingOppgave.journalpostId}")
+        val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
+            in videresendingEnheter -> {
+                val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
+                log.warn {
+                    "Mappet om nedlagt/sammenslått enhet: ${rutingOppgave.tildeltEnhetsnr} til ny enhet: $nyEnhet for journalpostId: ${rutingOppgave.journalpostId}"
                 }
-
-                else -> rutingOppgave.tildeltEnhetsnr
+                nyEnhet
             }
+
+            else -> rutingOppgave.tildeltEnhetsnr
+        }
         return opprettOppgave(
             OpprettOppgaveRequest(
                 personident = rutingOppgave.aktoerId,
@@ -114,16 +100,16 @@ class OppgaveClient(
         ).id.toString()
     }
 
-    suspend fun opprettOppgave(soknadData: SoknadData): String {
+    suspend fun opprettOppgave(søknadData: SøknadData): String {
         val nå = LocalDate.now()
         return opprettOppgave(
             OpprettOppgaveRequest(
-                personident = soknadData.fnrBruker,
-                journalpostId = soknadData.joarkRef,
-                beskrivelse = soknadData.sakstype.toBeskrivelse(),
+                personident = søknadData.fnrBruker,
+                journalpostId = søknadData.joarkRef,
+                beskrivelse = søknadData.sakstype.beskrivelse,
                 tema = "HJE",
                 oppgavetype = "JFR",
-                behandlingstype = soknadData.sakstype.toBehandlingstype(),
+                behandlingstype = søknadData.sakstype.behandlingstype,
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
                 prioritet = OpprettOppgaveRequest.Prioritet.NORM,
@@ -134,29 +120,40 @@ class OppgaveClient(
     suspend fun opprettOppgave(request: OpprettOppgaveRequest): Oppgave {
         log.info { "Oppretter oppgave, journalpostId: ${request.journalpostId}" }
         val tokenSet = azureAdClient.grant(scope)
-        val response =
-            client.post(baseUrl) {
-                bearerAuth(tokenSet)
-                setBody(request)
-            }
+        val response = client.post(baseUrl) {
+            bearerAuth(tokenSet)
+            setBody(request)
+        }
         return when (response.status) {
             HttpStatusCode.Created -> response.body<Oppgave>()
             else -> {
-                val body = runCatching { response.bodyAsText() }.getOrElse { it.message }
-                oppgaveApiError("Uventet svar fra oppgave, status: '${response.status}', body: '$body'")
+                error("Uventet svar fra oppgave, status: '${response.status}', body: '${response.bodyAsTextOrNull()}'")
             }
         }
     }
 }
 
-private fun Sakstype.toBeskrivelse() =
-    when (this) {
+private suspend fun HttpResponse.bodyAsTextOrNull() = runCatching { bodyAsText() }.getOrElse { it.message }
+
+private val Sakstype.beskrivelse
+    get() = when (this) {
         Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "Digitalt bytte av hjelpemidler"
         else -> "Digital søknad om hjelpemidler"
     }
 
-private fun Sakstype.toBehandlingstype() =
-    when (this) {
+private val Sakstype.behandlingstype
+    get() = when (this) {
         Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "ae0273"
         else -> "ae0227"
     }
+
+/**
+ * Nedlagte/sammenslåtte enheter som skal sendes til ny enhet. Kan skje av og til f.eks. pga. at avsender har brukt en gammel forside som de hadde liggende
+ */
+private val videresendingEnheter = mapOf(
+    "4708" to "4707",
+    "4709" to "4710",
+    "4717" to "4716",
+    "4720" to "4719",
+    "1190" to null, // vi lar arbeidsfordelingen i NORG ta seg av denne
+)
