@@ -115,9 +115,9 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
         val nå = LocalDate.now()
         val tema = "HJE"
         val oppgavetype = "JFR"
+        val valgteÅrsaker = journalpost.valgteÅrsaker ?: emptySet()
         return when (val sakstype = journalpost.sakstype) {
             Sakstype.BARNEBRILLER -> {
-                val valgteÅrsaker = journalpost.valgteÅrsaker ?: emptySet()
                 val behandlingstema = when {
                     "Behandlingsbriller/linser ordinære vilkår" in valgteÅrsaker -> "ab0427"
                     "Behandlingsbriller/linser særskilte vilkår" in valgteÅrsaker -> "ab0428"
@@ -152,7 +152,10 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
-                    beskrivelse = "Digital søknad om hjelpemidler",
+                    beskrivelse = when {
+                        valgteÅrsaker.isEmpty() -> "Digital søknad om hjelpemidler"
+                        else -> "Digital søknad om hjelpemidler. Overført av saksbehandler i Hotsak med begrunnelse: ${valgteÅrsaker.first()}"
+                    },
                     tema = tema,
                     oppgavetype = oppgavetype,
                     behandlingstype = "ae0227",
