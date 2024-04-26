@@ -12,6 +12,7 @@ import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.domain.SøknadData
+import no.nav.hjelpemidler.oppgave.logging.secureLog
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import no.nav.hjelpemidler.oppgave.serialization.publish
 import no.nav.hjelpemidler.oppgave.serialization.uuidValue
@@ -19,7 +20,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 private val log = KotlinLogging.logger {}
-private val secureLog = KotlinLogging.logger("tjenestekall")
 
 class OppgaveDataSink(
     rapidsConnection: RapidsConnection,

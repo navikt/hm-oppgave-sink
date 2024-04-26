@@ -16,19 +16,17 @@ fun main() {
         WiremockServer().startServer()
     }
 
-    val azureAdClient =
-        azureADClient {
-            cache(leeway = 10.seconds) {
-                maximumSize = 100
-            }
+    val azureAdClient = azureADClient {
+        cache(leeway = 10.seconds) {
+            maximumSize = 100
         }
+    }
 
-    val oppgaveClient =
-        OppgaveClient(
-            baseUrl = Configuration.OPPGAVE_BASE_URL,
-            scope = Configuration.OPPGAVE_SCOPE,
-            azureAdClient = azureAdClient,
-        )
+    val oppgaveClient = OppgaveClient(
+        baseUrl = Configuration.OPPGAVE_BASE_URL,
+        scope = Configuration.OPPGAVE_SCOPE,
+        azureAdClient = azureAdClient,
+    )
 
     RapidApplication
         .create(no.nav.hjelpemidler.configuration.Configuration.current)

@@ -10,6 +10,7 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.logging.secureLog
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
 import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
 import no.nav.hjelpemidler.oppgave.serialization.uuidValue
@@ -61,7 +62,7 @@ class RutingOppgaveSink(
 
         val oppgave: RutingOppgave = jsonMapper.readValue(packet.toJson())
         try {
-            log.info("Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(oppgave)}'")
+            secureLog.info("Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(oppgave)}'")
 
             // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
             val harAlleredeOppgaveForJournalpost = runBlocking(Dispatchers.IO) {

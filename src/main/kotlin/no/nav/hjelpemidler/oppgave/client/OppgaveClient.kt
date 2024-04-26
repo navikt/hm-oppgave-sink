@@ -47,14 +47,13 @@ class OppgaveClient(
 
     suspend fun harAlleredeOppgaveForJournalpost(journalpostId: String): Boolean {
         val tokenSet = azureAdClient.grant(scope)
-        val response =
-            client.get(baseUrl) {
-                bearerAuth(tokenSet)
-                parameter("journalpostId", journalpostId)
-                parameter("statuskategori", "AAPEN")
-                parameter("oppgavetype", "JFR")
-                parameter("oppgavetype", "FDR")
-            }
+        val response = client.get(baseUrl) {
+            bearerAuth(tokenSet)
+            parameter("journalpostId", journalpostId)
+            parameter("statuskategori", "AAPEN")
+            parameter("oppgavetype", "JFR")
+            parameter("oppgavetype", "FDR")
+        }
         return when (response.status) {
             HttpStatusCode.OK -> {
                 val sokOppgaverResponse = response.body<SokOppgaverResponse>()
@@ -69,7 +68,7 @@ class OppgaveClient(
     }
 
     suspend fun opprettOppgaveBasertPåRutingOppgave(rutingOppgave: RutingOppgave): String {
-        log.info("Oppretter gosys-oppgave basert på ruting oppgave, journalpostId: ${rutingOppgave.journalpostId}")
+        log.info("Oppretter gosys-oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}")
         val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
             in videresendingEnheter -> {
                 val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
