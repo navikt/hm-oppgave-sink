@@ -13,10 +13,10 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
-import no.nav.hjelpemidler.oppgave.jsonMapper
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
-import no.nav.hjelpemidler.oppgave.publish
-import no.nav.hjelpemidler.oppgave.uuidValue
+import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
+import no.nav.hjelpemidler.oppgave.serialization.publish
+import no.nav.hjelpemidler.oppgave.serialization.uuidValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

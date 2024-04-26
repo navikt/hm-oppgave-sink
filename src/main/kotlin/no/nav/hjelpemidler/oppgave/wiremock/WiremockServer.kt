@@ -4,7 +4,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.hjelpemidler.http.openid.AzureADEnvironmentVariable
 import no.nav.hjelpemidler.http.openid.TokenSet
-import no.nav.hjelpemidler.oppgave.jsonMapper
+import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
 import kotlin.time.Duration.Companion.hours
 
 class WiremockServer {

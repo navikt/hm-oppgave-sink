@@ -2,7 +2,7 @@ package no.nav.hjelpemidler.oppgave.metrics
 
 import mu.KotlinLogging
 import no.nav.helse.rapids_rivers.MessageContext
-import no.nav.hjelpemidler.oppgave.publish
+import no.nav.hjelpemidler.oppgave.serialization.publish
 import java.time.LocalDateTime
 import java.util.UUID
 

@@ -10,9 +10,9 @@ import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
-import no.nav.hjelpemidler.oppgave.jsonMapper
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
-import no.nav.hjelpemidler.oppgave.uuidValue
+import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
+import no.nav.hjelpemidler.oppgave.serialization.uuidValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

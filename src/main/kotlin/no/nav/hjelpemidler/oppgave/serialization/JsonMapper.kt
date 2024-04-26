@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave
+package no.nav.hjelpemidler.oppgave.serialization
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.JsonNode
