@@ -57,8 +57,8 @@ class OppgaveClient(
         return antallTreffTotalt != null && antallTreffTotalt > 0
     }
 
-    suspend fun opprettOppgaveBasertPåRutingOppgave(rutingOppgave: RutingOppgave): String {
-        log.info("Oppretter gosys-oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}")
+    suspend fun opprettOppgave(rutingOppgave: RutingOppgave): String {
+        log.info("Oppretter oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}")
 
         val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
             in videresendingEnheter -> {
@@ -109,7 +109,7 @@ class OppgaveClient(
     }
 
     suspend fun opprettOppgave(request: OpprettOppgaveRequest): Oppgave {
-        log.info { "Oppretter oppgave, journalpostId: ${request.journalpostId}" }
+        log.info { "Oppretter oppgave, journalpostId: ${request.journalpostId}, oppgavetype: ${request.oppgavetype}" }
 
         val tokenSet = azureAdClient.grant(scope)
         val response = client.post(baseUrl) {

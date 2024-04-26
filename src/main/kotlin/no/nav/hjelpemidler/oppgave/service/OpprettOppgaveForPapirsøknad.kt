@@ -21,7 +21,12 @@ import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
-class RutingOppgaveSink(
+/**
+ * Opprett oppgave for papirsøknad mottatt i hm-joark-listener.
+ *
+ * @see <a href="https://github.com/navikt/hm-joark-listener/blob/main/src/main/kotlin/no/nav/hjelpemidler/joark/JournalpostMottattRiver.kt">JournalpostMottattRiver</a>
+ */
+class OpprettOppgaveForPapirsøknad(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
 ) : PacketListenerWithOnError {
@@ -87,7 +92,7 @@ class RutingOppgaveSink(
     }
 
     private fun opprettOppgave(oppgave: RutingOppgave) =
-        runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave) } }
+        runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(oppgave) } }
             .onSuccess { oppgaveId -> log.info("Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $oppgaveId") }
             .onFailure { log.error(it) { "Feil under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
             .getOrThrow()

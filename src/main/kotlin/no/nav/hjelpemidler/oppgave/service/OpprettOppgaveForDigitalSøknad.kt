@@ -21,7 +21,12 @@ import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
-class OppgaveDataSink(
+/**
+ * Opprett oppgave for digital søknad som må behandles i Gosys.
+ *
+ * @see <a href="https://github.com/navikt/hm-joark-sink/blob/main/src/main/kotlin/no/nav/hjelpemidler/joark/service/OpprettJournalpostS%C3%B8knadFordeltGammelFlyt.kt">OpprettJournalpostSøknadFordeltGammelFlyt</a>
+ */
+class OpprettOppgaveForDigitalSøknad(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
     private val consumedEventName: String = Configuration.CONSUMED_EVENT_NAME,

@@ -5,9 +5,9 @@ import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.openid.azureADClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.mock.MockServer
-import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
-import no.nav.hjelpemidler.oppgave.service.OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning
-import no.nav.hjelpemidler.oppgave.service.RutingOppgaveSink
+import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDigitalSøknad
+import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForOverføring
+import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForPapirsøknad
 import kotlin.time.Duration.Companion.seconds
 
 fun main() {
@@ -33,9 +33,9 @@ fun main() {
     RapidApplication
         .create(no.nav.hjelpemidler.configuration.Configuration.current)
         .apply {
-            OppgaveDataSink(this, oppgaveClient)
-            RutingOppgaveSink(this, oppgaveClient)
-            OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(this, oppgaveClient)
+            OpprettOppgaveForDigitalSøknad(this, oppgaveClient)
+            OpprettOppgaveForPapirsøknad(this, oppgaveClient)
+            OpprettOppgaveForOverføring(this, oppgaveClient)
         }
         .start()
 }
