@@ -11,7 +11,7 @@ import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
-import no.nav.hjelpemidler.oppgave.domain.SøknadData
+import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.logging.secureLog
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import no.nav.hjelpemidler.oppgave.serialization.publish
@@ -34,9 +34,9 @@ class OppgaveDataSink(
     }
 
     private val JsonMessage.eventId get() = this["eventId"].uuidValue()
-    private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
-    private val JsonMessage.journalpostId get() = this["joarkRef"].textValue()
     private val JsonMessage.søknadId get() = this["soknadId"].uuidValue()
+    private val JsonMessage.journalpostId get() = this["joarkRef"].textValue()
+    private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
 
     private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
 
@@ -52,19 +52,20 @@ class OppgaveDataSink(
 
         try {
             val søknadId = packet.søknadId
+            val journalpostId = packet.journalpostId
             val sakstype = packet.sakstype
             val fnrBruker = packet.fnrBruker
-            log.info { "Arkivert søknad mottatt, søknadId: $søknadId" }
-            val oppgaveId = runBlocking(Dispatchers.IO) {
-                opprettOppgave(
-                    SøknadData(
-                        søknadId = søknadId,
-                        journalpostId = packet.journalpostId,
-                        sakstype = sakstype,
-                        fnrBruker = fnrBruker,
-                    ),
-                )
-            }
+
+            log.info { "Arkivert søknad mottatt, søknadId: $søknadId, journalpostId: $journalpostId, sakstype: $sakstype" }
+
+            val oppgaveId = opprettOppgave(
+                Søknad(
+                    søknadId = søknadId,
+                    journalpostId = journalpostId,
+                    sakstype = sakstype,
+                    fnrBruker = fnrBruker,
+                ),
+            )
 
             context.publish(
                 fnrBruker,
@@ -75,10 +76,6 @@ class OppgaveDataSink(
                     fnrBruker = fnrBruker,
                 ),
             )
-
-            Prometheus.oppgaveOpprettetCounter.inc()
-            log.info("Oppgave opprettet for søknadId: $søknadId")
-            secureLog.info("Oppgave opprettet for søknadId: $søknadId, fnrBruker: $fnrBruker")
         } catch (e: Exception) {
             throw RuntimeException("Håndtering av eventId: $eventId feilet", e)
         }
@@ -89,11 +86,18 @@ class OppgaveDataSink(
         return eventId in skipList
     }
 
-    private suspend fun opprettOppgave(søknadData: SøknadData): String =
-        runCatching { oppgaveClient.opprettOppgave(søknadData) }
-            .onSuccess { log.info("Oppgave opprettet: ${søknadData.søknadId}") }
-            .onFailure { log.error(it) { "Feilet under opprettelse av oppgave for søknadId: ${søknadData.søknadId}" } }
+    private fun opprettOppgave(søknad: Søknad): String {
+        val søknadId = søknad.søknadId
+        return runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(søknad) } }
+            .onSuccess { oppgaveId ->
+                log.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId")
+                secureLog.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId, fnrBruker: ${søknad.fnrBruker}")
+
+                Prometheus.oppgaveOpprettetCounter.inc()
+            }
+            .onFailure { log.error(it) { "Feil under opprettelse av oppgave for søknadId: $søknadId" } }
             .getOrThrow()
+    }
 }
 
 @Suppress("unused")

@@ -9,10 +9,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import mu.KotlinLogging
 import no.nav.hjelpemidler.http.correlationId
@@ -23,7 +20,7 @@ import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
-import no.nav.hjelpemidler.oppgave.domain.SøknadData
+import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
 
@@ -35,17 +32,16 @@ class OppgaveClient(
     private val azureAdClient: OpenIDClient,
     engine: HttpClientEngine = CIO.create(),
 ) {
-    private val client =
-        createHttpClient(engine) {
-            expectSuccess = false
-            defaultRequest {
-                correlationId()
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-            }
+    private val client = createHttpClient(engine) {
+        expectSuccess = true
+        defaultRequest {
+            correlationId()
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
         }
+    }
 
-    suspend fun harAlleredeOppgaveForJournalpost(journalpostId: String): Boolean {
+    suspend fun harOppgaveForJournalpost(journalpostId: String): Boolean {
         val tokenSet = azureAdClient.grant(scope)
         val response = client.get(baseUrl) {
             bearerAuth(tokenSet)
@@ -54,21 +50,16 @@ class OppgaveClient(
             parameter("oppgavetype", "JFR")
             parameter("oppgavetype", "FDR")
         }
-        return when (response.status) {
-            HttpStatusCode.OK -> {
-                val sokOppgaverResponse = response.body<SokOppgaverResponse>()
-                val antallTreffTotalt = sokOppgaverResponse.antallTreffTotalt
-                antallTreffTotalt != null && antallTreffTotalt > 0
-            }
 
-            else -> {
-                error("Uventet svar fra oppgave, status: '${response.status}', body: '${response.bodyAsTextOrNull()}'")
-            }
-        }
+        val sokOppgaverResponse = response.body<SokOppgaverResponse>()
+        val antallTreffTotalt = sokOppgaverResponse.antallTreffTotalt
+
+        return antallTreffTotalt != null && antallTreffTotalt > 0
     }
 
     suspend fun opprettOppgaveBasertPåRutingOppgave(rutingOppgave: RutingOppgave): String {
         log.info("Oppretter gosys-oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}")
+
         val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
             in videresendingEnheter -> {
                 val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
@@ -80,9 +71,10 @@ class OppgaveClient(
 
             else -> rutingOppgave.tildeltEnhetsnr
         }
+
         return opprettOppgave(
             OpprettOppgaveRequest(
-                personident = rutingOppgave.aktoerId,
+                personident = rutingOppgave.aktørId,
                 orgnr = rutingOppgave.orgnr,
                 journalpostId = rutingOppgave.journalpostId,
                 beskrivelse = rutingOppgave.beskrivelse,
@@ -94,21 +86,21 @@ class OppgaveClient(
                 opprettetAvEnhetsnr = rutingOppgave.opprettetAvEnhetsnr,
                 tildeltEnhetsnr = tildeltEnhet,
                 behandlingstema = rutingOppgave.behandlingstema,
-                behandlingstype = rutingOppgave.behandlingtype,
+                behandlingstype = rutingOppgave.behandlingstype,
             ),
         ).id.toString()
     }
 
-    suspend fun opprettOppgave(søknadData: SøknadData): String {
+    suspend fun opprettOppgave(søknad: Søknad): String {
         val nå = LocalDate.now()
         return opprettOppgave(
             OpprettOppgaveRequest(
-                personident = søknadData.fnrBruker,
-                journalpostId = søknadData.journalpostId,
-                beskrivelse = søknadData.sakstype.beskrivelse,
+                personident = søknad.fnrBruker,
+                journalpostId = søknad.journalpostId,
+                beskrivelse = søknad.sakstype.beskrivelse,
                 tema = "HJE",
                 oppgavetype = "JFR",
-                behandlingstype = søknadData.sakstype.behandlingstype,
+                behandlingstype = søknad.sakstype.behandlingstype,
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
                 prioritet = OpprettOppgaveRequest.Prioritet.NORM,
@@ -118,21 +110,16 @@ class OppgaveClient(
 
     suspend fun opprettOppgave(request: OpprettOppgaveRequest): Oppgave {
         log.info { "Oppretter oppgave, journalpostId: ${request.journalpostId}" }
+
         val tokenSet = azureAdClient.grant(scope)
         val response = client.post(baseUrl) {
             bearerAuth(tokenSet)
             setBody(request)
         }
-        return when (response.status) {
-            HttpStatusCode.Created -> response.body<Oppgave>()
-            else -> {
-                error("Uventet svar fra oppgave, status: '${response.status}', body: '${response.bodyAsTextOrNull()}'")
-            }
-        }
+
+        return response.body<Oppgave>()
     }
 }
-
-private suspend fun HttpResponse.bodyAsTextOrNull() = runCatching { bodyAsText() }.getOrElse { it.message }
 
 private val Sakstype.beskrivelse
     get() = when (this) {

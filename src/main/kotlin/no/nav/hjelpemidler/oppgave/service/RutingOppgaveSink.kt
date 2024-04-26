@@ -1,5 +1,6 @@
 package no.nav.hjelpemidler.oppgave.service
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -47,10 +48,7 @@ class RutingOppgaveSink(
 
     private val JsonMessage.eventId get() = this["eventId"].uuidValue()
 
-    override fun onPacket(
-        packet: JsonMessage,
-        context: MessageContext,
-    ) {
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val metrics = MetricsProducer(context)
 
         if (skipEvent(packet.eventId)) {
@@ -60,38 +58,38 @@ class RutingOppgaveSink(
 
         metrics.rutingOppgaveForsøktHåndtert(packet["oppgavetype"].asText())
 
-        val oppgave: RutingOppgave = jsonMapper.readValue(packet.toJson())
+        val rutingOppgave: RutingOppgave = jsonMapper.readValue(packet.toJson())
         try {
-            secureLog.info("Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(oppgave)}'")
+            secureLog.info("Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(rutingOppgave)}'")
 
             // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
             val harAlleredeOppgaveForJournalpost = runBlocking(Dispatchers.IO) {
-                oppgaveClient.harAlleredeOppgaveForJournalpost(oppgave.journalpostId)
+                oppgaveClient.harOppgaveForJournalpost(rutingOppgave.journalpostId)
             }
             if (harAlleredeOppgaveForJournalpost) {
                 log.info(
-                    "Ruting-oppgave ble skippet da det allerede finnes en oppgave for journalpostId: ${oppgave.journalpostId}",
+                    "Ruting-oppgave ble skippet da det allerede finnes en oppgave for journalpostId: ${rutingOppgave.journalpostId}",
                 )
-                metrics.rutingOppgaveEksisterteAllerede(oppgave.oppgavetype)
+                metrics.rutingOppgaveEksisterteAllerede(rutingOppgave.oppgavetype)
                 return
             }
 
-            log.info("Ruting-oppgave kan opprettes, den finnes ikke fra før, journalpostId: ${oppgave.journalpostId}")
+            log.info("Ruting-oppgave kan opprettes, den finnes ikke fra før, journalpostId: ${rutingOppgave.journalpostId}")
 
             // Opprett oppgave for journalpost
-            opprettOppgave(oppgave)
-            metrics.rutingOppgaveOpprettet(oppgave.oppgavetype)
+            opprettOppgave(rutingOppgave)
+            metrics.rutingOppgaveOpprettet(rutingOppgave.oppgavetype)
         } catch (e: Exception) {
-            log.error(e) { "Håndtering av ruting-oppgave feilet, eventId: ${packet.eventId}, journalpostId: ${oppgave.journalpostId}" }
-            metrics.rutingOppgaveException(oppgave.oppgavetype)
+            log.error(e) { "Håndtering av ruting-oppgave feilet, eventId: ${packet.eventId}, journalpostId: ${rutingOppgave.journalpostId}" }
+            metrics.rutingOppgaveException(rutingOppgave.oppgavetype)
             throw e
         }
     }
 
     private fun opprettOppgave(oppgave: RutingOppgave) =
         runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgaveBasertPåRutingOppgave(oppgave) } }
-            .onSuccess { log.info("Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $it") }
-            .onFailure { log.error(it) { "Feilet under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
+            .onSuccess { oppgaveId -> log.info("Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $oppgaveId") }
+            .onFailure { log.error(it) { "Feil under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
             .getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
@@ -109,12 +107,14 @@ data class RutingOppgave(
     val eventId: UUID,
     val eventName: String,
     val opprettet: LocalDateTime,
-    val aktoerId: String?,
+    @JsonAlias("aktoerId")
+    val aktørId: String?,
     val orgnr: String?,
     val journalpostId: String,
     val tema: String,
     val behandlingstema: String?,
-    val behandlingtype: String?,
+    @JsonAlias("behandlingtype")
+    val behandlingstype: String?,
     val oppgavetype: String,
     val aktivDato: LocalDate,
     val prioritet: OpprettOppgaveRequest.Prioritet,

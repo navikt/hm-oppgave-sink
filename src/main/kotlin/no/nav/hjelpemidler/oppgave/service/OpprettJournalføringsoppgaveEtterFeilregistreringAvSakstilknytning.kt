@@ -53,39 +53,23 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
 
     private val JsonMessage.eventId get() = this["eventId"].uuidValue()
 
-    data class OpprettetMottattJournalpost(
-        @JsonAlias("joarkRef")
-        val journalpostId: String,
-        @JsonAlias("fodselNrBruker")
-        val fnrBruker: String,
-        @JsonAlias("soknadId")
-        val søknadId: UUID,
-        val sakId: String,
-        val sakstype: Sakstype?,
-        val enhet: String,
-        val navIdent: String?,
-        val valgteÅrsaker: Set<String>? = null,
-        val begrunnelse: String?,
-    )
-
-    override fun onPacket(
-        packet: JsonMessage,
-        context: MessageContext,
-    ) {
+    override fun onPacket(packet: JsonMessage, context: MessageContext) {
         val eventId = packet.eventId
         if (skipEvent(eventId)) {
             log.info { "Hopper over event i skipList, eventId: $eventId" }
             return
         }
+
         val journalpost = jsonMapper.readValue<OpprettetMottattJournalpost>(packet.toJson())
         log.info {
             "Tilbakeført sak mottatt, sakId: ${journalpost.sakId}, sakstype: ${journalpost.sakstype}, søknadId: ${journalpost.søknadId}, journalpostId: ${journalpost.journalpostId}"
         }
+
         try {
             val oppgave = runBlocking(Dispatchers.IO) {
                 oppgaveClient.opprettOppgave(lagOpprettJournalføringsoppgaveRequest(journalpost))
             }
-            log.info("Oppgave for journalpostId: ${journalpost.journalpostId} opprettet med oppgaveId: ${oppgave.id}")
+            log.info("Opprettet oppgave for journalpostId: ${journalpost.journalpostId} med oppgaveId: ${oppgave.id}")
 
             context.publish(
                 journalpost.fnrBruker,
@@ -116,6 +100,7 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
         val tema = "HJE"
         val oppgavetype = "JFR"
         val valgteÅrsaker = journalpost.valgteÅrsaker ?: emptySet()
+
         return when (val sakstype = journalpost.sakstype) {
             Sakstype.BARNEBRILLER -> {
                 val behandlingstema = when {
@@ -124,6 +109,7 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
                     else -> "ab0317" // "Briller/linser"
                 }
                 val beskrivelse = valgteÅrsaker.firstOrNull() ?: "Tilskudd ved kjøp av briller til barn"
+
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
@@ -175,6 +161,21 @@ class OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning(
         return eventId in skip
     }
 }
+
+data class OpprettetMottattJournalpost(
+    @JsonAlias("joarkRef")
+    val journalpostId: String,
+    @JsonAlias("fodselNrBruker")
+    val fnrBruker: String,
+    @JsonAlias("soknadId")
+    val søknadId: UUID,
+    val sakId: String,
+    val sakstype: Sakstype?,
+    val enhet: String,
+    val navIdent: String?,
+    val valgteÅrsaker: Set<String>? = null,
+    val begrunnelse: String?,
+)
 
 @Suppress("unused")
 data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(

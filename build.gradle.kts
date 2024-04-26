@@ -19,6 +19,7 @@ dependencies {
 
     // Test
     testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
     testImplementation(libs.kotest.assertions.core)
 }
@@ -65,6 +66,7 @@ openApiGenerate {
             "apis" to "none",
             "models" to "",
             "modelDocs" to "false",
+            "modelTests" to "false",
         ),
     )
     configOptions.set(

@@ -2,18 +2,20 @@ package no.nav.hjelpemidler.oppgave
 
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.configuration.Environment
-import no.nav.hjelpemidler.configuration.LocalEnvironment
 import no.nav.hjelpemidler.http.openid.azureADClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.mock.MockServer
 import no.nav.hjelpemidler.oppgave.service.OppgaveDataSink
 import no.nav.hjelpemidler.oppgave.service.OpprettJournalføringsoppgaveEtterFeilregistreringAvSakstilknytning
 import no.nav.hjelpemidler.oppgave.service.RutingOppgaveSink
-import no.nav.hjelpemidler.oppgave.wiremock.WiremockServer
 import kotlin.time.Duration.Companion.seconds
 
 fun main() {
-    if (Environment.current == LocalEnvironment) {
-        WiremockServer().startServer()
+    if (Environment.current.tier.isLocal) {
+        MockServer().apply {
+            setup()
+            start()
+        }
     }
 
     val azureAdClient = azureADClient {
