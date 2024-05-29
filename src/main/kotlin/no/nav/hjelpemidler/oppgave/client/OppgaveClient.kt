@@ -97,13 +97,14 @@ class OppgaveClient(
             OpprettOppgaveRequest(
                 personident = søknad.fnrBruker,
                 journalpostId = søknad.journalpostId,
-                beskrivelse = søknad.sakstype.beskrivelse,
+                beskrivelse = søknad.sakstype.toBeskrivelse(),
                 tema = "HJE",
                 oppgavetype = "JFR",
-                behandlingstype = søknad.sakstype.behandlingstype,
+                behandlingstype = søknad.sakstype.toBehandlingstype(søknad.erHast),
+                behandlingstema = søknad.sakstype.toBehandlingstema(søknad.erHast),
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
-                prioritet = OpprettOppgaveRequest.Prioritet.NORM,
+                prioritet = if (søknad.erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
             ),
         ).id.toString()
     }
@@ -120,18 +121,6 @@ class OppgaveClient(
         return response.body<Oppgave>()
     }
 }
-
-private val Sakstype.beskrivelse
-    get() = when (this) {
-        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "Digitalt bytte av hjelpemidler"
-        else -> "Digital søknad om hjelpemidler"
-    }
-
-private val Sakstype.behandlingstype
-    get() = when (this) {
-        Sakstype.BYTTE, Sakstype.BRUKERPASSBYTTE -> "ae0273"
-        else -> "ae0227"
-    }
 
 /**
  * Nedlagte/sammenslåtte enheter som skal sendes til ny enhet. Kan skje av og til f.eks. pga. at avsender har brukt en gammel forside som de hadde liggende

@@ -7,4 +7,5 @@ data class Søknad(
     val journalpostId: String,
     val sakstype: Sakstype,
     val fnrBruker: String,
+    val erHast: Boolean,
 )
