@@ -57,9 +57,6 @@ class OpprettOppgaveForDigitalSøknad(
             return
         }
 
-        log.info("Hopper over følgende eventId: $eventId")
-        return
-
         try {
             val søknadId = packet.søknadId
             val journalpostId = packet.journalpostId
