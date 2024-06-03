@@ -34,7 +34,7 @@ class OpprettOppgaveForDigitalSøknad(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", consumedEventName) }
-            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype") }
+            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype", "erHast") }
         }.register(this)
     }
 
@@ -45,7 +45,7 @@ class OpprettOppgaveForDigitalSøknad(
 
     private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
 
-    private val JsonMessage.erHast get() = this["erHast"]?.booleanValue()
+    private val JsonMessage.erHast get() = this["erHast"].booleanValue()
 
     override fun onPacket(
         packet: JsonMessage,
