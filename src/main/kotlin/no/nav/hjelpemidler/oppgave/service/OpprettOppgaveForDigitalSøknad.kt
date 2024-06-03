@@ -45,7 +45,7 @@ class OpprettOppgaveForDigitalSøknad(
 
     private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
 
-    private val JsonMessage.erHast get() = this["erHast"]?.booleanValue()
+    private val JsonMessage.erHast get() = false
 
     override fun onPacket(
         packet: JsonMessage,
