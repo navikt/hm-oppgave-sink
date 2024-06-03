@@ -91,7 +91,9 @@ class OpprettOppgaveForDigitalSøknad(
     }
 
     private fun skipEvent(eventId: UUID): Boolean {
-        val skipList = setOf<UUID>()
+        val skipList = setOf<UUID>(
+            UUID.fromString("a7ee7d57-2818-470e-801b-076588330494")
+        )
         return eventId in skipList
     }
 
