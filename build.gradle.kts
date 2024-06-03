@@ -50,6 +50,8 @@ spotless {
 
 tasks.compileKotlin {
     dependsOn(tasks.openApiGenerate)
+    dependsOn("spotlessApply")
+    dependsOn("spotlessCheck")
 }
 
 tasks.test {

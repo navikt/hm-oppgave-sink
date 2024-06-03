@@ -19,7 +19,6 @@ import no.nav.hjelpemidler.http.openid.bearerAuth
 import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
-import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
