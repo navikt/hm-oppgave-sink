@@ -11,7 +11,6 @@ import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.helse.rapids_rivers.RapidsConnection
 import no.nav.helse.rapids_rivers.River
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
-import no.nav.hjelpemidler.oppgave.client.SoknadsbehandlingDbClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
@@ -32,7 +31,6 @@ private val log = KotlinLogging.logger {}
 class OpprettOppgaveForOverføring(
     rapidsConnection: RapidsConnection,
     private val oppgaveClient: OppgaveClient,
-    private val soknadsbehandlingDbClient: SoknadsbehandlingDbClient,
 ) : PacketListenerWithOnError {
     init {
         River(rapidsConnection).apply {
@@ -45,6 +43,7 @@ class OpprettOppgaveForOverføring(
                     "sakId",
                     "soknadId",
                     "sakstype",
+                    "erHast",
                 )
                 it.interestedIn(
                     "journalpostId",
@@ -139,8 +138,6 @@ class OpprettOppgaveForOverføring(
             else -> {
                 log.info { "lagOpprettJournalføringsoppgaveRequest sakstype: $sakstype" }
 
-                // TODO: bør erHast heller komme rett fra Hotsak?
-                val erHast = soknadsbehandlingDbClient.hentBehovsmelding(journalpost.søknadId).erHast()
                 val beskrivelse = sakstype.toBeskrivelse()
 
                 OpprettOppgaveRequest(
@@ -152,11 +149,11 @@ class OpprettOppgaveForOverføring(
                     },
                     tema = tema,
                     oppgavetype = oppgavetype,
-                    behandlingstype = sakstype.toBehandlingstype(erHast),
-                    behandlingstema = sakstype.toBehandlingstema(erHast),
+                    behandlingstype = sakstype.toBehandlingstype(journalpost.erHast),
+                    behandlingstema = sakstype.toBehandlingstema(journalpost.erHast),
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
-                    prioritet = if (erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
+                    prioritet = if (journalpost.erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
                     tilordnetRessurs = journalpost.navIdent,
                 )
             }
@@ -184,6 +181,7 @@ data class OpprettetMottattJournalpost(
     val navIdent: String?,
     val valgteÅrsaker: Set<String>? = null,
     val begrunnelse: String?,
+    val erHast: Boolean,
 )
 
 @Suppress("unused")
