@@ -34,7 +34,7 @@ class OpprettOppgaveForDigitalSøknad(
     init {
         River(rapidsConnection).apply {
             validate { it.demandValue("eventName", consumedEventName) }
-            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype") }
+            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype", "erHast") }
         }.register(this)
     }
 
@@ -44,6 +44,8 @@ class OpprettOppgaveForDigitalSøknad(
     private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
 
     private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
+
+    private val JsonMessage.erHast get() = this["erHast"].booleanValue()
 
     override fun onPacket(
         packet: JsonMessage,
@@ -60,8 +62,9 @@ class OpprettOppgaveForDigitalSøknad(
             val journalpostId = packet.journalpostId
             val sakstype = packet.sakstype
             val fnrBruker = packet.fnrBruker
+            val erHast = packet.erHast
 
-            log.info { "Arkivert søknad mottatt, søknadId: $søknadId, journalpostId: $journalpostId, sakstype: $sakstype" }
+            log.info { "Arkivert søknad mottatt, søknadId: $søknadId, journalpostId: $journalpostId, sakstype: $sakstype, erHast: $erHast" }
 
             val oppgaveId = opprettOppgave(
                 Søknad(
@@ -69,6 +72,7 @@ class OpprettOppgaveForDigitalSøknad(
                     journalpostId = journalpostId,
                     sakstype = sakstype,
                     fnrBruker = fnrBruker,
+                    erHast = erHast,
                 ),
             )
 
@@ -87,13 +91,18 @@ class OpprettOppgaveForDigitalSøknad(
     }
 
     private fun skipEvent(eventId: UUID): Boolean {
-        val skipList = setOf<UUID>()
+        val skipList = setOf<UUID>(
+            UUID.fromString("d38e62d6-a804-4f22-8975-e8b16b4eae3e")
+        )
         return eventId in skipList
     }
 
     private fun opprettOppgave(søknad: Søknad): String {
         val søknadId = søknad.søknadId
-        return runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(søknad) } }
+
+        return runCatching {
+            runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(søknad) }
+        }
             .onSuccess { oppgaveId ->
                 log.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId")
                 secureLog.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId, fnrBruker: ${søknad.fnrBruker}")
