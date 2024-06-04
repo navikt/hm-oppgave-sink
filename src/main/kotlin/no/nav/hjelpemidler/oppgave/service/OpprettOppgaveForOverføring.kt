@@ -2,6 +2,7 @@ package no.nav.hjelpemidler.oppgave.service
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -43,7 +44,7 @@ class OpprettOppgaveForOverføring(
                     "sakId",
                     "soknadId",
                     "sakstype",
-                    "erHast",
+                    "soknadJson",
                 )
                 it.interestedIn(
                     "journalpostId",
@@ -181,8 +182,15 @@ data class OpprettetMottattJournalpost(
     val navIdent: String?,
     val valgteÅrsaker: Set<String>? = null,
     val begrunnelse: String?,
-    val erHast: Boolean,
+    @JsonAlias("soknadJson")
+    val søknadJson: JsonNode,
 )
+{
+    val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
+        null -> false
+        else -> true
+    }
+}
 
 @Suppress("unused")
 data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
