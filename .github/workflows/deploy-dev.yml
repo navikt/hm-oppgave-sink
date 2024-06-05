@@ -9,7 +9,7 @@ on:
       - "CODEOWNERS"
     branches:
       - main
-      - hast_v2
+      - hast-fra-hotsak
 
 jobs:
   build:

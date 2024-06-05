@@ -41,5 +41,3 @@ spec:
     outbound:
       external:
         - host: oppgave.prod-fss-pub.nais.io
-      rules:
-        - application: hm-soknadsbehandling-db
