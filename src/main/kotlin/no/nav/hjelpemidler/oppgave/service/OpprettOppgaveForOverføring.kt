@@ -184,8 +184,7 @@ data class OpprettetMottattJournalpost(
     val begrunnelse: String?,
     @JsonAlias("soknadJson")
     val søknadJson: JsonNode,
-)
-{
+) {
     val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
         null -> false
         else -> true

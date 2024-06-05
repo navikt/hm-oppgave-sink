@@ -7,7 +7,5 @@
   "OPPGAVE_BASE_URL": "https://oppgave-q1.dev-fss-pub.nais.io/api/v1/oppgaver",
   "OPPGAVE_SCOPE": "api://dev-fss.oppgavehandtering.oppgave-q1/.default",
   "CONSUMED_EVENT_NAME": "hm-SøknadArkivert-q1",
-  "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet-q1",
-  "SOKNADSBEHANDLING_DB_URL": "http://hm-soknadsbehandling-db.teamdigihot.svc.cluster.local",
-  "SOKNADSBEHANDLING_DB_SCOPE": "api://dev-gcp.teamdigihot.hm-soknadsbehandling-db/.default"
+  "PRODUCED_EVENT_NAME": "hm-OppgaveOpprettet-q1"
 }
