@@ -1,6 +1,6 @@
 package no.nav.hjelpemidler.oppgave.metrics
 
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import no.nav.helse.rapids_rivers.MessageContext
 import no.nav.hjelpemidler.oppgave.serialization.publish
 import java.time.LocalDateTime
