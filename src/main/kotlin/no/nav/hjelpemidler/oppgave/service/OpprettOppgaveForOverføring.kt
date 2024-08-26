@@ -76,7 +76,7 @@ class OpprettOppgaveForOverføring(
             val oppgave = runBlocking(Dispatchers.IO) {
                 oppgaveClient.opprettOppgave(lagOpprettJournalføringsoppgaveRequest(journalpost))
             }
-            log.info("Opprettet oppgave for journalpostId: ${journalpost.journalpostId} med oppgaveId: ${oppgave.id}")
+            log.info { "Opprettet oppgave for journalpostId: ${journalpost.journalpostId} med oppgaveId: ${oppgave.id}" }
 
             context.publish(
                 journalpost.fnrBruker,

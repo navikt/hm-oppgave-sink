@@ -57,7 +57,7 @@ class OppgaveClient(
     }
 
     suspend fun opprettOppgave(rutingOppgave: RutingOppgave): String {
-        log.info("Oppretter oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}")
+        log.info { "Oppretter oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}" }
 
         val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
             in videresendingEnheter -> {

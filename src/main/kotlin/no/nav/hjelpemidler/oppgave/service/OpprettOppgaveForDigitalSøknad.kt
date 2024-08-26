@@ -104,8 +104,8 @@ class OpprettOppgaveForDigitalSøknad(
             runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(søknad) }
         }
             .onSuccess { oppgaveId ->
-                log.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId")
-                secureLog.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId, fnrBruker: ${søknad.fnrBruker}")
+                log.info { "Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId" }
+                secureLog.info { "Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId, fnrBruker: ${søknad.fnrBruker}" }
 
                 Prometheus.oppgaveOpprettetCounter.increment()
             }

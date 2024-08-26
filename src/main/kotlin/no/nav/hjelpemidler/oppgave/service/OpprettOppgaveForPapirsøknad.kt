@@ -65,21 +65,19 @@ class OpprettOppgaveForPapirsøknad(
 
         val rutingOppgave: RutingOppgave = jsonMapper.readValue(packet.toJson())
         try {
-            secureLog.info("Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(rutingOppgave)}'")
+            secureLog.info { "Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(rutingOppgave)}'" }
 
             // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
             val harAlleredeOppgaveForJournalpost = runBlocking(Dispatchers.IO) {
                 oppgaveClient.harOppgaveForJournalpost(rutingOppgave.journalpostId)
             }
             if (harAlleredeOppgaveForJournalpost) {
-                log.info(
-                    "Ruting-oppgave ble skippet da det allerede finnes en oppgave for journalpostId: ${rutingOppgave.journalpostId}",
-                )
+                log.info { "Ruting-oppgave ble skippet da det allerede finnes en oppgave for journalpostId: ${rutingOppgave.journalpostId}" }
                 metrics.rutingOppgaveEksisterteAllerede(rutingOppgave.oppgavetype)
                 return
             }
 
-            log.info("Ruting-oppgave kan opprettes, den finnes ikke fra før, journalpostId: ${rutingOppgave.journalpostId}")
+            log.info { "Ruting-oppgave kan opprettes, den finnes ikke fra før, journalpostId: ${rutingOppgave.journalpostId}" }
 
             // Opprett oppgave for journalpost
             opprettOppgave(rutingOppgave)
@@ -93,7 +91,7 @@ class OpprettOppgaveForPapirsøknad(
 
     private fun opprettOppgave(oppgave: RutingOppgave) =
         runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(oppgave) } }
-            .onSuccess { oppgaveId -> log.info("Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $oppgaveId") }
+            .onSuccess { oppgaveId -> log.info { "Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $oppgaveId" } }
             .onFailure { log.error(it) { "Feil under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
             .getOrThrow()
 
