@@ -1,14 +1,12 @@
 package no.nav.hjelpemidler.oppgave.metrics
 
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.Counter
+import io.micrometer.core.instrument.Counter
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 
 object Prometheus {
-    private val collectorRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
+    private val registry: MeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
-    val oppgaveOpprettetCounter = Counter
-        .build()
-        .name("hm_soknad_opprettet_oppgave")
-        .help("Antall oppgaver opprettet i oppgave")
-        .register(collectorRegistry)
+    val oppgaveOpprettetCounter: Counter = registry.counter("hm_soknad_opprettet_oppgave")
 }

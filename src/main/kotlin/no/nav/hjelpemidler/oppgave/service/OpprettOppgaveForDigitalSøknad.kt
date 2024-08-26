@@ -107,7 +107,7 @@ class OpprettOppgaveForDigitalSøknad(
                 log.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId")
                 secureLog.info("Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId, fnrBruker: ${søknad.fnrBruker}")
 
-                Prometheus.oppgaveOpprettetCounter.inc()
+                Prometheus.oppgaveOpprettetCounter.increment()
             }
             .onFailure { log.error(it) { "Feil under opprettelse av oppgave for søknadId: $søknadId" } }
             .getOrThrow()

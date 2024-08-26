@@ -89,7 +89,7 @@ class OpprettOppgaveForOverføring(
                     nyJournalpostId = journalpost.journalpostId,
                 ),
             )
-            Prometheus.oppgaveOpprettetCounter.inc()
+            Prometheus.oppgaveOpprettetCounter.increment()
 
             log.info {
                 "Journalføringsoppgave opprettet for sak, sakId: ${journalpost.sakId}, journalpostId: ${journalpost.journalpostId}"
@@ -102,7 +102,7 @@ class OpprettOppgaveForOverføring(
         }
     }
 
-    private suspend fun lagOpprettJournalføringsoppgaveRequest(journalpost: OpprettetMottattJournalpost): OpprettOppgaveRequest {
+    private fun lagOpprettJournalføringsoppgaveRequest(journalpost: OpprettetMottattJournalpost): OpprettOppgaveRequest {
         val nå = LocalDate.now()
         val tema = "HJE"
         val oppgavetype = "JFR"
