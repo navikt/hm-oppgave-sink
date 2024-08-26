@@ -7,7 +7,13 @@ info:
     Konsumenter har ansvar for å ivareta behandlingsgrunnlag/hjemmel ved bruk av APIet og kun forholde seg til oppgaver (i.e basert på tema) som sikrer at dette blir ivaretatt.
     Tilgang gis ved PR. Bruk av on-prem STS skal fases ut, så nye tilganger godkjennes kun for AAD.
 
-    Merk at vi forventer at Headeren <strong>"X-Correlation-ID"</strong> er angitt for alle tjenestekall. Denne logges alltid i Oppgave, og benyttes for å kunne sammenstille hendelser på tvers av kallkjeder.
+    Token hentes enten vha azure-token-generator, eller ida. Testbrukere må ha rollen 0000_GA_GOSYS_NASJONAL for å få tilgang til oppgaver.
+
+    Vi forventer at konsumenter følger tolerant reader-prinsippet (kun lese feltene man benytter, ignorere resten), da vi ved ved behov vil utvide APIet. Det vil nok
+    etter hvert også komme en v2 av APIet der vi tar bort en del legacy-mekanismer. I mellomtiden har vi skjult noen mekanismer som vi anser som deprecated i swagger-doken, slik at
+    den blir mer oversiktelig.
+
+    Merk at vi forventer at Headeren <strong>"X-Correlation-ID"</strong> er angitt for alle tjenestekall. Denne logges i applikasjonen, og benyttes for å kunne sammenstille hendelser på tvers av kallkjeder.
     Denne skal være unik for hvert tjenestekall, og oppgis når Team oppgavehåndtering skal bistå i feilsøk, analyse etc.
 
   contact:
@@ -18,6 +24,14 @@ tags:
 - name: Mappe
   description: Operasjoner på mapper
 paths:
+  /api/v1/oppgaver/kafka:
+    post:
+      operationId: publiserKafkahendelser
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
   /api/v1/kodeverk/tema:
     get:
       tags:
@@ -125,6 +139,50 @@ paths:
           description: Ukjent feilsituasjon har oppstått
       security:
       - oidc: []
+  /api/v1/oppgaver/{id}/kommentarer:
+    get:
+      tags:
+      - Oppgave
+      summary: Henter kommentarer for oppgaven
+      description: "Dette er en ny tjeneste for uthenting av strukturerte kommentarer,\
+        \ som tilbys ifm arbeid med å fase ut bruken av beskrivelse/beskrivelseshistorikk.\
+        \ I produksjon er feltet populert med data fra litt før 01.01.2024.Vi anbefaler\
+        \ konsumenter å avvente noe med å ta dette i bruk, da det finnes et stort\
+        \ antall oppgaver som fremdeles ikke vil inneha data her (kun i beskrivelse)Vi\
+        \ arbeider videre med hvordan vi best mulig skal få gjennomført den øvrige\
+        \ migreringen, men det vil være til stor hjelp om dere som i dag registrerer\
+        \ kommentarer/statusoppdateringer i beskrivelsesfeltet også begynner å sende\
+        \ inn kommentar ifm oppdatering av oppgaven ( i første om gang i tillegg til\
+        \ beskrivelsen). Et stort antall av kommmentarene parses i dag fra differansen\
+        \ av forrige og innsendt beskrivelse, og dette ønsker vi slutte med. Ta kontakt\
+        \ med oss dersom dere har gjort dette, slik at vi kan skru av beskrivelsesparsingen\
+        \ for deres app"
+      operationId: hentKommentarer
+      parameters:
+      - name: X-Correlation-ID
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "204":
+          description: Kommentar registrert
+        "400":
+          description: Ugyldig input
+        "401":
+          description: Konsument mangler gyldig token
+        "403":
+          description: Bruker er ikke autorisert for denne operasjonen
+        "500":
+          description: Ukjent feilsituasjon har oppstått i Oppgave
+      security:
+      - oidc: []
   /api/v1/mapper:
     get:
       tags:
@@ -164,7 +222,7 @@ paths:
         in: query
         description: Begrensning i antall returnerte mapper
         schema:
-          maximum: 2000
+          maximum: 5000
           type: integer
           format: int64
           default: 10
@@ -305,6 +363,18 @@ paths:
           type: array
           items:
             type: string
+      - name: ferdigstiltFom
+        in: query
+        description: Nedre grense for filtrering på ferdigstilt tidspunkt
+        schema:
+          type: string
+          format: yyyy-MM-ddThh:mm:ss
+      - name: ferdigstiltTom
+        in: query
+        description: Øvre grense for filtrering på ferdigstilt tidspunkt
+        schema:
+          type: string
+          format: yyyy-MM-ddThh:mm:ss
       - name: orgnr
         in: query
         description: Orgnr til organisasjonen oppgavene er opprettet for
@@ -361,8 +431,9 @@ paths:
         example: 26b40001-6e93-4678-8d90-f15a99941d52
       requestBody:
         description: "Eksempel på oppgaven en journalføringsoppgave. Merk at disse\
-          \ vanligvis bør kategoriseres med behandlingstema og/eller behandlingstype\
-          \ i tillegg. For å se alle tillatte felt, trykk \"Schema\""
+          \ som hovedregel alltid skal kategoriseres med behandlingstema og/eller\
+          \ behandlingstype iht hvilken kategorisering som samsvarer med brevkoden.\
+          \ For å se alle tillatte felt, trykk \"Schema\""
         content:
           application/json:
             schema:
@@ -371,6 +442,7 @@ paths:
               aktoerId: "2280720130426"
               journalpostId: "437723027"
               tema: KON
+              behandlingstype: ae0004
               oppgavetype: JFR
               prioritet: NORM
               aktivDato: 2023-01-01
@@ -392,6 +464,7 @@ paths:
                 tildeltEnhetsnr: "4863"
                 journalpostId: "437723027"
                 tema: KON
+                behandlingstype: ae0004
                 oppgavetype: JFR
                 versjon: 1
                 opprettetAv: Z991459
@@ -400,6 +473,52 @@ paths:
                 metadata: {}
                 aktivDato: 2023-01-01
                 opprettetTidspunkt: 2023-03-15T11:33:42.747+01:00
+        "400":
+          description: Ugyldig request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Konsument mangler gyldig token
+        "403":
+          description: Bruker er ikke autorisert for denne operasjonen
+        "500":
+          description: Ukjent feilsituasjon har oppstått i Oppgave
+      security:
+      - oidc: []
+  /api/v1/oppgaver/{oppgaveId}/hendelser:
+    get:
+      tags:
+      - Oppgave
+      summary: Hent  endringshendelser knyttet til en oppgave
+      description: "Henter endringshendelser tilknyttet en oppgave på strukturert\
+        \ format (i motsetning til endringer som typisk har vært registrert i beskrivelesfeltet).\
+        \ For meta som tradisjonelt har vært lagt i beskrivelsen, har vi lang historikk.\
+        \ Vi har imidlertid nylig utvidet med en god del øvrige felter, så konsument\
+        \ må ta høyde for at felter kan være uten verdi for eldre oppgaver"
+      operationId: hentHendelser
+      parameters:
+      - name: X-Correlation-ID
+        in: header
+        description: UUID for feilsøk på tvers av tjenester
+        required: true
+        schema:
+          type: string
+        example: 26b40001-6e93-4678-8d90-f15a99941d52
+      - name: oppgaveId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Liste over hendelser
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HendelseJson'
         "400":
           description: Ugyldig request
           content:
@@ -512,6 +631,14 @@ paths:
       - oidc: []
 components:
   schemas:
+    PubliserKafkahendelserRequest:
+      type: object
+      properties:
+        oppgaveIder:
+          type: array
+          items:
+            type: integer
+            format: int64
     Tema:
       type: object
       properties:
@@ -540,6 +667,22 @@ components:
           type: string
         term:
           type: string
+    KommentarJson:
+      type: object
+      properties:
+        tekst:
+          type: string
+        registrertAv:
+          type: string
+        registrertAvEnhet:
+          type: string
+        registrertAvSystem:
+          type: string
+        registrertTidspunkt:
+          type: string
+          format: date-time
+        legacy:
+          type: boolean
     HentMapperResponse:
       type: object
       properties:
@@ -586,13 +729,13 @@ components:
           type: integer
           description: "Brukes for å håndtere optimistisk låsing, hvor to brukere\
             \ har skrevet på samme mappe. Hver gang det gjøres endring på en mappe,\
-            \ økes verdien av VERSJON med 1. Når en klient skal lagre endring på en\
-            \ mappe, sendes verdien av VERSJON mappen hadde da informasjon om mappen\
-            \ som nå er endret ble hentet ut. Dersom verdien av VERSJON er endret,\
-            \ har noen andre lagret mappen i mellomtiden, og mappen kan ikke lagres.\
-            \ 409 Conflict vil returneres fra tjenesten. Under oppretting av mappe\
-            \ trenger man ikke å spesifisere noen verdi for dette feltet, mappen vil\
-            \ starte på versjon 1"
+            \ økes verdien av VERSJON med 1. Når en klient skal lagre til på en mappe,\
+            \ sendes verdien av VERSJON mappen hadde da informasjon om mappen som\
+            \ nå er endret ble hentet ut. Dersom verdien av VERSJON er endret, har\
+            \ noen andre lagret mappen i mellomtiden, og mappen kan ikke lagres. 409\
+            \ Conflict vil returneres fra tjenesten. Under oppretting av mappe trenger\
+            \ man ikke å spesifisere noen verdi for dette feltet, mappen vil starte\
+            \ på versjon 1"
           format: int32
           example: 1
         opprettetAv:
@@ -609,6 +752,17 @@ components:
           type: string
           description: Endret tidspunkt iht. ISO-8601
           format: date-time
+    BrukerDto:
+      type: object
+      properties:
+        ident:
+          type: string
+        type:
+          type: string
+          enum:
+          - PERSON
+          - ARBEIDSGIVER
+          - SAMHANDLER
     Oppgave:
       required:
       - aktivDato
@@ -681,7 +835,21 @@ components:
             skal løse oppgaven
         beskrivelse:
           type: string
-          description: Beskrivelse av oppgaven.
+          description: "MERK! Vi arbeider med å migrere bort fra ett stort tekstfelt\
+            \ til strukturerte kommentarer + strukturert endringslogg. Bruken av feltet\
+            \ er under utfasing i Gosys. Dersom ditt system benytter dette feltet\
+            \ ber vi dere følge disse retningslinjene\n\n: 1. Beskrivelse som registreres\
+            \ samtidig som oppgaven blir opprettet, skal _ikke_ ha header\n2. Når\
+            \ beskrivelsen benyttes til status-oppdateringer, kommentarer etc i etterkant\
+            \ så skal header på følgende format benyttes, og legges til foran den\
+            \ eksisterende beskrivelsen:  --- dd.MM.yyyy <navn på ansatt> (<navident/systemnavn>,\
+            \ <enhet endringen utføres på vegne av>)\\n\\n\n3. Ta i bruk kommentar-feltet\
+            \ for å registrere kommentarer fra saksbehandlere og/eller automatiske\
+            \ oppdateringer i tillegg til beskrivelsen, samt gi oss beskjed om at\
+            \ dette er gjort. Kommentaren skal _ikke_ ha headerLegacyfelt som benyttes\
+            \ til mye forskjellig. For å ivareta bakoverkompatibilitet, må konsumenter\
+            \ som ønsker at beskrivelseshistorikken skal være synlig i andre skjermbilder\
+            \ enn så lenge fortsette å benytte dette "
         tema:
           maxLength: 255
           minLength: 0
@@ -693,8 +861,10 @@ components:
           maxLength: 255
           minLength: 0
           type: string
-          description: 'Kategoriserer oppgaven innenfor angitt tema. Tekstlig verdi
-            må inntil videre hentes fra felles kodeverk '
+          description: "Kategoriserer oppgaven innenfor angitt tema. Som hovedregel\
+            \ skal det alltid angis enten behandlingstema, behandlingstype eller begge.\
+            \ Tillatte verdier er begrenset per tema, og endringer avklares med fagansvarlig/styringsenhet\
+            \ for området. Se /api/v1/kodeverk/gjelder/{tema}"
           example: ab0203
         oppgavetype:
           maxLength: 255
@@ -707,26 +877,28 @@ components:
           maxLength: 255
           minLength: 0
           type: string
-          description: 'Kategoriserer oppgaven innenfor angitt tema. Tekstlig verdi
-            må inntil videre hentes fra felles kodeverk '
+          description: "Kategoriserer oppgaven innenfor angitt tema. Som hovedregel\
+            \ skal det alltid angis enten behandlingstema, behandlingstype eller begge.\
+            \ Tillatte verdier er begrenset per tema, og endringer avklares med fagansvarlig/styringsenhet\
+            \ for området. Se /api/v1/kodeverk/gjelder/{tema}"
           example: ae0001
         versjon:
           type: integer
           description: "Brukes for å håndtere optimistisk låsing, hvor to brukere\
-            \ har skrevet på samme oppgave. Hver gang det gjøres endring på en oppgave,\
-            \ økes verdien av VERSJON med 1. Når en klient skal lagre endring på en\
-            \ oppgave, sendes verdien av VERSJON oppgaven hadde da informasjon om\
-            \ oppgaven som nå er endret ble hentet ut. Dersom verdien av VERSJON er\
-            \ endret, har noen andre lagret oppgaven i mellomtiden, og oppgaven kan\
-            \ ikke lagres. 409 Conflict vil returneres fra tjenesten. Under oppretting\
-            \ av oppgave trenger man ikke å spesifisere noen verdi for dette feltet,\
-            \ oppgaven vil starte på versjon 1"
+            \ har skrevet på samme oppgave. Hver gang det gjøres til på en oppgave,\
+            \ økes verdien av VERSJON med 1. Når en klient skal lagre til på en oppgave,\
+            \ sendes verdien av VERSJON oppgaven hadde da informasjon om oppgaven\
+            \ som nå er endret ble hentet ut. Dersom verdien av VERSJON er endret,\
+            \ har noen andre lagret oppgaven i mellomtiden, og oppgaven kan ikke lagres.\
+            \ 409 Conflict vil returneres fra tjenesten. Under oppretting av oppgave\
+            \ trenger man ikke å spesifisere noen verdi for dette feltet, oppgaven\
+            \ vil starte på versjon 1"
           format: int32
           example: 1
         mappeId:
           type: integer
-          description: Hvilken mappe oppgaven er plassert i. Mapper administreres
-            av den enkelte enhet
+          description: 'Hvilken mappe oppgaven er plassert i. Mapper administreres
+            av den enkelte enhet. Mapper tilknyttet enheten hentes via eget endepunkt '
           format: int64
           example: 848
         opprettetAv:
@@ -739,8 +911,7 @@ components:
           example: Z998888
         prioritet:
           type: string
-          description: Kategorisering av oppgaven. Angir Hvilken prioritet oppgaven
-            har
+          description: Angir hvilken prioritet oppgaven har
           example: NORM
           enum:
           - HOY
@@ -779,6 +950,8 @@ components:
           type: string
           description: Tidspunktet oppgaven sist ble endret iht. ISO-8601
           format: date-time
+        bruker:
+          $ref: '#/components/schemas/BrukerDto'
     SokOppgaverResponse:
       type: object
       properties:
@@ -791,6 +964,61 @@ components:
           description: Liste over oppgaver
           items:
             $ref: '#/components/schemas/Oppgave'
+    HendelseJson:
+      type: object
+      properties:
+        oppgaveId:
+          type: integer
+          format: int64
+        utfortAv:
+          type: string
+        tildeltEnhetsnr:
+          type: string
+        mappeId:
+          type: integer
+          format: int64
+        tilordnetRessurs:
+          type: string
+        status:
+          type: string
+        tema:
+          type: string
+        oppgavetype:
+          type: string
+        tidspunkt:
+          type: string
+          format: date-time
+        utfortAvEnhetsnr:
+          type: string
+        hendelsestype:
+          type: string
+          enum:
+          - OPPGAVE_OPPRETTET
+          - OPPGAVE_ENDRET
+          - OPPGAVE_FERDIGSTILT
+          - OPPGAVE_FEILREGISTRERT
+        behandlingstema:
+          type: string
+        behandlingstype:
+          type: string
+        fristFerdigstillelse:
+          type: string
+          format: date
+        aktivDato:
+          type: string
+          format: date
+        prioritet:
+          type: string
+          enum:
+          - HOY
+          - NORM
+          - LAV
+        journalpostId:
+          type: string
+        saksreferanse:
+          type: string
+        utfortFraSystem:
+          type: string
     ErrorResponse:
       type: object
       properties:
@@ -825,14 +1053,15 @@ components:
           minLength: 4
           type: string
           description: "Enheten oppgaven tildeles. Dersom enhet ikke er angitt, så\
-            \ vil oppgaven automatisk bli forsøkt fordelt iht. standard arbeidsfordelingsregler\
+            \ vil oppgaven automatisk bli forsøkt fordeling iht. standard arbeidsfordelingsregler\
             \ (se norg2)"
           example: "4820"
         opprettetAvEnhetsnr:
           maxLength: 4
           minLength: 4
           type: string
-          description: Hvilken enhet som har opprettet oppgaven
+          description: Hvilken enhet som har opprettet oppgaven. Skal alltid angis
+            dersom oppgaven registreres av en medarbeider
           example: "4820"
         journalpostId:
           maxLength: 40
@@ -845,20 +1074,19 @@ components:
           maxLength: 40
           minLength: 0
           type: string
-          description: Indikerer hvilken applikasjon oppgaven skal behandles i
+          description: Indikerer hvilken applikasjon oppgaven skal behandles i. Hvis
+            angitt vil dette begrense hva man kan endre på av oppgaven i Gosys
           example: FS22
-        tilordnetRessurs:
-          maxLength: 7
-          minLength: 0
-          type: string
-          description: Navident til ressurs som skal tilordnes oppgaven
-          example: Z998323
         beskrivelse:
           type: string
-          description: "Kort beskrivelse av oppgaven med tilleggsinfo utover det kategoriseringen\
-            \ kan tilby. Merk at denne ikke skal benyttes isteden for kategorisering,\
-            \ da beskrivelse hverken er søkbart eller vises i alle tilfeller. Skal\
-            \ ikke inneholde personsensitiv informasjon"
+          description: "Kort tekstlig beskrivelse av oppgaven. Vennligst overhold\
+            \ følgende retningslinjer 1. Det skal ikke benyttes header (unngå alle\
+            \ varianter av --- dd.mm.yyyy (XXXXXX, <enhetsnr>) --- 2. Skal ikke væ\
+            re nødvendig informasjon for saksbehandlere til å finne riktig oppgave\
+            \ i en liste. Til dette skal tema, oppgavetype, behandlingstema, behandlingstype\
+            \ benyttes 3. Unngå personsensitiv og/eller lokaliserende informasjon,\
+            \ da dette feltet enn så lenge presenteres i en god del arbeidslister\
+            \ i eldre systemer"
         tema:
           maxLength: 255
           minLength: 0
@@ -869,8 +1097,10 @@ components:
           maxLength: 255
           minLength: 0
           type: string
-          description: Kategorisering av oppgaven. Må være tillatt for det aktuelle
-            temaet og i kombinasjon med en ev. behandlingstype. Se api for kodeverk
+          description: Kategorisering av oppgaven. Som hovedregel skal alltid minst
+            en av behandlingstema og/eller behandlingstype være angitt. Må være tillatt
+            for det aktuelle temaet og i kombinasjon med en ev. behandlingstype. Se
+            api for kodeverk
           example: ab0335
         oppgavetype:
           maxLength: 255
@@ -883,8 +1113,10 @@ components:
           maxLength: 255
           minLength: 0
           type: string
-          description: Kategorisering av oppgaven. Må være tillatt for det aktuelle
-            temaet og i kombinasjon med et ev. behandlingstema. Se api for kodeverk
+          description: Kategorisering av oppgaven. Som hovedregel skal alltid minst
+            en av behanlingstema og/eller behandlingstype være angitt. Må være tillatt
+            for det aktuelle temaet og i kombinasjon med et ev. behandlingstema. Se
+            api for kodeverk
           example: ae0034
         aktivDato:
           type: string
@@ -1010,6 +1242,8 @@ components:
           description: Angis for å indikere hvilken applikasjon oppgaven skal behandles
             i
           example: FS22
+        kommentar:
+          $ref: '#/components/schemas/RegistrerKommentarJson'
         personident:
           maxLength: 13
           minLength: 11
@@ -1019,6 +1253,17 @@ components:
             \ angis. Merk at det kun er i helt spesielle tilfeller ident skal endres,\
             \ i.e ifm journalføring"
           example: "12345678911"
+    RegistrerKommentarJson:
+      type: object
+      properties:
+        tekst:
+          type: string
+        automatiskGenerert:
+          type: boolean
+          description: "Skal settes til true dersom kommentaren er automatisk generert\
+            \ av et system, og det benyttes OBO-token. Ignoreres ved CCF"
+      description: Kommentar i tilknytning til endringer. Hensyntas kun ved patch
+      example: "Avventer dokumentasjon, lagt på vent til 25.01"
   securitySchemes:
     oidc:
       type: http

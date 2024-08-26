@@ -130,7 +130,7 @@ class OpprettOppgaveForOverføring(
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
-                    tilordnetRessurs = journalpost.navIdent,
+                    // tilordnetRessurs = journalpost.navIdent, // fjernet fra spec
                     opprettetAvEnhetsnr = journalpost.enhet,
                     tildeltEnhetsnr = journalpost.enhet,
                 )
@@ -155,7 +155,7 @@ class OpprettOppgaveForOverføring(
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = if (journalpost.erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
-                    tilordnetRessurs = journalpost.navIdent,
+                    // tilordnetRessurs = journalpost.navIdent, // fjernet fra spec
                 )
             }
         }
