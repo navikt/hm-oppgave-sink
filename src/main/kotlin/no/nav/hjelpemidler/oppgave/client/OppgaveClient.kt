@@ -59,6 +59,9 @@ class OppgaveClient(
     suspend fun opprettOppgave(rutingOppgave: RutingOppgave): String {
         log.info { "Oppretter oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}" }
 
+        /**
+         * todo -> finn ut om vi egentlig alltid bør la NORG ta seg av å sette feltet, altså bare sende null
+         */
         val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
             in videresendingEnheter -> {
                 val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
@@ -130,4 +133,5 @@ private val videresendingEnheter = mapOf(
     "4717" to "4716",
     "4720" to "4719",
     "1190" to null, // vi lar arbeidsfordelingen i NORG ta seg av denne
+    "1089" to null, // vi lar arbeidsfordelingen i NORG ta seg av denne
 )
