@@ -59,21 +59,6 @@ class OppgaveClient(
     suspend fun opprettOppgave(rutingOppgave: RutingOppgave): String {
         log.info { "Oppretter oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}" }
 
-        /**
-         * todo -> finn ut om vi egentlig alltid bør la NORG ta seg av å sette feltet, altså bare sende null
-         */
-        val tildeltEnhet = when (rutingOppgave.tildeltEnhetsnr) {
-            in videresendingEnheter -> {
-                val nyEnhet = videresendingEnheter[rutingOppgave.tildeltEnhetsnr]
-                log.warn {
-                    "Mappet om nedlagt/sammenslått enhet: ${rutingOppgave.tildeltEnhetsnr} til ny enhet: $nyEnhet for journalpostId: ${rutingOppgave.journalpostId}"
-                }
-                nyEnhet
-            }
-
-            else -> rutingOppgave.tildeltEnhetsnr
-        }
-
         return opprettOppgave(
             OpprettOppgaveRequest(
                 personident = rutingOppgave.aktørId,
@@ -86,7 +71,7 @@ class OppgaveClient(
                 fristFerdigstillelse = rutingOppgave.fristFerdigstillelse,
                 prioritet = rutingOppgave.prioritet,
                 opprettetAvEnhetsnr = rutingOppgave.opprettetAvEnhetsnr,
-                tildeltEnhetsnr = tildeltEnhet,
+                tildeltEnhetsnr = null, // vil bli forsøkt utledet i oppgave/norg2 iht. standard arbeidsfordelingsregler
                 behandlingstema = rutingOppgave.behandlingstema,
                 behandlingstype = rutingOppgave.behandlingstype,
             ),
@@ -123,15 +108,3 @@ class OppgaveClient(
         return response.body<Oppgave>()
     }
 }
-
-/**
- * Nedlagte/sammenslåtte enheter som skal sendes til ny enhet. Kan skje av og til f.eks. pga. at avsender har brukt en gammel forside som de hadde liggende
- */
-private val videresendingEnheter = mapOf(
-    "4708" to "4707",
-    "4709" to "4710",
-    "4717" to "4716",
-    "4720" to "4719",
-    "1190" to null, // vi lar arbeidsfordelingen i NORG ta seg av denne
-    "1089" to null, // vi lar arbeidsfordelingen i NORG ta seg av denne
-)
