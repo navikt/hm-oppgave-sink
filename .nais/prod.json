@@ -1,6 +1,6 @@
 {
   "HTTP_PORT": "8080",
-  "KAFKA_RESET_POLICY": "earliest",
+  "KAFKA_RESET_POLICY": "EARLIEST",
   "KAFKA_RAPID_TOPIC": "teamdigihot.hm-soknadsbehandling-v1",
   "KAFKA_CONSUMER_GROUP_ID": "hm-oppgave-sink-v1",
   "RAPID_APP_NAME": "hm-oppgave-sink",
