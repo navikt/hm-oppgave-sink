@@ -14,7 +14,7 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.logging)
     implementation(libs.rapidsAndRivers)
-    implementation(libs.hm.http)
+    implementation(libs.hotlibs.http)
     implementation(libs.wiremock)
 
     // Test
