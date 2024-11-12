@@ -3,6 +3,7 @@ package no.nav.hjelpemidler.oppgave.service
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
@@ -156,9 +157,7 @@ class OpprettOppgaveForOverføring(
                     fristFerdigstillelse = nå,
                     prioritet = if (journalpost.erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
                     // tilordnetRessurs = journalpost.navIdent, // fjernet fra spec
-                ).also {
-                    log.info {"DEBUG: ${journalpost.søknadId} oppgaveRequest = $it"}
-                }
+                )
             }
         }
     }
@@ -189,13 +188,8 @@ data class OpprettetMottattJournalpost(
 ) {
     val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
         null -> false
+        is NullNode -> false
         else -> true
-    }
-
-    init {
-        log.info {"DEBUG: $søknadId søknadJson = $søknadJson"}
-        log.info {"DEBUG: $søknadId søknadJson[\"soknad\"]?.get(\"hast\") = ${søknadJson["soknad"]?.get("hast")}"}
-        log.info {"DEBUG: $søknadId erHast = $erHast"}
     }
 }
 
