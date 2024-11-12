@@ -156,7 +156,9 @@ class OpprettOppgaveForOverføring(
                     fristFerdigstillelse = nå,
                     prioritet = if (journalpost.erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
                     // tilordnetRessurs = journalpost.navIdent, // fjernet fra spec
-                )
+                ).also {
+                    log.info {"DEBUG: ${journalpost.søknadId} oppgaveRequest = $it"}
+                }
             }
         }
     }
@@ -185,13 +187,15 @@ data class OpprettetMottattJournalpost(
     @JsonAlias("soknadJson")
     val søknadJson: JsonNode,
 ) {
-    init {
-        log.info {"DEBUG: $søknadId søknadJson = $søknadJson"}
-        log.info {"DEBUG: $søknadId søknadJson[\"soknad\"]?.get(\"hast\") = ${søknadJson["soknad"]?.get("hast")}"}
-    }
     val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
         null -> false
         else -> true
+    }
+
+    init {
+        log.info {"DEBUG: $søknadId søknadJson = $søknadJson"}
+        log.info {"DEBUG: $søknadId søknadJson[\"soknad\"]?.get(\"hast\") = ${søknadJson["soknad"]?.get("hast")}"}
+        log.info {"DEBUG: $søknadId erHast = $erHast"}
     }
 }
 
