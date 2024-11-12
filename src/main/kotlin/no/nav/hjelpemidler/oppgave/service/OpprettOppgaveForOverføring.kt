@@ -185,6 +185,10 @@ data class OpprettetMottattJournalpost(
     @JsonAlias("soknadJson")
     val søknadJson: JsonNode,
 ) {
+    init {
+        log.info {"DEBUG: $søknadId søknadJson = $søknadJson"}
+        log.info {"DEBUG: $søknadId søknadJson[\"soknad\"]?.get(\"hast\") = ${søknadJson["soknad"]?.get("hast")}"}
+    }
     val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
         null -> false
         else -> true
