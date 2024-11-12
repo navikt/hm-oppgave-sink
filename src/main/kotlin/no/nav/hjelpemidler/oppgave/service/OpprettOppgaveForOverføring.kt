@@ -3,6 +3,7 @@ package no.nav.hjelpemidler.oppgave.service
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
@@ -187,6 +188,7 @@ data class OpprettetMottattJournalpost(
 ) {
     val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
         null -> false
+        is NullNode -> false
         else -> true
     }
 }
