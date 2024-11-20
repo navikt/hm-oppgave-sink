@@ -45,7 +45,6 @@ class OpprettOppgaveForOverføring(
                     "sakId",
                     "soknadId",
                     "sakstype",
-                    "soknadJson",
                 )
                 it.interestedIn(
                     "journalpostId",
@@ -54,6 +53,7 @@ class OpprettOppgaveForOverføring(
                     "valgteÅrsaker",
                     "enhet",
                     "begrunnelse",
+                    "soknadJson", // fixme -> slettes når den ikke brukes lenger
                     "prioritet",
                 )
             }
