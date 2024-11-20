@@ -87,11 +87,11 @@ class OppgaveClient(
                 beskrivelse = søknad.sakstype.toBeskrivelse(),
                 tema = "HJE",
                 oppgavetype = "JFR",
-                behandlingstype = søknad.sakstype.toBehandlingstype(søknad.erHast),
-                behandlingstema = søknad.sakstype.toBehandlingstema(søknad.erHast),
+                behandlingstype = søknad.sakstype.toBehandlingstype(søknad.prioritet),
+                behandlingstema = søknad.sakstype.toBehandlingstema(søknad.prioritet),
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
-                prioritet = if (søknad.erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
+                prioritet = søknad.prioritet,
             ),
         ).id.toString()
     }

@@ -1,5 +1,7 @@
 package no.nav.hjelpemidler.oppgave.domain
 
+import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
+
 enum class Sakstype {
     SØKNAD,
     BESTILLING,
@@ -13,16 +15,16 @@ enum class Sakstype {
         else -> "Digital søknad om hjelpemidler"
     }
 
-    fun toBehandlingstype(erHast: Boolean): String? {
-        if (erHast) return null
+    fun toBehandlingstype(prioritet: OpprettOppgaveRequest.Prioritet): String? {
+        if (prioritet == OpprettOppgaveRequest.Prioritet.HOY) return null
         return when (this) {
             BYTTE, BRUKERPASSBYTTE -> "ae0273" // Digitalt bytte
             else -> "ae0227" // Digital søknad
         }
     }
 
-    fun toBehandlingstema(erHast: Boolean): String? {
-        if (!erHast) return null
+    fun toBehandlingstema(prioritet: OpprettOppgaveRequest.Prioritet): String? {
+        if (prioritet != OpprettOppgaveRequest.Prioritet.HOY) return null
         return when (this) {
             BYTTE, BRUKERPASSBYTTE -> "ab0521" // Hastebytte
             else -> "ab0520" // Hastesøknad

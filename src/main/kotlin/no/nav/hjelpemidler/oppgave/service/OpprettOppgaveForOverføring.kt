@@ -54,6 +54,7 @@ class OpprettOppgaveForOverføring(
                     "valgteÅrsaker",
                     "enhet",
                     "begrunnelse",
+                    "prioritet",
                 )
             }
         }.register(this)
@@ -142,6 +143,7 @@ class OpprettOppgaveForOverføring(
 
                 val beskrivelse = sakstype.toBeskrivelse()
 
+                val prioritet = journalpost.utledPrioritet()
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
@@ -151,11 +153,11 @@ class OpprettOppgaveForOverføring(
                     },
                     tema = tema,
                     oppgavetype = oppgavetype,
-                    behandlingstype = sakstype.toBehandlingstype(journalpost.erHast),
-                    behandlingstema = sakstype.toBehandlingstema(journalpost.erHast),
+                    behandlingstype = sakstype.toBehandlingstype(prioritet),
+                    behandlingstema = sakstype.toBehandlingstema(prioritet),
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
-                    prioritet = if (journalpost.erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
+                    prioritet = prioritet,
                     // tilordnetRessurs = journalpost.navIdent, // fjernet fra spec
                 )
             }
@@ -184,12 +186,24 @@ data class OpprettetMottattJournalpost(
     val valgteÅrsaker: Set<String>? = null,
     val begrunnelse: String?,
     @JsonAlias("soknadJson")
+    @Deprecated("Vi skal slutte å sende søknaden fra Hotsak")
     val søknadJson: JsonNode,
+    val prioritet: OpprettOppgaveRequest.Prioritet?,
 ) {
+    @Deprecated("Vi går over til å bruke prioritet direkte")
     val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
         null -> false
         is NullNode -> false
         else -> true
+    }
+
+    fun utledPrioritet(): OpprettOppgaveRequest.Prioritet {
+        if (prioritet != null) return prioritet
+        return if (erHast) {
+            OpprettOppgaveRequest.Prioritet.HOY
+        } else {
+            OpprettOppgaveRequest.Prioritet.NORM
+        }
     }
 }
 

@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.logging.secureLog
@@ -72,7 +73,7 @@ class OpprettOppgaveForDigitalSøknad(
                     journalpostId = journalpostId,
                     sakstype = sakstype,
                     fnrBruker = fnrBruker,
-                    erHast = erHast,
+                    prioritet = if (erHast) OpprettOppgaveRequest.Prioritet.HOY else OpprettOppgaveRequest.Prioritet.NORM,
                 ),
             )
 

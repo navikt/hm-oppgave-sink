@@ -9,7 +9,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class OpprettOppgaveForOverføringTest {
-
     @Test
     fun `skal tolke NullNode riktig ved utleding av om saken haster`() {
         val jsonString = """{"soknad":{"hast": null}}"""
@@ -29,6 +28,7 @@ class OpprettOppgaveForOverføringTest {
             valgteÅrsaker = null,
             begrunnelse = null,
             søknadJson = json,
+            prioritet = null,
         ).erHast
         assertFalse(erHast)
     }
