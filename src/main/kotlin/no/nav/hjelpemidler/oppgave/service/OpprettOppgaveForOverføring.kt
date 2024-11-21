@@ -2,8 +2,6 @@ package no.nav.hjelpemidler.oppgave.service
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
@@ -53,7 +51,6 @@ class OpprettOppgaveForOverføring(
                     "valgteÅrsaker",
                     "enhet",
                     "begrunnelse",
-                    "soknadJson", // fixme -> slettes når den ikke brukes lenger
                     "prioritet",
                 )
             }
@@ -132,7 +129,6 @@ class OpprettOppgaveForOverføring(
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = OpprettOppgaveRequest.Prioritet.NORM,
-                    // tilordnetRessurs = journalpost.navIdent, // fjernet fra spec
                     opprettetAvEnhetsnr = journalpost.enhet,
                     tildeltEnhetsnr = journalpost.enhet,
                 )
@@ -143,7 +139,7 @@ class OpprettOppgaveForOverføring(
 
                 val beskrivelse = sakstype.toBeskrivelse()
 
-                val prioritet = journalpost.utledPrioritet()
+                val prioritet = journalpost.prioritet ?: OpprettOppgaveRequest.Prioritet.NORM
                 OpprettOppgaveRequest(
                     personident = journalpost.fnrBruker,
                     journalpostId = journalpost.journalpostId,
@@ -185,27 +181,8 @@ data class OpprettetMottattJournalpost(
     val navIdent: String?,
     val valgteÅrsaker: Set<String>? = null,
     val begrunnelse: String?,
-    @JsonAlias("soknadJson")
-    @Deprecated("Vi skal slutte å sende søknaden fra Hotsak")
-    val søknadJson: JsonNode,
     val prioritet: OpprettOppgaveRequest.Prioritet?,
-) {
-    @Deprecated("Vi går over til å bruke prioritet direkte")
-    val erHast: Boolean = when (søknadJson["soknad"]?.get("hast")) {
-        null -> false
-        is NullNode -> false
-        else -> true
-    }
-
-    fun utledPrioritet(): OpprettOppgaveRequest.Prioritet {
-        if (prioritet != null) return prioritet
-        return if (erHast) {
-            OpprettOppgaveRequest.Prioritet.HOY
-        } else {
-            OpprettOppgaveRequest.Prioritet.NORM
-        }
-    }
-}
+)
 
 @Suppress("unused")
 data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
@@ -216,8 +193,8 @@ data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
     val sakstype: Sakstype?,
     val fnrBruker: String,
     val nyJournalpostId: String,
+    val eventId: UUID = UUID.randomUUID(),
+    val opprettet: LocalDateTime = LocalDateTime.now(),
 ) {
-    val eventId: UUID = UUID.randomUUID()
     val eventName: String = "hm-opprettetJournalføringsoppgaveForTilbakeførtSak"
-    val opprettet: LocalDateTime = LocalDateTime.now()
 }
