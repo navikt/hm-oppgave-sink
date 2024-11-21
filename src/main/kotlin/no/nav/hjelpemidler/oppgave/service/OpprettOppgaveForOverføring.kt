@@ -25,8 +25,6 @@ private val log = KotlinLogging.logger {}
 
 /**
  * Opprett oppgave for digital søknad som er overført fra Hotsak til Gosys.
- *
- * @see <a href="https://github.com/navikt/hm-joark-sink/blob/main/src/main/kotlin/no/nav/hjelpemidler/joark/service/hotsak/OpprettNyJournalpostEtterFeilregistrering.kt">OpprettNyJournalpostEtterFeilregistrering</a>
  */
 class OpprettOppgaveForOverføring(
     rapidsConnection: RapidsConnection,
@@ -68,7 +66,7 @@ class OpprettOppgaveForOverføring(
 
         val journalpost = jsonMapper.readValue<OpprettetMottattJournalpost>(packet.toJson())
         log.info {
-            "Tilbakeført sak mottatt, sakId: ${journalpost.sakId}, sakstype: ${journalpost.sakstype}, søknadId: ${journalpost.søknadId}, journalpostId: ${journalpost.journalpostId}"
+            "Tilbakeført sak mottatt, sakId: ${journalpost.sakId}, sakstype: ${journalpost.sakstype}, søknadId: ${journalpost.søknadId}, journalpostId: ${journalpost.journalpostId}, prioritet: ${journalpost.prioritet}"
         }
 
         try {
