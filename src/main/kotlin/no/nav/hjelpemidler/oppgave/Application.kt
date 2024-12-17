@@ -1,6 +1,10 @@
 package no.nav.hjelpemidler.oppgave
 
+import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.post
@@ -10,6 +14,7 @@ import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.openid.azureADClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.mock.MockServer
+import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDigitalSøknad
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForOverføring
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForPapirsøknad
@@ -37,6 +42,9 @@ fun main() {
     )
 
     RapidApplication.create(no.nav.hjelpemidler.configuration.Configuration.current) { engine, _ ->
+        engine.application.install(ContentNegotiation) {
+            register(ContentType.Application.Json, JacksonConverter(jsonMapper))
+        }
         engine.application.routing {
             if (Environment.current.tier.isDev) {
                 post("/internal/rydd-opp-gosys-oppgaver") {

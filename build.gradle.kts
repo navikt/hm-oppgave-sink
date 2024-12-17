@@ -16,6 +16,8 @@ dependencies {
     implementation(libs.rapidsAndRivers)
     implementation(libs.hotlibs.http)
     implementation(libs.wiremock)
+    implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.serialization.jackson)
 
     // Test
     testImplementation(libs.kotlin.test.junit5)
