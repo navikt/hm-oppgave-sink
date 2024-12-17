@@ -113,11 +113,11 @@ class OppgaveClient(
         return response.body<Oppgave>()
     }
 
-    suspend fun fjernGamleOppgaver(aktoerId: String, before: LocalDateTime = LocalDateTime.now(), limit: Int = 100) {
+    suspend fun fjernGamleOppgaver(aktoerId: String, before: LocalDateTime = LocalDateTime.now(), limit: Int = 100): String {
         if (!Environment.current.tier.isDev) throw Exception("Bare fjern gamle oppgaver i gosys hvis man er i dev!")
 
         data class Oppgave(
-            val id: String,
+            val id: Long,
             val versjon: Int,
         )
 
@@ -138,9 +138,12 @@ class OppgaveClient(
         // Ferdigstill oppgaver
         val filtrerteOppgaver = sokBody
             .oppgaver!!
-            .filter { it.opprettetTidspunkt?.toLocalDateTime()?.isAfter(before) ?: false }
-            .filter { it.journalpostId != null }
-            .map { Oppgave(it.journalpostId!!, it.versjon) }
+            .filter { it.opprettetTidspunkt?.toLocalDateTime()?.isBefore(before) ?: false }
+            .map { Oppgave(it.id, it.versjon) }
+
+        if (filtrerteOppgaver.isEmpty()) {
+            return "Ingen oppgaver igjen etter filtrering, totalt antall oppgaver: ${sokBody.antallTreffTotalt}"
+        }
 
         val patchMultiOppgaveRequest = PatchMultiOppgaveRequest(oppgaver = filtrerteOppgaver)
 
@@ -154,5 +157,7 @@ class OppgaveClient(
             val body = runCatching { patchRespone.bodyAsText() }.getOrNull() ?: "<ingen>"
             log.error { "Fjerning av gamle opgpaver i gosys feilet med statusKode=${patchRespone.status.value}, body=$body" }
         }
+
+        return "OK"
     }
 }

@@ -54,8 +54,7 @@ fun main() {
                         val limit: Int = 100,
                     )
                     val req = call.receive<Request>()
-                    oppgaveClient.fjernGamleOppgaver(req.aktoerId, req.before, req.limit)
-                    call.respond("OK")
+                    call.respond(oppgaveClient.fjernGamleOppgaver(req.aktoerId, req.before, req.limit))
                 }
             }
         }
