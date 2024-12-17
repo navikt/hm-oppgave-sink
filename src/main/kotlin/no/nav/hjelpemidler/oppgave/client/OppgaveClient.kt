@@ -142,8 +142,13 @@ class OppgaveClient(
                 bearerAuth(tokenSet)
                 setBody(
                     PatchOppgaveRequest(
-                        versjon = oppgave.versjon,
                         status = PatchOppgaveRequest.Status.FERDIGSTILT,
+                        versjon = oppgave.versjon,
+                        oppgavetype = oppgave.oppgavetype,
+                        prioritet = PatchOppgaveRequest.Prioritet.valueOf(oppgave.prioritet.value),
+                        tema = oppgave.tema,
+                        tildeltEnhetsnr = oppgave.tildeltEnhetsnr,
+                        aktivDato = oppgave.aktivDato,
                     ),
                 )
             }
