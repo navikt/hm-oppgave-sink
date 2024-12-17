@@ -22,6 +22,7 @@ import no.nav.hjelpemidler.http.openid.OpenIDClient
 import no.nav.hjelpemidler.http.openid.bearerAuth
 import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.client.models.PatchOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
@@ -116,16 +117,6 @@ class OppgaveClient(
     suspend fun fjernGamleOppgaver(aktoerId: String, before: LocalDateTime = LocalDateTime.now(), limit: Int = 100): String {
         if (!Environment.current.tier.isDev) throw Exception("Bare fjern gamle oppgaver i gosys hvis man er i dev!")
 
-        data class Oppgave(
-            val id: Long,
-            val versjon: Int,
-        )
-
-        data class PatchMultiOppgaveRequest(
-            val status: String = "FERDIGSTILT",
-            val oppgaver: List<Oppgave>,
-        )
-
         // Hent listen over personens oppgaver
         val filter = "?statuskategori=AAPEN&tema=HJE&aktoerId=$aktoerId&sorteringsrekkefolge=ASC&sorteringsfelt=ENDRET_TIDSPUNKT&limit=$limit"
 
@@ -139,23 +130,27 @@ class OppgaveClient(
         val filtrerteOppgaver = sokBody
             .oppgaver!!
             .filter { it.opprettetTidspunkt?.toLocalDateTime()?.isBefore(before) ?: false }
-            .map { Oppgave(it.id, it.versjon) }
 
         if (filtrerteOppgaver.isEmpty()) {
             return "Ingen oppgaver igjen etter filtrering, totalt antall oppgaver: ${sokBody.antallTreffTotalt}"
         }
 
-        val patchMultiOppgaveRequest = PatchMultiOppgaveRequest(oppgaver = filtrerteOppgaver)
-
-        val tokenSet2 = azureAdClient.grant(scope)
-        val patchRespone = client.patch(baseUrl) {
-            bearerAuth(tokenSet2)
-            setBody(patchMultiOppgaveRequest)
-        }
-
-        if (!patchRespone.status.isSuccess()) {
-            val body = runCatching { patchRespone.bodyAsText() }.getOrNull() ?: "<ingen>"
-            log.error { "Fjerning av gamle opgpaver i gosys feilet med statusKode=${patchRespone.status.value}, body=$body" }
+        filtrerteOppgaver.forEachIndexed { index, oppgave ->
+            log.info { "Ferdigstiller oppgave $index/${filtrerteOppgaver.count()} (id=${oppgave.id}, versjon=${oppgave.versjon})" }
+            val tokenSet = azureAdClient.grant(scope)
+            val response = client.patch(baseUrl + "/${oppgave.id}") {
+                bearerAuth(tokenSet)
+                setBody(
+                    PatchOppgaveRequest(
+                        versjon = oppgave.versjon,
+                        status = PatchOppgaveRequest.Status.FERDIGSTILT,
+                    ),
+                )
+            }
+            if (!response.status.isSuccess()) {
+                val body = runCatching { response.bodyAsText() }.getOrNull() ?: "<ingen>"
+                log.error { "Fjerning av gamle opgpave i gosys feilet med statusKode=${response.status.value}, body=$body" }
+            }
         }
 
         return "OK"
