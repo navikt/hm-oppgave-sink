@@ -5,16 +5,18 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import no.nav.hjelpemidler.logging.secureLog
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
-import no.nav.hjelpemidler.oppgave.logging.secureLog
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
-import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
-import no.nav.hjelpemidler.oppgave.serialization.uuidValue
+import no.nav.hjelpemidler.serialization.jackson.jsonMapper
+import no.nav.hjelpemidler.serialization.jackson.uuidValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -32,7 +34,7 @@ class OpprettOppgaveForPapirsøknad(
 ) : PacketListenerWithOnError {
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("eventName", "hm-ruting-oppgave") }
+            precondition { it.requireValue("eventName", "hm-ruting-oppgave") }
             validate {
                 it.requireKey(
                     "eventId",
@@ -53,7 +55,12 @@ class OpprettOppgaveForPapirsøknad(
 
     private val JsonMessage.eventId get() = this["eventId"].uuidValue()
 
-    override fun onPacket(packet: JsonMessage, context: MessageContext) {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+        metadata: MessageMetadata,
+        meterRegistry: MeterRegistry,
+    ) {
         val metrics = MetricsProducer(context)
 
         if (skipEvent(packet.eventId)) {

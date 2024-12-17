@@ -2,7 +2,6 @@ package no.nav.hjelpemidler.oppgave
 
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.application.call
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive
@@ -14,15 +13,15 @@ import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.openid.azureADClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.mock.MockServer
-import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDigitalSøknad
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForOverføring
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForPapirsøknad
+import no.nav.hjelpemidler.serialization.jackson.jsonMapper
 import java.time.LocalDateTime
 import kotlin.time.Duration.Companion.seconds
 
 fun main() {
-    if (Environment.current.tier.isLocal) {
+    if (Environment.current.isLocal) {
         MockServer().apply {
             setup()
             start()
@@ -46,13 +45,14 @@ fun main() {
             register(ContentType.Application.Json, JacksonConverter(jsonMapper))
         }
         engine.application.routing {
-            if (Environment.current.tier.isDev) {
+            if (Environment.current.isDev) {
                 post("/internal/rydd-opp-gosys-oppgaver") {
                     data class Request(
                         val aktoerId: String,
                         val before: LocalDateTime = LocalDateTime.now(),
                         val limit: Int = 100,
                     )
+
                     val req = call.receive<Request>()
                     call.respond(oppgaveClient.fjernGamleOppgaver(req.aktoerId, req.before, req.limit))
                 }

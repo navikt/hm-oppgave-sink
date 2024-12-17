@@ -4,19 +4,21 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import no.nav.hjelpemidler.logging.secureLog
 import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.domain.Søknad
-import no.nav.hjelpemidler.oppgave.logging.secureLog
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
 import no.nav.hjelpemidler.oppgave.serialization.publish
-import no.nav.hjelpemidler.oppgave.serialization.uuidValue
+import no.nav.hjelpemidler.serialization.jackson.uuidValue
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -34,7 +36,7 @@ class OpprettOppgaveForDigitalSøknad(
 ) : PacketListenerWithOnError {
     init {
         River(rapidsConnection).apply {
-            validate { it.demandValue("eventName", consumedEventName) }
+            precondition { it.requireValue("eventName", consumedEventName) }
             validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype", "erHast") }
         }.register(this)
     }
@@ -51,6 +53,8 @@ class OpprettOppgaveForDigitalSøknad(
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
+        metadata: MessageMetadata,
+        meterRegistry: MeterRegistry,
     ) {
         val eventId = packet.eventId
         if (skipEvent(eventId)) {

@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.ok
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import no.nav.hjelpemidler.http.openid.TokenSet
-import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
+import no.nav.hjelpemidler.serialization.jackson.jsonMapper
 import java.io.Closeable
 import kotlin.time.Duration.Companion.hours
 

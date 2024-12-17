@@ -2,8 +2,8 @@ package no.nav.hjelpemidler.oppgave
 
 import io.kotest.matchers.maps.shouldHaveKeys
 import no.nav.hjelpemidler.configuration.environmentVariablesIn
-import no.nav.hjelpemidler.oppgave.serialization.jsonMapper
-import no.nav.hjelpemidler.oppgave.test.readValue
+import no.nav.hjelpemidler.serialization.jackson.jsonMapper
+import no.nav.hjelpemidler.serialization.jackson.readValue
 import kotlin.io.path.Path
 import kotlin.test.Test
 
