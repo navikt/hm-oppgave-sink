@@ -8,10 +8,14 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
+import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.correlationId
 import no.nav.hjelpemidler.http.createHttpClient
 import no.nav.hjelpemidler.http.openid.OpenIDClient
@@ -22,6 +26,7 @@ import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 private val log = KotlinLogging.logger {}
 
@@ -106,5 +111,48 @@ class OppgaveClient(
         }
 
         return response.body<Oppgave>()
+    }
+
+    suspend fun fjernGamleOppgaver(aktoerId: String, before: LocalDateTime = LocalDateTime.now(), limit: Int = 100) {
+        if (!Environment.current.tier.isDev) throw Exception("Bare fjern gamle oppgaver i gosys hvis man er i dev!")
+
+        data class Oppgave(
+            val id: String,
+            val versjon: Int,
+        )
+
+        data class PatchMultiOppgaveRequest(
+            val status: String = "FERDIGSTILT",
+            val oppgaver: List<Oppgave>,
+        )
+
+        // Hent listen over personens oppgaver
+        val filter = "?statuskategori=AAPEN&tema=HJE&aktoerId=$aktoerId&sorteringsrekkefolge=ASC&sorteringsfelt=ENDRET_TIDSPUNKT&limit=$limit"
+
+        val tokenSet = azureAdClient.grant(scope)
+        val sokResponse = client.get(baseUrl + filter) {
+            bearerAuth(tokenSet)
+        }
+        val sokBody = sokResponse.body<SokOppgaverResponse>()
+
+        // Ferdigstill oppgaver
+        val filtrerteOppgaver = sokBody
+            .oppgaver!!
+            .filter { it.opprettetTidspunkt?.toLocalDateTime()?.isAfter(before) ?: false }
+            .filter { it.journalpostId != null }
+            .map { Oppgave(it.journalpostId!!, it.versjon) }
+
+        val patchMultiOppgaveRequest = PatchMultiOppgaveRequest(oppgaver = filtrerteOppgaver)
+
+        val tokenSet2 = azureAdClient.grant(scope)
+        val patchRespone = client.patch(baseUrl) {
+            bearerAuth(tokenSet2)
+            setBody(patchMultiOppgaveRequest)
+        }
+
+        if (!patchRespone.status.isSuccess()) {
+            val body = runCatching { patchRespone.bodyAsText() }.getOrNull() ?: "<ingen>"
+            log.error { "Fjerning av gamle opgpaver i gosys feilet med statusKode=${patchRespone.status.value}, body=$body" }
+        }
     }
 }
