@@ -41,12 +41,6 @@ spotless {
     }
 }
 
-tasks.compileKotlin {
-    dependsOn(tasks.openApiGenerate)
-    dependsOn("spotlessApply")
-    dependsOn("spotlessCheck")
-}
-
 @Suppress("UnstableApiUsage")
 testing {
     suites {
@@ -93,4 +87,11 @@ sourceSets {
     }
 }
 
-tasks.shadowJar { mergeServiceFiles() }
+tasks {
+    compileKotlin {
+        dependsOn(openApiGenerate)
+        dependsOn("spotlessApply")
+        dependsOn("spotlessCheck")
+    }
+    shadowJar { mergeServiceFiles() }
+}
