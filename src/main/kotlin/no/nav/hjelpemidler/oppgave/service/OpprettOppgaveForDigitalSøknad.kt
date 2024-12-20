@@ -17,7 +17,7 @@ import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
-import no.nav.hjelpemidler.oppgave.serialization.publish
+import no.nav.hjelpemidler.oppgave.publish
 import no.nav.hjelpemidler.serialization.jackson.uuidValue
 import java.time.LocalDateTime
 import java.util.UUID

@@ -11,24 +11,15 @@ application {
 }
 
 dependencies {
-    implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.logging)
     implementation(libs.rapidsAndRivers)
     implementation(libs.hotlibs.http)
     implementation(libs.wiremock)
     implementation(libs.ktor.server.content.negotiation)
     implementation(libs.ktor.serialization.jackson)
-
-    // Test
-    testImplementation(libs.kotlin.test.junit5)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotest.assertions.core)
 }
 
-kotlin {
-    jvmToolchain(21)
-}
+java { toolchain { languageVersion.set(JavaLanguageVersion.of(21)) } }
 
 spotless {
     kotlin {
@@ -56,14 +47,26 @@ tasks.compileKotlin {
     dependsOn("spotlessCheck")
 }
 
-tasks.test {
-    useJUnitPlatform()
+@Suppress("UnstableApiUsage")
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useKotlinTest(libs.versions.kotlin.asProvider())
+            dependencies {
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.mockk)
+                implementation(libs.tbdLibs.rapidsAndRivers.test)
+            }
+        }
+    }
 }
 
+val openApiGenerated: Provider<Directory> = layout.buildDirectory.dir("generated/source/openapi")
 openApiGenerate {
-    inputSpec.set("$rootDir/src/main/resources/oppgave/openapi.yaml")
-    outputDir.set("$buildDir/generated/source/openapi")
     generatorName.set("kotlin")
+    inputSpec.set(layout.projectDirectory.file("src/main/resources/oppgave/openapi.yaml").toString())
+    outputDir.set(openApiGenerated.map(Directory::toString))
     packageName.set("no.nav.hjelpemidler.oppgave.client")
     globalProperties.set(
         mapOf(
@@ -85,7 +88,9 @@ openApiGenerate {
 sourceSets {
     main {
         kotlin {
-            srcDir("$buildDir/generated/source/openapi/main")
+            srcDir(openApiGenerated.map { it.dir("main") })
         }
     }
 }
+
+tasks.shadowJar { mergeServiceFiles() }

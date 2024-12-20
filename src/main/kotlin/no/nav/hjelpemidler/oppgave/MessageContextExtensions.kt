@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.serialization
+package no.nav.hjelpemidler.oppgave
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper

@@ -2,7 +2,7 @@ package no.nav.hjelpemidler.oppgave.metrics
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import io.github.oshai.kotlinlogging.KotlinLogging
-import no.nav.hjelpemidler.oppgave.serialization.publish
+import no.nav.hjelpemidler.oppgave.publish
 import java.time.LocalDateTime
 import java.util.UUID
 
