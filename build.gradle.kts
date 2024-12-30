@@ -11,12 +11,17 @@ application {
 }
 
 dependencies {
-    implementation(libs.kotlin.logging)
-    implementation(libs.rapidsAndRivers)
+    implementation(platform(libs.hotlibs.platform))
     implementation(libs.hotlibs.http)
+    implementation(libs.kotlin.logging)
     implementation(libs.wiremock)
-    implementation(libs.ktor.server.content.negotiation)
+
+    // Ktor
     implementation(libs.ktor.serialization.jackson)
+    implementation(libs.ktor.server.content.negotiation)
+
+    // Rapids and rivers
+    implementation(libs.rapidsAndRivers)
 }
 
 java { toolchain { languageVersion.set(JavaLanguageVersion.of(21)) } }
@@ -47,9 +52,7 @@ testing {
         val test by getting(JvmTestSuite::class) {
             useKotlinTest(libs.versions.kotlin.asProvider())
             dependencies {
-                implementation(libs.kotest.assertions.core)
-                implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.mockk)
+                implementation(libs.hotlibs.test)
                 implementation(libs.tbdLibs.rapidsAndRivers.test)
             }
         }
