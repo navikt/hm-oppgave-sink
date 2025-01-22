@@ -118,7 +118,7 @@ class OppgaveClient(
         if (!Environment.current.tier.isDev) throw Exception("Bare fjern gamle oppgaver i gosys hvis man er i dev!")
 
         // Hent listen over personens oppgaver
-        val filter = "?statuskategori=AAPEN&tema=HJE&aktoerId=$aktoerId&sorteringsrekkefolge=ASC&sorteringsfelt=ENDRET_TIDSPUNKT&limit=$limit"
+        val filter = "?statuskategori=AAPEN&tema=HJE&aktoerId=$aktoerId&sorteringsrekkefolge=ASC&sorteringsfelt=OPPRETTET_TIDSPUNKT&limit=$limit"
 
         val tokenSet = azureAdClient.grant(scope)
         val sokResponse = client.get(baseUrl + filter) {
