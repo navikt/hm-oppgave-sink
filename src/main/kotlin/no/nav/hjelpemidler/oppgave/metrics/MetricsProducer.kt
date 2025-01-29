@@ -9,17 +9,13 @@ import java.util.UUID
 private val log = KotlinLogging.logger {}
 
 class MetricsProducer(private val context: MessageContext) {
-    fun rutingOppgaveForsøktHåndtert(type: String) =
-        hendelseOpprettet(RUTING_OPPGAVE_FORSØKT_HÅNDTERT, mapOf("type" to type))
+    fun rutingOppgaveForsøktHåndtert(type: String) = hendelseOpprettet(RUTING_OPPGAVE_FORSØKT_HÅNDTERT, mapOf("type" to type))
 
-    fun rutingOppgaveOpprettet(type: String) =
-        hendelseOpprettet(RUTING_OPPGAVE_OPPRETTET, mapOf("type" to type))
+    fun rutingOppgaveOpprettet(type: String) = hendelseOpprettet(RUTING_OPPGAVE_OPPRETTET, mapOf("type" to type))
 
-    fun rutingOppgaveEksisterteAllerede(type: String) =
-        hendelseOpprettet(RUTING_OPPGAVE_EKSISTERTE_ALLEREDE, mapOf("type" to type))
+    fun rutingOppgaveEksisterteAllerede(type: String) = hendelseOpprettet(RUTING_OPPGAVE_EKSISTERTE_ALLEREDE, mapOf("type" to type))
 
-    fun rutingOppgaveException(type: String) =
-        hendelseOpprettet(RUTING_OPPGAVE_EXCEPTION, mapOf("type" to type))
+    fun rutingOppgaveException(type: String) = hendelseOpprettet(RUTING_OPPGAVE_EXCEPTION, mapOf("type" to type))
 
     fun hendelseOpprettet(
         measurement: String,

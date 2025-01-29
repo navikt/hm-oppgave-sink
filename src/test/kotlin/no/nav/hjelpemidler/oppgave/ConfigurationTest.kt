@@ -31,9 +31,7 @@ class ConfigurationTest {
         jsonVariables shouldHaveKeys environmentVariables
     }
 
-    private fun readJsonVariables(path: String) =
-        jsonMapper.readValue<Map<String, String>>(Path("./.nais").resolve(path))
+    private fun readJsonVariables(path: String) = jsonMapper.readValue<Map<String, String>>(Path("./.nais").resolve(path))
 
-    private infix fun Map<String, String>.shouldHaveKeys(keys: Collection<String>) =
-        shouldHaveKeys(*keys.toTypedArray())
+    private infix fun Map<String, String>.shouldHaveKeys(keys: Collection<String>) = shouldHaveKeys(*keys.toTypedArray())
 }

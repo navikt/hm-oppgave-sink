@@ -96,11 +96,10 @@ class OpprettOppgaveForPapirsøknad(
         }
     }
 
-    private fun opprettOppgave(oppgave: RutingOppgave) =
-        runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(oppgave) } }
-            .onSuccess { oppgaveId -> log.info { "Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $oppgaveId" } }
-            .onFailure { log.error(it) { "Feil under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
-            .getOrThrow()
+    private fun opprettOppgave(oppgave: RutingOppgave) = runCatching { runBlocking(Dispatchers.IO) { oppgaveClient.opprettOppgave(oppgave) } }
+        .onSuccess { oppgaveId -> log.info { "Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $oppgaveId" } }
+        .onFailure { log.error(it) { "Feil under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
+        .getOrThrow()
 
     private fun skipEvent(eventId: UUID): Boolean {
         val skipList = setOf(
