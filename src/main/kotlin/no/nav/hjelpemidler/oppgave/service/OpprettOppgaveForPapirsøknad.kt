@@ -107,6 +107,7 @@ class OpprettOppgaveForPapirsøknad(
             "d0a68746-4804-44f1-931f-0b52ec9f9c95",
             "6b8d59cd-3b7c-48a4-86bc-fea690758f85",
             "14f09097-d2bf-4d4e-97cc-709a3854ec98",
+            "5fad9d57-b18a-4e3e-a182-5aa309d33074",
         ).map(UUID::fromString)
         return eventId in skipList
     }
