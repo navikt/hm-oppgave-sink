@@ -41,10 +41,11 @@ class OpprettOppgaveForOverføring(
                     "joarkRef",
                     "eventId",
                     "sakId",
-                    "soknadId",
                     "sakstype",
                 )
                 it.interestedIn(
+                    "soknadId", // todo -> fjernes
+                    "søknadId", // todo -> flyttes til requireKey
                     "journalpostId",
                     "fnrBruker",
                     "navIdent",
