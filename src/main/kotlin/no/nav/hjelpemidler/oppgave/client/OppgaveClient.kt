@@ -77,7 +77,7 @@ class OppgaveClient(
                 fristFerdigstillelse = rutingOppgave.fristFerdigstillelse,
                 prioritet = rutingOppgave.prioritet,
                 opprettetAvEnhetsnr = rutingOppgave.opprettetAvEnhetsnr,
-                tildeltEnhetsnr = null, // vil bli forsøkt utledet i oppgave/norg2 iht. standard arbeidsfordelingsregler
+                tildeltEnhetsnr = rutingOppgave.tildeltEnhetsnr,
                 behandlingstema = rutingOppgave.behandlingstema,
                 behandlingstype = rutingOppgave.behandlingstype,
             ),
