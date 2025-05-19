@@ -86,6 +86,13 @@ class OpprettOppgaveForPapirsøknad(
 
             log.info { "Ruting-oppgave kan opprettes, den finnes ikke fra før, journalpostId: ${rutingOppgave.journalpostId}" }
 
+            val rutingOppgave = if (rutingOppgave.tildeltEnhetsnr != null && nullUtUgyldigTildeltEnhet(rutingOppgave.tildeltEnhetsnr)) {
+                log.info { "Nuller ut tildeltEnhetsnr for event med ugyldig tildelt enhetsnr, eventId: ${packet.eventId}, tildeltEnhetsnr: ${rutingOppgave.tildeltEnhetsnr}" }
+                rutingOppgave.copy(tildeltEnhetsnr = null)
+            } else {
+                rutingOppgave
+            }
+
             // Opprett oppgave for journalpost
             opprettOppgave(rutingOppgave)
             metrics.rutingOppgaveOpprettet(rutingOppgave.oppgavetype)
@@ -112,6 +119,10 @@ class OpprettOppgaveForPapirsøknad(
         ).map(UUID::fromString)
         return eventId in skipList
     }
+
+    private fun nullUtUgyldigTildeltEnhet(enhet: String): Boolean = enhet in listOf(
+        "1290",
+    )
 }
 
 data class RutingOppgave(
