@@ -13,7 +13,7 @@ application {
 dependencies {
     implementation(platform(libs.hotlibs.platform))
     implementation(libs.hotlibs.http)
-    implementation(libs.kotlin.logging)
+    implementation(libs.hotlibs.logging)
     implementation(libs.wiremock)
 
     // Ktor

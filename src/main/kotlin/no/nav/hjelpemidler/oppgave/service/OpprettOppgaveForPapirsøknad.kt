@@ -11,7 +11,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import no.nav.hjelpemidler.logging.secureLog
+import no.nav.hjelpemidler.logging.teamInfo
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
@@ -72,7 +72,7 @@ class OpprettOppgaveForPapirsøknad(
 
         val rutingOppgave: RutingOppgave = jsonMapper.readValue(packet.toJson())
         try {
-            secureLog.info { "Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(rutingOppgave)}'" }
+            log.teamInfo { "Ruting-oppgave mottatt: '${jsonMapper.writeValueAsString(rutingOppgave)}'" }
 
             // Sjekk om det allerede finnes en oppgave for denne journalposten, da kan vi nemlig slutte prosesseringen tidlig.
             val harAlleredeOppgaveForJournalpost = runBlocking(Dispatchers.IO) {

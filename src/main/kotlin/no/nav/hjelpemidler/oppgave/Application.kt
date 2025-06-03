@@ -10,7 +10,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.configuration.Environment
-import no.nav.hjelpemidler.http.openid.azureADClient
+import no.nav.hjelpemidler.http.openid.entraIDClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.mock.MockServer
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDigitalSøknad
@@ -28,7 +28,7 @@ fun main() {
         }
     }
 
-    val azureAdClient = azureADClient {
+    val entraIDClient = entraIDClient {
         cache(leeway = 10.seconds) {
             maximumSize = 100
         }
@@ -37,7 +37,7 @@ fun main() {
     val oppgaveClient = OppgaveClient(
         baseUrl = Configuration.OPPGAVE_BASE_URL,
         scope = Configuration.OPPGAVE_SCOPE,
-        azureAdClient = azureAdClient,
+        azureAdClient = entraIDClient,
     )
 
     RapidApplication.create(no.nav.hjelpemidler.configuration.Configuration.current) { engine, _ ->

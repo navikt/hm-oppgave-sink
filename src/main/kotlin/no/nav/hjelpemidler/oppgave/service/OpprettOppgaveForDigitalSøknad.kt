@@ -10,7 +10,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import no.nav.hjelpemidler.logging.secureLog
+import no.nav.hjelpemidler.logging.teamInfo
 import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
@@ -110,7 +110,7 @@ class OpprettOppgaveForDigitalSøknad(
         }
             .onSuccess { oppgaveId ->
                 log.info { "Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId" }
-                secureLog.info { "Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId, fnrBruker: ${søknad.fnrBruker}" }
+                log.teamInfo { "Oppgave opprettet, søknadId: $søknadId, oppgaveId: $oppgaveId, fnrBruker: ${søknad.fnrBruker}" }
 
                 Prometheus.oppgaveOpprettetCounter.increment()
             }

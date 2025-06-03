@@ -30,8 +30,6 @@ spec:
      - name: {{@key}}
        value: "{{this}}"
   {{/each}}
-  secureLogs:
-    enabled: true
   kafka:
     pool: nav-dev
   azure:
@@ -39,6 +37,9 @@ spec:
       enabled: true
   accessPolicy:
     outbound:
+      rules:
+        - application: logging
+          namespace: nais-system
       external:
         - host: oppgave-q1.dev-fss-pub.nais.io # q1
         - host: oppgave.dev-fss-pub.nais.io #q2
