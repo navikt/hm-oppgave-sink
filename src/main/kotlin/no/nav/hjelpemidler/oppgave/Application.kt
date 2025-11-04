@@ -1,5 +1,6 @@
 package no.nav.hjelpemidler.oppgave
 
+import io.ktor.client.engine.cio.CIO
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.install
@@ -10,7 +11,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.configuration.Environment
-import no.nav.hjelpemidler.http.openid.entraIDClient
+import no.nav.hjelpemidler.http.openid.TexasClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.mock.MockServer
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDigitalSøknad
@@ -18,7 +19,6 @@ import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForOverføring
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForPapirsøknad
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
 import java.time.LocalDateTime
-import kotlin.time.Duration.Companion.seconds
 
 fun main() {
     if (Environment.current.isLocal) {
@@ -28,19 +28,15 @@ fun main() {
         }
     }
 
-    val entraIDClient = entraIDClient {
-        cache(leeway = 10.seconds) {
-            maximumSize = 100
-        }
-    }
-
+    val engine = CIO.create()
+    val texasClient = TexasClient(engine)
     val oppgaveClient = OppgaveClient(
         baseUrl = Configuration.OPPGAVE_BASE_URL,
-        scope = Configuration.OPPGAVE_SCOPE,
-        azureAdClient = entraIDClient,
+        tokenSetProvider = texasClient.entraId(Configuration.OPPGAVE_SCOPE),
+        engine = engine,
     )
 
-    RapidApplication.create(no.nav.hjelpemidler.configuration.Configuration.current) { engine, _ ->
+    RapidApplication.create(no.nav.hjelpemidler.configuration.Configuration) { engine, _ ->
         engine.application.install(ContentNegotiation) {
             register(ContentType.Application.Json, JacksonConverter(jsonMapper))
         }

@@ -86,12 +86,13 @@ class OpprettOppgaveForPapirsøknad(
 
             log.info { "Ruting-oppgave kan opprettes, den finnes ikke fra før, journalpostId: ${rutingOppgave.journalpostId}" }
 
-            val rutingOppgave = if (rutingOppgave.tildeltEnhetsnr != null && nullUtUgyldigTildeltEnhet(rutingOppgave.tildeltEnhetsnr)) {
-                log.info { "Nuller ut tildeltEnhetsnr for event med ugyldig tildelt enhetsnr, eventId: ${packet.eventId}, tildeltEnhetsnr: ${rutingOppgave.tildeltEnhetsnr}" }
-                rutingOppgave.copy(tildeltEnhetsnr = null)
-            } else {
-                rutingOppgave
-            }
+            val rutingOppgave =
+                if (rutingOppgave.tildeltEnhetsnr != null && nullUtUgyldigTildeltEnhet(rutingOppgave.tildeltEnhetsnr)) {
+                    log.info { "Nuller ut tildeltEnhetsnr for event med ugyldig tildelt enhetsnr, eventId: ${packet.eventId}, tildeltEnhetsnr: ${rutingOppgave.tildeltEnhetsnr}" }
+                    rutingOppgave.copy(tildeltEnhetsnr = null)
+                } else {
+                    rutingOppgave
+                }
 
             // Opprett oppgave for journalpost
             opprettOppgave(rutingOppgave)
@@ -129,13 +130,13 @@ data class RutingOppgave(
     val eventId: UUID,
     val eventName: String,
     val opprettet: LocalDateTime,
-    @JsonAlias("aktoerId")
+    @param:JsonAlias("aktoerId")
     val aktørId: String?,
     val orgnr: String?,
     val journalpostId: String,
     val tema: String,
     val behandlingstema: String?,
-    @JsonAlias("behandlingtype")
+    @param:JsonAlias("behandlingtype")
     val behandlingstype: String?,
     val oppgavetype: String,
     val aktivDato: LocalDate,

@@ -18,8 +18,8 @@ import io.ktor.http.isSuccess
 import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.correlationId
 import no.nav.hjelpemidler.http.createHttpClient
-import no.nav.hjelpemidler.http.openid.OpenIDClient
-import no.nav.hjelpemidler.http.openid.bearerAuth
+import no.nav.hjelpemidler.http.openid.TokenSetProvider
+import no.nav.hjelpemidler.http.openid.openID
 import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.PatchOppgaveRequest
@@ -33,12 +33,12 @@ private val log = KotlinLogging.logger {}
 
 class OppgaveClient(
     private val baseUrl: String,
-    private val scope: String,
-    private val azureAdClient: OpenIDClient,
+    private val tokenSetProvider: TokenSetProvider,
     engine: HttpClientEngine = CIO.create(),
 ) {
     private val client = createHttpClient(engine) {
         expectSuccess = true
+        openID(tokenSetProvider)
         defaultRequest {
             correlationId()
             accept(ContentType.Application.Json)
@@ -47,9 +47,7 @@ class OppgaveClient(
     }
 
     suspend fun harOppgaveForJournalpost(journalpostId: String): Boolean {
-        val tokenSet = azureAdClient.grant(scope)
         val response = client.get(baseUrl) {
-            bearerAuth(tokenSet)
             parameter("journalpostId", journalpostId)
             parameter("statuskategori", "AAPEN")
             parameter("oppgavetype", "JFR")
@@ -105,25 +103,25 @@ class OppgaveClient(
     suspend fun opprettOppgave(request: OpprettOppgaveRequest): Oppgave {
         log.info { "Oppretter oppgave, journalpostId: ${request.journalpostId}, oppgavetype: ${request.oppgavetype}" }
 
-        val tokenSet = azureAdClient.grant(scope)
         val response = client.post(baseUrl) {
-            bearerAuth(tokenSet)
             setBody(request)
         }
 
         return response.body<Oppgave>()
     }
 
-    suspend fun fjernGamleOppgaver(aktoerId: String, before: LocalDateTime = LocalDateTime.now(), limit: Int = 100): String {
+    suspend fun fjernGamleOppgaver(
+        aktoerId: String,
+        before: LocalDateTime = LocalDateTime.now(),
+        limit: Int = 100,
+    ): String {
         if (!Environment.current.tier.isDev) throw Exception("Bare fjern gamle oppgaver i gosys hvis man er i dev!")
 
         // Hent listen over personens oppgaver
-        val filter = "?statuskategori=AAPEN&tema=HJE&aktoerId=$aktoerId&sorteringsrekkefolge=ASC&sorteringsfelt=OPPRETTET_TIDSPUNKT&limit=$limit"
+        val filter =
+            "?statuskategori=AAPEN&tema=HJE&aktoerId=$aktoerId&sorteringsrekkefolge=ASC&sorteringsfelt=OPPRETTET_TIDSPUNKT&limit=$limit"
 
-        val tokenSet = azureAdClient.grant(scope)
-        val sokResponse = client.get(baseUrl + filter) {
-            bearerAuth(tokenSet)
-        }
+        val sokResponse = client.get(baseUrl + filter)
         val sokBody = sokResponse.body<SokOppgaverResponse>()
 
         // Ferdigstill oppgaver
@@ -137,9 +135,7 @@ class OppgaveClient(
 
         filtrerteOppgaver.forEachIndexed { index, oppgave ->
             log.info { "Ferdigstiller oppgave $index/${filtrerteOppgaver.count()} (id=${oppgave.id}, versjon=${oppgave.versjon})" }
-            val tokenSet = azureAdClient.grant(scope)
             val response = client.patch(baseUrl + "/${oppgave.id}") {
-                bearerAuth(tokenSet)
                 setBody(
                     PatchOppgaveRequest(
                         status = PatchOppgaveRequest.Status.FERDIGSTILT,

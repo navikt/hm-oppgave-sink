@@ -22,7 +22,6 @@ import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.mock.lagOppgave
 import no.nav.hjelpemidler.oppgave.mock.withBody
-import no.nav.hjelpemidler.oppgave.test.TestOpenIDClient
 import java.time.LocalDate
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -39,8 +38,7 @@ class OppgaveClientTest {
     fun setUp(wireMockRuntimeInfo: WireMockRuntimeInfo) {
         client = OppgaveClient(
             baseUrl = "${wireMockRuntimeInfo.httpBaseUrl}/api/v1/oppgaver",
-            scope = "test",
-            azureAdClient = TestOpenIDClient(TokenSet.bearer(1.hours, "")),
+            tokenSetProvider = { TokenSet("", 1.hours) },
             engine = engine,
         )
     }

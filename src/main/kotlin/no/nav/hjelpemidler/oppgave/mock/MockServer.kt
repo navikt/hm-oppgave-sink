@@ -18,7 +18,7 @@ class MockServer : Closeable {
     fun setup() {
         server.stubFor(
             post(urlPathEqualTo("/token"))
-                .willReturn(ok().withBody(TokenSet.bearer(1.hours, ""))),
+                .willReturn(ok().withBody(TokenSet("", 1.hours))),
         )
 
         server.stubFor(

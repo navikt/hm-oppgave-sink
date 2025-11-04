@@ -44,8 +44,8 @@ class OpprettOppgaveForOverføring(
                     "sakstype",
                 )
                 it.interestedIn(
-                    "soknadId", // todo -> fjernes
                     "søknadId", // todo -> flyttes til requireKey
+                    "soknadId", // todo -> fjernes
                     "journalpostId",
                     "fnrBruker",
                     "navIdent",
@@ -175,11 +175,11 @@ class OpprettOppgaveForOverføring(
 }
 
 data class OpprettetMottattJournalpost(
-    @JsonAlias("joarkRef")
+    @param:JsonAlias("joarkRef")
     val journalpostId: String,
-    @JsonAlias("fodselNrBruker")
+    @param:JsonAlias("fodselNrBruker")
     val fnrBruker: String,
-    @JsonAlias("soknadId")
+    @param:JsonAlias("soknadId")
     val søknadId: UUID,
     val sakId: String,
     val sakstype: Sakstype,
@@ -192,7 +192,7 @@ data class OpprettetMottattJournalpost(
 
 @Suppress("unused")
 data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
-    @JsonProperty("soknadId")
+    @param:JsonProperty("soknadId")
     val søknadId: UUID,
     val oppgaveId: String,
     val sakId: String,

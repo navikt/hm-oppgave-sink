@@ -121,7 +121,7 @@ class OpprettOppgaveForDigitalSøknad(
 
 @Suppress("unused")
 data class OppgaveOpprettetEvent(
-    @JsonProperty("soknadId")
+    @param:JsonProperty("soknadId")
     val søknadId: UUID,
     val oppgaveId: String,
     val sakstype: Sakstype,
