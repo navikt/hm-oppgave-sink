@@ -32,7 +32,7 @@ fun main() {
     val texasClient = TexasClient(engine)
     val oppgaveClient = OppgaveClient(
         baseUrl = Configuration.OPPGAVE_BASE_URL,
-        tokenSetProvider = texasClient.entraId(Configuration.OPPGAVE_SCOPE),
+        tokenSetProvider = texasClient.entraIdApplication(Configuration.OPPGAVE_SCOPE),
         engine = engine,
     )
 
