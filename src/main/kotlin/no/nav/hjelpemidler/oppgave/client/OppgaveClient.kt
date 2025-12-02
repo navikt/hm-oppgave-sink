@@ -75,7 +75,10 @@ class OppgaveClient(
                 fristFerdigstillelse = rutingOppgave.fristFerdigstillelse,
                 prioritet = rutingOppgave.prioritet,
                 opprettetAvEnhetsnr = rutingOppgave.opprettetAvEnhetsnr,
-                tildeltEnhetsnr = rutingOppgave.tildeltEnhetsnr,
+                tildeltEnhetsnr = rutingOppgave.tildeltEnhetsnr.takeIf {
+                    // retter crash loop i prod, denne enheten er nedlagt
+                    it != "4760"
+                },
                 behandlingstema = rutingOppgave.behandlingstema,
                 behandlingstype = rutingOppgave.behandlingstype,
             ),
