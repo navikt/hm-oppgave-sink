@@ -24,6 +24,7 @@ import no.nav.hjelpemidler.oppgave.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.PatchOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
+import no.nav.hjelpemidler.oppgave.domain.Behandlingstype
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
@@ -63,6 +64,15 @@ class OppgaveClient(
     suspend fun opprettOppgave(rutingOppgave: RutingOppgave): String {
         log.info { "Oppretter oppgave basert på ruting-oppgave, journalpostId: ${rutingOppgave.journalpostId}" }
 
+        // midlertidig hack før FKV er oppdatert
+        // https://nav-it.slack.com/archives/CFR572D16/p1765450631718509
+        var behandlingstema: String? = rutingOppgave.behandlingstema
+        var behandlingstype: String? = rutingOppgave.behandlingstype
+        if (behandlingstema in setOf("ab0380")) {
+            behandlingstema = null
+            behandlingstype = Behandlingstype.BESTILLING.eksternKode
+        }
+
         return opprettOppgave(
             OpprettOppgaveRequest(
                 personident = rutingOppgave.aktørId,
@@ -79,8 +89,8 @@ class OppgaveClient(
                     // retter crash loop i prod, denne enheten er nedlagt
                     it != "4760"
                 },
-                behandlingstema = rutingOppgave.behandlingstema,
-                behandlingstype = rutingOppgave.behandlingstype,
+                behandlingstema = behandlingstema,
+                behandlingstype = behandlingstype,
             ),
         ).id.toString()
     }
