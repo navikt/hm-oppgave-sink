@@ -155,12 +155,11 @@ class OpprettOppgaveForOverføring(
                     },
                     tema = tema,
                     oppgavetype = oppgavetype,
-                    behandlingstype = sakstype.toBehandlingstype(prioritet),
-                    behandlingstema = sakstype.toBehandlingstema(prioritet),
+                    behandlingstema = null,
+                    behandlingstype = sakstype.toBehandlingstype(prioritet).eksternKode,
                     aktivDato = nå,
                     fristFerdigstillelse = nå,
                     prioritet = prioritet,
-                    // tilordnetRessurs = journalpost.navIdent, // fjernet fra spec
                 )
             }
         }
