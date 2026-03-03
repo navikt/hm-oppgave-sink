@@ -84,11 +84,8 @@ class OppgaveClient(
                 aktivDato = rutingOppgave.aktivDato,
                 fristFerdigstillelse = rutingOppgave.fristFerdigstillelse,
                 prioritet = rutingOppgave.prioritet,
-                opprettetAvEnhetsnr = rutingOppgave.opprettetAvEnhetsnr,
-                tildeltEnhetsnr = rutingOppgave.tildeltEnhetsnr.takeIf {
-                    // retter crash loop i prod, denne enheten er nedlagt
-                    it != "4760"
-                },
+                opprettetAvEnhetsnr = rutingOppgave.opprettetAvEnhetsnr.takeUnless(::isNedlagtEnhet),
+                tildeltEnhetsnr = rutingOppgave.tildeltEnhetsnr?.takeUnless(::isNedlagtEnhet),
                 behandlingstema = behandlingstema,
                 behandlingstype = behandlingstype,
             ),
@@ -128,7 +125,7 @@ class OppgaveClient(
         before: LocalDateTime = LocalDateTime.now(),
         limit: Int = 100,
     ): String {
-        if (!Environment.current.tier.isDev) throw Exception("Bare fjern gamle oppgaver i gosys hvis man er i dev!")
+        if (!Environment.current.isDev) error("Bare fjern gamle oppgaver i Gosys hvis man er i dev!")
 
         // Hent listen over personens oppgaver
         val filter =
@@ -147,7 +144,7 @@ class OppgaveClient(
         }
 
         filtrerteOppgaver.forEachIndexed { index, oppgave ->
-            log.info { "Ferdigstiller oppgave $index/${filtrerteOppgaver.count()} (id=${oppgave.id}, versjon=${oppgave.versjon})" }
+            log.info { "Ferdigstiller oppgave $index/${filtrerteOppgaver.count()} (id: ${oppgave.id}, versjon: ${oppgave.versjon})" }
             val response = client.patch(baseUrl + "/${oppgave.id}") {
                 setBody(
                     PatchOppgaveRequest(
@@ -163,10 +160,15 @@ class OppgaveClient(
             }
             if (!response.status.isSuccess()) {
                 val body = runCatching { response.bodyAsText() }.getOrNull() ?: "<ingen>"
-                log.error { "Fjerning av gamle opgpave i gosys feilet med statusKode=${response.status.value}, body=$body" }
+                log.error { "Fjerning av gamle oppgaver i Gosys feilet med status: ${response.status.value}, body: $body" }
             }
         }
 
         return "OK"
     }
 }
+
+/**
+ * Er enheten nedlagt eller under avvikling?
+ */
+private fun isNedlagtEnhet(enhetsnummer: String): Boolean = enhetsnummer in setOf("4702", "4760")
