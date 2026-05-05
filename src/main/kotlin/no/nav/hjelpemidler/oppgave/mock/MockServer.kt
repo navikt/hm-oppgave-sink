@@ -43,4 +43,4 @@ class MockServer : Closeable {
 
 fun <T : Any> ResponseDefinitionBuilder.withBody(body: T): ResponseDefinitionBuilder = this
     .withHeader("Content-Type", "application/json")
-    .withJsonBody(jsonMapper.valueToTree(body))
+    .withBody(jsonMapper.writeValueAsBytes(body))

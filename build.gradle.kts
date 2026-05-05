@@ -11,20 +11,30 @@ application {
 }
 
 dependencies {
+    // hotlibs
     implementation(platform(libs.hotlibs.platform))
     implementation(libs.hotlibs.http)
     implementation(libs.hotlibs.logging)
+    implementation(libs.hotlibs.rapidsAndRivers)
+
     implementation(libs.wiremock)
 
     // Ktor
-    implementation(libs.ktor.serialization.jackson)
+    implementation(libs.ktor.serialization.jackson3)
     implementation(libs.ktor.server.content.negotiation)
-
-    // Rapids and rivers
-    implementation(libs.rapidsAndRivers)
 }
 
-java { toolchain { languageVersion.set(JavaLanguageVersion.of(21)) } }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+    }
+}
 
 spotless {
     kotlin {
@@ -62,8 +72,8 @@ testing {
 val openApiGenerated: Provider<Directory> = layout.buildDirectory.dir("generated/source/openapi")
 openApiGenerate {
     generatorName.set("kotlin")
-    inputSpec.set(layout.projectDirectory.file("src/main/resources/oppgave/openapi.yaml").toString())
-    outputDir.set(openApiGenerated.map(Directory::toString))
+    inputSpec.set(layout.projectDirectory.file("src/main/resources/oppgave/openapi.yaml"))
+    outputDir.set(openApiGenerated)
     packageName.set("no.nav.hjelpemidler.oppgave.client")
     globalProperties.set(
         mapOf(

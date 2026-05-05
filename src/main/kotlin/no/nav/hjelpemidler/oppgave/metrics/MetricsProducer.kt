@@ -2,9 +2,9 @@ package no.nav.hjelpemidler.oppgave.metrics
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import io.github.oshai.kotlinlogging.KotlinLogging
-import no.nav.hjelpemidler.oppgave.publish
+import no.nav.hjelpemidler.kafka.BigQueryHendelse
+import no.nav.hjelpemidler.rapids_and_rivers.publish
 import java.time.LocalDateTime
-import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
@@ -23,12 +23,9 @@ class MetricsProducer(private val context: MessageContext) {
         tags: Map<String, String> = emptyMap(),
     ) {
         context.publish(
-            measurement,
-            mapOf(
-                "eventId" to UUID.randomUUID(),
-                "eventName" to "hm-bigquery-sink-hendelse",
-                "schemaId" to "hendelse_v2",
-                "payload" to mapOf(
+            BigQueryHendelse(
+                schemaId = "hendelse_v2",
+                payload = mapOf(
                     "opprettet" to LocalDateTime.now(),
                     "navn" to measurement,
                     "kilde" to "hm-oppgave-sink",

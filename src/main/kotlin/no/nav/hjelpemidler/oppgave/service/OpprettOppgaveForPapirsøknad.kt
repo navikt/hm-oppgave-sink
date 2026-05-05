@@ -1,7 +1,6 @@
 package no.nav.hjelpemidler.oppgave.service
 
 import com.fasterxml.jackson.annotation.JsonAlias
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -15,8 +14,10 @@ import no.nav.hjelpemidler.logging.teamInfo
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
+import no.nav.hjelpemidler.rapids_and_rivers.eventId
+import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
-import no.nav.hjelpemidler.serialization.jackson.uuidValue
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -53,8 +54,6 @@ class OpprettOppgaveForPapirsøknad(
         }.register(this)
     }
 
-    private val JsonMessage.eventId get() = this["eventId"].uuidValue()
-
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
@@ -63,12 +62,13 @@ class OpprettOppgaveForPapirsøknad(
     ) {
         val metrics = MetricsProducer(context)
 
-        if (skipEvent(packet.eventId)) {
-            log.info { "Hopper over event i skipList, eventId: ${packet.eventId}" }
+        val eventId = packet.eventId
+        if (eventId in skippedEventId) {
+            log.warn { "Hopper over event i skippedEventId, eventId: $eventId" }
             return
         }
 
-        metrics.rutingOppgaveForsøktHåndtert(packet["oppgavetype"].asText())
+        metrics.rutingOppgaveForsøktHåndtert(packet["oppgavetype"].stringValue())
 
         val rutingOppgave: RutingOppgave = jsonMapper.readValue(packet.toJson())
         try {
@@ -88,7 +88,7 @@ class OpprettOppgaveForPapirsøknad(
 
             val rutingOppgave =
                 if (rutingOppgave.tildeltEnhetsnr != null && nullUtUgyldigTildeltEnhet(rutingOppgave.tildeltEnhetsnr)) {
-                    log.info { "Nuller ut tildeltEnhetsnr for event med ugyldig tildelt enhetsnr, eventId: ${packet.eventId}, tildeltEnhetsnr: ${rutingOppgave.tildeltEnhetsnr}" }
+                    log.info { "Nuller ut tildeltEnhetsnr for event med ugyldig tildelt enhetsnr, eventId: $eventId, tildeltEnhetsnr: ${rutingOppgave.tildeltEnhetsnr}" }
                     rutingOppgave.copy(tildeltEnhetsnr = null)
                 } else {
                     rutingOppgave
@@ -98,7 +98,7 @@ class OpprettOppgaveForPapirsøknad(
             opprettOppgave(rutingOppgave)
             metrics.rutingOppgaveOpprettet(rutingOppgave.oppgavetype)
         } catch (e: Exception) {
-            log.error(e) { "Håndtering av ruting-oppgave feilet, eventId: ${packet.eventId}, journalpostId: ${rutingOppgave.journalpostId}" }
+            log.error(e) { "Håndtering av ruting-oppgave feilet, eventId: $eventId, journalpostId: ${rutingOppgave.journalpostId}" }
             metrics.rutingOppgaveException(rutingOppgave.oppgavetype)
             throw e
         }
@@ -108,18 +108,6 @@ class OpprettOppgaveForPapirsøknad(
         .onSuccess { oppgaveId -> log.info { "Journalføringsoppgave opprettet for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, oppgaveId: $oppgaveId" } }
         .onFailure { log.error(it) { "Feil under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
         .getOrThrow()
-
-    private fun skipEvent(eventId: UUID): Boolean {
-        val skipList = setOf(
-            "47376212-4289-4c0c-b6e6-417e4c989193",
-            "d0a68746-4804-44f1-931f-0b52ec9f9c95",
-            "6b8d59cd-3b7c-48a4-86bc-fea690758f85",
-            "14f09097-d2bf-4d4e-97cc-709a3854ec98",
-            "5fad9d57-b18a-4e3e-a182-5aa309d33074",
-            "7a21b265-7937-4cab-8e8b-d3c3c125a7d6",
-        ).map(UUID::fromString)
-        return eventId in skipList
-    }
 
     private fun nullUtUgyldigTildeltEnhet(enhet: String): Boolean = enhet in listOf(
         "1290",
@@ -145,4 +133,13 @@ data class RutingOppgave(
     val fristFerdigstillelse: LocalDate,
     val tildeltEnhetsnr: String?,
     val beskrivelse: String,
+)
+
+private val skippedEventId = uuidSetOf(
+    "47376212-4289-4c0c-b6e6-417e4c989193",
+    "d0a68746-4804-44f1-931f-0b52ec9f9c95",
+    "6b8d59cd-3b7c-48a4-86bc-fea690758f85",
+    "14f09097-d2bf-4d4e-97cc-709a3854ec98",
+    "5fad9d57-b18a-4e3e-a182-5aa309d33074",
+    "7a21b265-7937-4cab-8e8b-d3c3c125a7d6",
 )

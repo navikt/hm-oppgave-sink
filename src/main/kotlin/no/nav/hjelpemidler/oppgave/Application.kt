@@ -2,7 +2,7 @@ package no.nav.hjelpemidler.oppgave
 
 import io.ktor.client.engine.cio.CIO
 import io.ktor.http.ContentType
-import io.ktor.serialization.jackson.JacksonConverter
+import io.ktor.serialization.jackson3.JacksonConverter
 import io.ktor.server.application.install
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.request.receive

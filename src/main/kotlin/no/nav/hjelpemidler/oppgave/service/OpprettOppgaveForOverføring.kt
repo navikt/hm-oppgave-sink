@@ -2,7 +2,6 @@ package no.nav.hjelpemidler.oppgave.service
 
 import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -12,13 +11,16 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import no.nav.hjelpemidler.kafka.KafkaMessage
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
-import no.nav.hjelpemidler.oppgave.publish
+import no.nav.hjelpemidler.rapids_and_rivers.eventId
+import no.nav.hjelpemidler.rapids_and_rivers.publish
+import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
-import no.nav.hjelpemidler.serialization.jackson.uuidValue
+import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -58,8 +60,6 @@ class OpprettOppgaveForOverføring(
         }.register(this)
     }
 
-    private val JsonMessage.eventId get() = this["eventId"].uuidValue()
-
     override fun onPacket(
         packet: JsonMessage,
         context: MessageContext,
@@ -67,8 +67,8 @@ class OpprettOppgaveForOverføring(
         meterRegistry: MeterRegistry,
     ) {
         val eventId = packet.eventId
-        if (skipEvent(eventId)) {
-            log.info { "Hopper over event i skipList, eventId: $eventId" }
+        if (eventId in skippedEventId) {
+            log.warn { "Hopper over event i skippedEventId, eventId: $eventId" }
             return
         }
 
@@ -84,8 +84,8 @@ class OpprettOppgaveForOverføring(
             log.info { "Opprettet oppgave for journalpostId: ${journalpost.journalpostId} med oppgaveId: ${oppgave.id}" }
 
             context.publish(
-                journalpost.fnrBruker,
-                OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
+                key = journalpost.fnrBruker,
+                message = OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
                     søknadId = journalpost.søknadId,
                     oppgaveId = oppgave.id.toString(),
                     sakId = journalpost.sakId,
@@ -164,13 +164,6 @@ class OpprettOppgaveForOverføring(
             }
         }
     }
-
-    private fun skipEvent(eventId: UUID): Boolean {
-        val skip = setOf(
-            "47376212-4289-4c0c-b6e6-417e4c989193",
-        ).map(UUID::fromString)
-        return eventId in skip
-    }
 }
 
 data class OpprettetMottattJournalpost(
@@ -198,8 +191,12 @@ data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
     val sakstype: Sakstype?,
     val fnrBruker: String,
     val nyJournalpostId: String,
-    val eventId: UUID = UUID.randomUUID(),
+    override val eventId: UUID = UUID.randomUUID(),
     val opprettet: LocalDateTime = LocalDateTime.now(),
-) {
-    val eventName: String = "hm-opprettetJournalføringsoppgaveForTilbakeførtSak"
+) : KafkaMessage {
+    override val eventName: String = "hm-opprettetJournalføringsoppgaveForTilbakeførtSak"
 }
+
+private val skippedEventId = uuidSetOf(
+    "47376212-4289-4c0c-b6e6-417e4c989193",
+)

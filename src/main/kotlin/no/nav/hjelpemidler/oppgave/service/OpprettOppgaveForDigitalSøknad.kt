@@ -10,6 +10,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import no.nav.hjelpemidler.kafka.KafkaMessage
 import no.nav.hjelpemidler.logging.teamInfo
 import no.nav.hjelpemidler.oppgave.Configuration
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
@@ -17,7 +18,10 @@ import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.domain.Sakstype
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.metrics.Prometheus
-import no.nav.hjelpemidler.oppgave.publish
+import no.nav.hjelpemidler.rapids_and_rivers.eventId
+import no.nav.hjelpemidler.rapids_and_rivers.publish
+import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf
+import no.nav.hjelpemidler.serialization.jackson.enumValue
 import no.nav.hjelpemidler.serialization.jackson.uuidValue
 import java.time.LocalDateTime
 import java.util.UUID
@@ -37,17 +41,23 @@ class OpprettOppgaveForDigitalSøknad(
     init {
         River(rapidsConnection).apply {
             precondition { it.requireValue("eventName", consumedEventName) }
-            validate { it.requireKey("fnrBruker", "joarkRef", "soknadId", "eventId", "sakstype", "erHast") }
+            validate {
+                it.requireKey(
+                    "eventId",
+                    "soknadId",
+                    "joarkRef",
+                    "fnrBruker",
+                    "sakstype",
+                    "erHast",
+                )
+            }
         }.register(this)
     }
 
-    private val JsonMessage.eventId get() = this["eventId"].uuidValue()
     private val JsonMessage.søknadId get() = this["soknadId"].uuidValue()
-    private val JsonMessage.journalpostId get() = this["joarkRef"].textValue()
-    private val JsonMessage.fnrBruker get() = this["fnrBruker"].textValue()
-
-    private val JsonMessage.sakstype get() = Sakstype.valueOf(this["sakstype"].textValue())
-
+    private val JsonMessage.journalpostId get() = this["joarkRef"].stringValue()
+    private val JsonMessage.fnrBruker get() = this["fnrBruker"].stringValue()
+    private val JsonMessage.sakstype get() = this["sakstype"].enumValue<Sakstype>()
     private val JsonMessage.erHast get() = this["erHast"].booleanValue()
 
     override fun onPacket(
@@ -57,8 +67,8 @@ class OpprettOppgaveForDigitalSøknad(
         meterRegistry: MeterRegistry,
     ) {
         val eventId = packet.eventId
-        if (skipEvent(eventId)) {
-            log.info { "Hopper over event i skipList, eventId: $eventId" }
+        if (eventId in skippedEventId) {
+            log.warn { "Hopper over event i skippedEventId, eventId: $eventId" }
             return
         }
 
@@ -82,8 +92,8 @@ class OpprettOppgaveForDigitalSøknad(
             )
 
             context.publish(
-                fnrBruker,
-                OppgaveOpprettetEvent(
+                key = fnrBruker,
+                message = OppgaveOpprettetEvent(
                     søknadId = søknadId,
                     oppgaveId = oppgaveId,
                     sakstype = sakstype,
@@ -93,13 +103,6 @@ class OpprettOppgaveForDigitalSøknad(
         } catch (e: Exception) {
             throw RuntimeException("Håndtering av eventId: $eventId feilet", e)
         }
-    }
-
-    private fun skipEvent(eventId: UUID): Boolean {
-        val skipList = setOf<UUID>(
-            UUID.fromString("d38e62d6-a804-4f22-8975-e8b16b4eae3e"),
-        )
-        return eventId in skipList
     }
 
     private fun opprettOppgave(søknad: Søknad): String {
@@ -121,13 +124,17 @@ class OpprettOppgaveForDigitalSøknad(
 
 @Suppress("unused")
 data class OppgaveOpprettetEvent(
-    @param:JsonProperty("soknadId")
+    @JsonProperty("soknadId")
     val søknadId: UUID,
     val oppgaveId: String,
     val sakstype: Sakstype,
     val fnrBruker: String,
-) {
-    val eventId: UUID = UUID.randomUUID()
-    val eventName: String = Configuration.PRODUCED_EVENT_NAME
-    val opprettet: LocalDateTime = LocalDateTime.now()
+    override val eventId: UUID = UUID.randomUUID(),
+    val opprettet: LocalDateTime = LocalDateTime.now(),
+) : KafkaMessage {
+    override val eventName: String = Configuration.PRODUCED_EVENT_NAME
 }
+
+private val skippedEventId = uuidSetOf(
+    "d38e62d6-a804-4f22-8975-e8b16b4eae3e",
+)
