@@ -109,8 +109,9 @@ class OpprettOppgaveForPapirsøknad(
         .onFailure { log.error(it) { "Feil under opprettelse av journalføringsoppgave for ruting-oppgave, journalpostId: ${oppgave.journalpostId}, tildeltEnhetsnr: ${oppgave.tildeltEnhetsnr}, opprettetAvEnhetsnr: ${oppgave.opprettetAvEnhetsnr}" } }
         .getOrThrow()
 
-    private fun nullUtUgyldigTildeltEnhet(enhet: String): Boolean = enhet in listOf(
+    private fun nullUtUgyldigTildeltEnhet(enhet: String): Boolean = enhet in setOf(
         "1290",
+        "4432",
     )
 }
 
