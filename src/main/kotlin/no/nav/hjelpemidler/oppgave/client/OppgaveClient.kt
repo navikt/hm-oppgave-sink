@@ -171,4 +171,4 @@ class OppgaveClient(
 /**
  * Er enheten nedlagt eller under avvikling?
  */
-private fun isNedlagtEnhet(enhetsnummer: String): Boolean = enhetsnummer in setOf("4702", "4760")
+private fun isNedlagtEnhet(enhetsnummer: String): Boolean = enhetsnummer in setOf("4702", "4717", "4760")
