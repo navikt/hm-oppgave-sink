@@ -98,7 +98,7 @@ class OpprettOppgaveForDelbestilling(
         }
             .onSuccess { oppgaveId ->
                 log.info { "Delbestillingsppgave opprettet, saksnummer: $saksnummer, oppgaveId: $oppgaveId" }
-                log.teamInfo { "Oppgave opprettet, søknadId: $saksnummer, oppgaveId: $oppgaveId, fnrBruker: ${delbestilling.fnrBruker}" }
+                log.teamInfo { "Oppgave opprettet, saksnummer: $saksnummer, oppgaveId: $oppgaveId, fnrBruker: ${delbestilling.fnrBruker}" }
 
                 Prometheus.oppgaveOpprettetCounter.increment()
             }
