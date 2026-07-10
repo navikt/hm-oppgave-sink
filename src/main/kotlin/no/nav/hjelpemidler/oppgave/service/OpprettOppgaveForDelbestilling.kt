@@ -36,15 +36,10 @@ class OpprettOppgaveForDelbestilling(
             precondition { it.requireValue("eventName", "hm-DelbestillingArkivert") }
             validate {
                 it.requireKey(
-                    "eventId",
                     "saksnummer",
+                    "brukersFnr",
                     "joarkRef",
-                    "mottattTidspunkt",
-                    "joarkRef",
-                    "dokumentTittel",
-                    "eksternReferanseId",
-                    "mottattTidspunkt",
-                    "eventId"
+                    "eventId",
                 )
             }
         }.register(this)
