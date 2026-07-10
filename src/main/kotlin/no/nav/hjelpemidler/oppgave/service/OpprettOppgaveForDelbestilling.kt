@@ -44,6 +44,7 @@ class OpprettOppgaveForDelbestilling(
                     "dokumentTittel",
                     "eksternReferanseId",
                     "mottattTidspunkt",
+                    "eventId"
                 )
             }
         }.register(this)
@@ -52,7 +53,7 @@ class OpprettOppgaveForDelbestilling(
     private val JsonMessage.saksnummer get() = this["saksnummer"].longValue()
     private val JsonMessage.brukersFnr get() = this["brukersFnr"].stringValue()
     private val JsonMessage.joarkRef get() = this["joarkRef"].stringValue()
-    private val JsonMessage.eventId get() = this["sakstype"].uuidValue()
+    private val JsonMessage.eventId get() = this["eventId"].uuidValue()
 
     override fun onPacket(
         packet: JsonMessage,
