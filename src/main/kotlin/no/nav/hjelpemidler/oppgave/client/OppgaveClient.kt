@@ -25,6 +25,7 @@ import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.PatchOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.domain.Behandlingstype
+import no.nav.hjelpemidler.oppgave.domain.Delbestilling
 import no.nav.hjelpemidler.oppgave.domain.Søknad
 import no.nav.hjelpemidler.oppgave.service.RutingOppgave
 import java.time.LocalDate
@@ -106,6 +107,24 @@ class OppgaveClient(
                 aktivDato = nå,
                 fristFerdigstillelse = nå,
                 prioritet = søknad.prioritet,
+            ),
+        ).id.toString()
+    }
+
+    suspend fun opprettOppgave(delbestilling: Delbestilling): String {
+        val nå = LocalDate.now()
+        return opprettOppgave(
+            OpprettOppgaveRequest(
+                personident = delbestilling.fnrBruker,
+                journalpostId = delbestilling.journalpostId,
+                beskrivelse = delbestilling.sakstype.toBeskrivelse(),
+                tema = "HJE",
+                oppgavetype = "JFR", // TODO: Finn ut korrekt oppgavetype her
+                behandlingstema = null,
+                behandlingstype = delbestilling.sakstype.toBehandlingstype(delbestilling.prioritet).eksternKode,
+                aktivDato = nå,
+                fristFerdigstillelse = nå,
+                prioritet = delbestilling.prioritet,
             ),
         ).id.toString()
     }
