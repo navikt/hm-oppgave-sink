@@ -4,8 +4,8 @@ import io.kotest.matchers.maps.shouldHaveKeys
 import no.nav.hjelpemidler.configuration.environmentVariablesIn
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
 import no.nav.hjelpemidler.serialization.jackson.readValue
+import org.junit.jupiter.api.Test
 import kotlin.io.path.Path
-import kotlin.test.Test
 
 class ConfigurationTest {
     private val environmentVariables = environmentVariablesIn(Configuration, includeExternal = false)

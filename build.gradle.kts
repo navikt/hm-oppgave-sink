@@ -7,12 +7,13 @@ plugins {
 
 application {
     applicationName = "hm-oppgave-sink"
-    mainClass.set("no.nav.hjelpemidler.oppgave.ApplicationKt")
+    mainClass = "no.nav.hjelpemidler.oppgave.ApplicationKt"
 }
 
 dependencies {
     // hotlibs
     implementation(platform(libs.hotlibs.platform))
+    implementation(libs.hotlibs.core)
     implementation(libs.hotlibs.http)
     implementation(libs.hotlibs.logging)
     implementation(libs.hotlibs.rapidsAndRivers)
@@ -26,7 +27,7 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -56,16 +57,17 @@ spotless {
     }
 }
 
-@Suppress("UnstableApiUsage")
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
-            useKotlinTest(libs.versions.kotlin.asProvider())
-            dependencies {
-                implementation(libs.hotlibs.test)
-                implementation(libs.tbdLibs.rapidsAndRivers.test)
+        @Suppress("UnstableApiUsage")
+        val test =
+            named<JvmTestSuite>("test") {
+                useJUnitJupiter(libs.versions.junit)
+                dependencies {
+                    implementation(libs.hotlibs.test)
+                    implementation(libs.rapidsAndRivers.test)
+                }
             }
-        }
     }
 }
 
@@ -106,5 +108,8 @@ tasks {
         dependsOn("spotlessApply")
         dependsOn("spotlessCheck")
     }
-    shadowJar { mergeServiceFiles() }
+    shadowJar {
+        mergeServiceFiles()
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 }

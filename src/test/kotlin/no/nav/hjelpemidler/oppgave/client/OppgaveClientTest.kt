@@ -22,9 +22,9 @@ import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.mock.lagOppgave
 import no.nav.hjelpemidler.oppgave.mock.withBody
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import kotlin.time.Duration.Companion.hours
 
 @WireMockTest
@@ -34,7 +34,7 @@ class OppgaveClientTest {
 
     private lateinit var client: OppgaveClient
 
-    @BeforeTest
+    @BeforeEach
     fun setUp(wireMockRuntimeInfo: WireMockRuntimeInfo) {
         client = OppgaveClient(
             baseUrl = "${wireMockRuntimeInfo.httpBaseUrl}/api/v1/oppgaver",
