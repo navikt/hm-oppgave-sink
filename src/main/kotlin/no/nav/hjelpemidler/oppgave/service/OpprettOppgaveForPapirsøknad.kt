@@ -119,13 +119,13 @@ data class RutingOppgave(
     val eventId: UUID,
     val eventName: String,
     val opprettet: LocalDateTime,
-    @param:JsonAlias("aktoerId")
+    @JsonAlias("aktoerId")
     val aktørId: String?,
     val orgnr: String?,
     val journalpostId: String,
     val tema: String,
     val behandlingstema: String?,
-    @param:JsonAlias("behandlingtype")
+    @JsonAlias("behandlingtype")
     val behandlingstype: String?,
     val oppgavetype: String,
     val aktivDato: LocalDate,

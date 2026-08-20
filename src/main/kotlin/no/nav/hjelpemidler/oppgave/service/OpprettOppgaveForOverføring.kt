@@ -167,11 +167,11 @@ class OpprettOppgaveForOverføring(
 }
 
 data class OpprettetMottattJournalpost(
-    @param:JsonAlias("joarkRef")
+    @JsonAlias("joarkRef")
     val journalpostId: String,
-    @param:JsonAlias("fodselNrBruker")
+    @JsonAlias("fodselNrBruker")
     val fnrBruker: String,
-    @param:JsonAlias("soknadId")
+    @JsonAlias("soknadId")
     val søknadId: UUID,
     val sakId: String,
     val sakstype: Sakstype,
@@ -184,7 +184,7 @@ data class OpprettetMottattJournalpost(
 
 @Suppress("unused")
 data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
-    @param:JsonProperty("soknadId")
+    @JsonProperty("soknadId")
     val søknadId: UUID,
     val oppgaveId: String,
     val sakId: String,
