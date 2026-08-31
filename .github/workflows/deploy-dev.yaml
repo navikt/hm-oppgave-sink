@@ -9,7 +9,7 @@ on:
       - "CODEOWNERS"
     branches:
       - main
-      - debug-hast
+      - ManuellDelbestilling
 
 jobs:
   build:

@@ -14,6 +14,7 @@ import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.openid.TexasClient
 import no.nav.hjelpemidler.oppgave.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.mock.MockServer
+import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDelbestilling
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDigitalSøknad
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForOverføring
 import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForPapirsøknad
@@ -59,6 +60,7 @@ fun main() {
             OpprettOppgaveForDigitalSøknad(this, oppgaveClient)
             OpprettOppgaveForPapirsøknad(this, oppgaveClient)
             OpprettOppgaveForOverføring(this, oppgaveClient)
+            OpprettOppgaveForDelbestilling(this, oppgaveClient)
         }
         .start()
 }
