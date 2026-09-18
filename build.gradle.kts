@@ -7,7 +7,7 @@ plugins {
 
 application {
     applicationName = "hm-oppgave-sink"
-    mainClass = "no.nav.hjelpemidler.oppgave.ApplicationKt"
+    mainClass = "no.nav.hjelpemidler.oppgave.sink.ApplicationKt"
 }
 
 dependencies {
@@ -76,7 +76,7 @@ openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set(layout.projectDirectory.file("src/main/resources/oppgave/openapi.yaml"))
     outputDir.set(openApiGenerated)
-    packageName.set("no.nav.hjelpemidler.oppgave.client")
+    packageName.set("no.nav.hjelpemidler.oppgave.sink.client")
     globalProperties.set(
         mapOf(
             "apis" to "none",

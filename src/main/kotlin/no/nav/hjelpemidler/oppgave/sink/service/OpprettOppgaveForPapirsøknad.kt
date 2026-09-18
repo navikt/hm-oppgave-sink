@@ -1,6 +1,5 @@
-package no.nav.hjelpemidler.oppgave.service
+package no.nav.hjelpemidler.oppgave.sink.service
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -11,9 +10,9 @@ import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import no.nav.hjelpemidler.logging.teamInfo
-import no.nav.hjelpemidler.oppgave.client.OppgaveClient
-import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
-import no.nav.hjelpemidler.oppgave.metrics.MetricsProducer
+import no.nav.hjelpemidler.oppgave.sink.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.sink.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.sink.metrics.MetricsProducer
 import no.nav.hjelpemidler.rapids_and_rivers.eventId
 import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
@@ -119,13 +118,11 @@ data class RutingOppgave(
     val eventId: UUID,
     val eventName: String,
     val opprettet: LocalDateTime,
-    @JsonAlias("aktoerId")
     val aktørId: String?,
     val orgnr: String?,
     val journalpostId: String,
     val tema: String,
     val behandlingstema: String?,
-    @JsonAlias("behandlingtype")
     val behandlingstype: String?,
     val oppgavetype: String,
     val aktivDato: LocalDate,

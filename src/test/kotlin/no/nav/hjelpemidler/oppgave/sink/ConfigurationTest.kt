@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave
+package no.nav.hjelpemidler.oppgave.sink
 
 import io.kotest.matchers.maps.shouldHaveKeys
 import no.nav.hjelpemidler.configuration.environmentVariablesIn

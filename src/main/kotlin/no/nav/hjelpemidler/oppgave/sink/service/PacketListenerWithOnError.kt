@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.service
+package no.nav.hjelpemidler.oppgave.sink.service
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext

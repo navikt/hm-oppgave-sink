@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.client
+package no.nav.hjelpemidler.oppgave.sink.client
 
 import com.github.tomakehurst.wiremock.client.WireMock.created
 import com.github.tomakehurst.wiremock.client.WireMock.get
@@ -18,10 +18,10 @@ import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.test.runTest
 import no.nav.hjelpemidler.http.openid.TokenSet
-import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
-import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
-import no.nav.hjelpemidler.oppgave.mock.lagOppgave
-import no.nav.hjelpemidler.oppgave.mock.withBody
+import no.nav.hjelpemidler.oppgave.sink.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.sink.client.models.SokOppgaverResponse
+import no.nav.hjelpemidler.oppgave.sink.mock.lagOppgave
+import no.nav.hjelpemidler.oppgave.sink.mock.withBody
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

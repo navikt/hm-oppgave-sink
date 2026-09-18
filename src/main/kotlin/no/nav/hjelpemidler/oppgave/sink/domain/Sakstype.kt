@@ -1,6 +1,6 @@
-package no.nav.hjelpemidler.oppgave.domain
+package no.nav.hjelpemidler.oppgave.sink.domain
 
-import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.sink.client.models.OpprettOppgaveRequest
 
 enum class Sakstype {
     SØKNAD,

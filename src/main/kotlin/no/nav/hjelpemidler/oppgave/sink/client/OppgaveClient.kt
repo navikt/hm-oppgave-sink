@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.client
+package no.nav.hjelpemidler.oppgave.sink.client
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.body
@@ -20,13 +20,13 @@ import no.nav.hjelpemidler.http.correlationId
 import no.nav.hjelpemidler.http.createHttpClient
 import no.nav.hjelpemidler.http.openid.TokenSetProvider
 import no.nav.hjelpemidler.http.openid.openID
-import no.nav.hjelpemidler.oppgave.client.models.Oppgave
-import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
-import no.nav.hjelpemidler.oppgave.client.models.PatchOppgaveRequest
-import no.nav.hjelpemidler.oppgave.client.models.SokOppgaverResponse
-import no.nav.hjelpemidler.oppgave.domain.Behandlingstype
-import no.nav.hjelpemidler.oppgave.domain.Søknad
-import no.nav.hjelpemidler.oppgave.service.RutingOppgave
+import no.nav.hjelpemidler.oppgave.sink.client.models.Oppgave
+import no.nav.hjelpemidler.oppgave.sink.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.sink.client.models.PatchOppgaveRequest
+import no.nav.hjelpemidler.oppgave.sink.client.models.SokOppgaverResponse
+import no.nav.hjelpemidler.oppgave.sink.domain.Behandlingstype
+import no.nav.hjelpemidler.oppgave.sink.domain.Søknad
+import no.nav.hjelpemidler.oppgave.sink.service.RutingOppgave
 import java.time.LocalDate
 import java.time.LocalDateTime
 

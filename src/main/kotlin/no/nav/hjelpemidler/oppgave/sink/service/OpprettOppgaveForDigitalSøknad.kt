@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.service
+package no.nav.hjelpemidler.oppgave.sink.service
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
@@ -12,12 +12,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import no.nav.hjelpemidler.kafka.KafkaMessage
 import no.nav.hjelpemidler.logging.teamInfo
-import no.nav.hjelpemidler.oppgave.Configuration
-import no.nav.hjelpemidler.oppgave.client.OppgaveClient
-import no.nav.hjelpemidler.oppgave.client.models.OpprettOppgaveRequest
-import no.nav.hjelpemidler.oppgave.domain.Sakstype
-import no.nav.hjelpemidler.oppgave.domain.Søknad
-import no.nav.hjelpemidler.oppgave.metrics.Prometheus
+import no.nav.hjelpemidler.oppgave.sink.Configuration
+import no.nav.hjelpemidler.oppgave.sink.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.sink.client.models.OpprettOppgaveRequest
+import no.nav.hjelpemidler.oppgave.sink.domain.Sakstype
+import no.nav.hjelpemidler.oppgave.sink.domain.Søknad
+import no.nav.hjelpemidler.oppgave.sink.metrics.Prometheus
 import no.nav.hjelpemidler.rapids_and_rivers.eventId
 import no.nav.hjelpemidler.rapids_and_rivers.publish
 import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf

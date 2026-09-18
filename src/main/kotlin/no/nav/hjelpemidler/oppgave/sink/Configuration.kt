@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave
+package no.nav.hjelpemidler.oppgave.sink
 
 import no.nav.hjelpemidler.configuration.EnvironmentVariable
 

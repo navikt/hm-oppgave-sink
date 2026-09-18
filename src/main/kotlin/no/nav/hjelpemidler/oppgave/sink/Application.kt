@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave
+package no.nav.hjelpemidler.oppgave.sink
 
 import io.ktor.client.engine.cio.CIO
 import io.ktor.http.ContentType
@@ -12,11 +12,11 @@ import io.ktor.server.routing.routing
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.openid.TexasClient
-import no.nav.hjelpemidler.oppgave.client.OppgaveClient
-import no.nav.hjelpemidler.oppgave.mock.MockServer
-import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForDigitalSøknad
-import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForOverføring
-import no.nav.hjelpemidler.oppgave.service.OpprettOppgaveForPapirsøknad
+import no.nav.hjelpemidler.oppgave.sink.client.OppgaveClient
+import no.nav.hjelpemidler.oppgave.sink.mock.MockServer
+import no.nav.hjelpemidler.oppgave.sink.service.OpprettOppgaveForDigitalSøknad
+import no.nav.hjelpemidler.oppgave.sink.service.OpprettOppgaveForOverføring
+import no.nav.hjelpemidler.oppgave.sink.service.OpprettOppgaveForPapirsøknad
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
 import java.time.LocalDateTime
 

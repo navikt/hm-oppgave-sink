@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.metrics
+package no.nav.hjelpemidler.oppgave.sink.metrics
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry

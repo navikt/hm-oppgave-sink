@@ -1,4 +1,4 @@
-package no.nav.hjelpemidler.oppgave.metrics
+package no.nav.hjelpemidler.oppgave.sink.metrics
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import io.github.oshai.kotlinlogging.KotlinLogging

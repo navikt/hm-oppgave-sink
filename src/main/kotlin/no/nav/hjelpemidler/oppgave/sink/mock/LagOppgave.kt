@@ -1,6 +1,6 @@
-package no.nav.hjelpemidler.oppgave.mock
+package no.nav.hjelpemidler.oppgave.sink.mock
 
-import no.nav.hjelpemidler.oppgave.client.models.Oppgave
+import no.nav.hjelpemidler.oppgave.sink.client.models.Oppgave
 import java.time.LocalDate
 import kotlin.random.Random
 
