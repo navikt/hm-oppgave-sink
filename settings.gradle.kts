@@ -1,29 +1,16 @@
-fun RepositoryHandler.github(repository: String) {
-    maven("https://maven.pkg.github.com/$repository") {
-        credentials {
-            username = System.getenv("GITHUB_ACTOR")
-            password = System.getenv("GITHUB_TOKEN")
-        }
-    }
-}
+import no.nav.hjelpemidler.gradle.addGitHubMavenRepository
 
-val hotlibsKatalogVersionProvider = providers.gradleProperty("hotlibsKatalogVersion")
-
-dependencyResolutionManagement {
-    @Suppress("UnstableApiUsage")
+pluginManagement {
     repositories {
-        mavenCentral()
-        github("navikt/hotlibs")
-        github("navikt/rapids-and-rivers")
-
-        // Plassert under GitHub-repositories (med authentication) for å unngå unødvendige kostnader.
-        maven("https://github-package-registry-mirror.gc.nav.no/cached/maven-release")
-    }
-    versionCatalogs {
-        create("libs") {
-            from(hotlibsKatalogVersionProvider.map { "no.nav.hjelpemidler:katalog:$it" }.get())
-        }
+        gradlePluginPortal()
+        maven("https://navikt.github.io/hotlibs-gradle")
     }
 }
+
+plugins {
+    id("no.nav.hjelpemidler.hotlibs") version "1.0"
+}
+
+addGitHubMavenRepository("navikt/rapids-and-rivers")
 
 rootProject.name = "hm-oppgave-sink"
