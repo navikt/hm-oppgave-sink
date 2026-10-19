@@ -18,7 +18,6 @@ import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
 import tools.jackson.module.kotlin.readValue
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 private val log = KotlinLogging.logger {}
@@ -117,7 +116,6 @@ class OpprettOppgaveForPapirsøknad(
 data class RutingOppgave(
     val eventId: UUID,
     val eventName: String,
-    val opprettet: LocalDateTime,
     val aktørId: String?,
     val orgnr: String?,
     val journalpostId: String,
