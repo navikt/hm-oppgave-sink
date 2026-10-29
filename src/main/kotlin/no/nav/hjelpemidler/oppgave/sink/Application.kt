@@ -22,6 +22,7 @@ import java.time.LocalDateTime
 
 fun main() {
     if (Environment.current.isLocal) {
+        // Mock
         MockServer().apply {
             setup()
             start()
