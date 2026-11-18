@@ -73,7 +73,7 @@ class OppgaveClient(
         }
 
         if (behandlingstema in setOf("ab0369")) {
-            behandlingstema = null
+            behandlingstema = "ab0536"
             behandlingstype = "ae0287"
         }
 
