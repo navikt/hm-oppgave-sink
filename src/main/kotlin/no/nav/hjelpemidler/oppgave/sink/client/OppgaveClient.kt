@@ -3,7 +3,6 @@ package no.nav.hjelpemidler.oppgave.sink.client
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngine
-import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
@@ -18,8 +17,8 @@ import io.ktor.http.isSuccess
 import no.nav.hjelpemidler.configuration.Environment
 import no.nav.hjelpemidler.http.correlationId
 import no.nav.hjelpemidler.http.createHttpClient
-import no.nav.hjelpemidler.http.openid.TokenSetProvider
-import no.nav.hjelpemidler.http.openid.openID
+import no.nav.hjelpemidler.http.openid.entraId
+import no.nav.hjelpemidler.oppgave.sink.Configuration
 import no.nav.hjelpemidler.oppgave.sink.client.models.Oppgave
 import no.nav.hjelpemidler.oppgave.sink.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.sink.client.models.PatchOppgaveRequest
@@ -33,13 +32,13 @@ import java.time.LocalDateTime
 private val log = KotlinLogging.logger {}
 
 class OppgaveClient(
-    private val baseUrl: String,
-    private val tokenSetProvider: TokenSetProvider,
-    engine: HttpClientEngine = CIO.create(),
+    engine: HttpClientEngine,
+    private val baseUrl: String = Configuration.OPPGAVE_BASE_URL,
+    private val target: String = Configuration.OPPGAVE_SCOPE,
 ) {
     private val client = createHttpClient(engine) {
         expectSuccess = true
-        openID(tokenSetProvider)
+        entraId(target)
         defaultRequest {
             correlationId()
             accept(ContentType.Application.Json)
@@ -71,6 +70,11 @@ class OppgaveClient(
         if (behandlingstema in setOf("ab0380")) {
             behandlingstema = null
             behandlingstype = Behandlingstype.BESTILLING.eksternKode
+        }
+
+        if (behandlingstema in setOf("ab0369")) {
+            behandlingstema = null
+            behandlingstype = "ae0287"
         }
 
         return opprettOppgave(

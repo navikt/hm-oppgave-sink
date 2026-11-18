@@ -21,8 +21,8 @@ import no.nav.hjelpemidler.rapids_and_rivers.publish
 import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf
 import no.nav.hjelpemidler.serialization.jackson.jsonMapper
 import tools.jackson.module.kotlin.readValue
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 private val log = KotlinLogging.logger {}
@@ -192,7 +192,7 @@ data class OpprettetJournalføringsoppgaveForTilbakeførtSakEvent(
     val fnrBruker: String,
     val nyJournalpostId: String,
     override val eventId: UUID = UUID.randomUUID(),
-    val opprettet: LocalDateTime = LocalDateTime.now(),
+    override val opprettet: Instant = Instant.now(),
 ) : KafkaMessage {
     override val eventName: String = "hm-opprettetJournalføringsoppgaveForTilbakeførtSak"
 }

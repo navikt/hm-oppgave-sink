@@ -11,7 +11,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.routing
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.hjelpemidler.configuration.Environment
-import no.nav.hjelpemidler.http.openid.TexasClient
 import no.nav.hjelpemidler.oppgave.sink.client.OppgaveClient
 import no.nav.hjelpemidler.oppgave.sink.mock.MockServer
 import no.nav.hjelpemidler.oppgave.sink.service.OpprettOppgaveForDigitalSøknad
@@ -30,12 +29,7 @@ fun main() {
     }
 
     val engine = CIO.create()
-    val texasClient = TexasClient(engine)
-    val oppgaveClient = OppgaveClient(
-        baseUrl = Configuration.OPPGAVE_BASE_URL,
-        tokenSetProvider = texasClient.entraIdApplication(Configuration.OPPGAVE_SCOPE),
-        engine = engine,
-    )
+    val oppgaveClient = OppgaveClient(engine = engine)
 
     RapidApplication.create(no.nav.hjelpemidler.configuration.Configuration) { engine, _ ->
         engine.application.install(ContentNegotiation) {

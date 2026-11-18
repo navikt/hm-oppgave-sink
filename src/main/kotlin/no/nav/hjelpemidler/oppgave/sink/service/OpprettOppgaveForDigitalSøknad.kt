@@ -23,7 +23,7 @@ import no.nav.hjelpemidler.rapids_and_rivers.publish
 import no.nav.hjelpemidler.rapids_and_rivers.uuidSetOf
 import no.nav.hjelpemidler.serialization.jackson.enumValue
 import no.nav.hjelpemidler.serialization.jackson.uuidValue
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 
 private val log = KotlinLogging.logger {}
@@ -130,7 +130,7 @@ data class OppgaveOpprettetEvent(
     val sakstype: Sakstype,
     val fnrBruker: String,
     override val eventId: UUID = UUID.randomUUID(),
-    val opprettet: LocalDateTime = LocalDateTime.now(),
+    override val opprettet: Instant = Instant.now(),
 ) : KafkaMessage {
     override val eventName: String = Configuration.PRODUCED_EVENT_NAME
 }

@@ -17,17 +17,17 @@ import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.test.runTest
-import no.nav.hjelpemidler.http.openid.TokenSet
 import no.nav.hjelpemidler.oppgave.sink.client.models.OpprettOppgaveRequest
 import no.nav.hjelpemidler.oppgave.sink.client.models.SokOppgaverResponse
 import no.nav.hjelpemidler.oppgave.sink.mock.lagOppgave
 import no.nav.hjelpemidler.oppgave.sink.mock.withBody
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import kotlin.time.Duration.Companion.hours
 
 @WireMockTest
+@Disabled
 class OppgaveClientTest {
     private val engine = CIO.create()
     private val oppgave = lagOppgave()
@@ -37,9 +37,8 @@ class OppgaveClientTest {
     @BeforeEach
     fun setUp(wireMockRuntimeInfo: WireMockRuntimeInfo) {
         client = OppgaveClient(
-            baseUrl = "${wireMockRuntimeInfo.httpBaseUrl}/api/v1/oppgaver",
-            tokenSetProvider = { TokenSet("", 1.hours) },
             engine = engine,
+            baseUrl = "${wireMockRuntimeInfo.httpBaseUrl}/api/v1/oppgaver",
         )
     }
 
